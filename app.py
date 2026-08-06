@@ -268,8 +268,8 @@ TEXTOS = {
             "Acompanhe suas entradas, saídas e resultados consolidados."
         ),
         "no_data": (
-            "Nenhum lançamento cadastrado ainda. Vá em '➕ Novo Lançamento' para"
-            " começar."
+            "Nenhum lançamento no painel {contexto} ainda. Vá em '➕"
+            " {nav_novo}' para começar."
         ),
         "total_rev": "📥 Entradas / Receitas",
         "total_exp": "📉 Saídas / Despesas",
@@ -308,6 +308,11 @@ TEXTOS = {
         "profile_success": "Perfil atualizado com sucesso!",
         "profile_error": "Erro ao atualizar perfil.",
         "logout": "🚪 Sair da Conta",
+        "context_pessoal": "Pessoal",
+        "context_profissional": "Profissional / Comércio",
+        "sidebar_pessoal": "🏠 Pessoal",
+        "sidebar_profissional": "📊 Profissional / Comércio",
+        "nav_novo_label": "Novo Lançamento",
         "types": ["Despesa", "Receita", "Investimento"],
         "cat_pessoal": [
             "Aluguel",
@@ -357,7 +362,10 @@ TEXTOS = {
         "nav_profile": "👤 My Profile",
         "overview_title": "Financial Control",
         "overview_sub": "Track your cash flows, income, and expenses.",
-        "no_data": "No entries yet. Go to '➕ New Entry' to start.",
+        "no_data": (
+            "No entries in the {context} panel yet. Go to '➕ {nav_novo}' to"
+            " start."
+        ),
         "total_rev": "📥 Income / Inflows",
         "total_exp": "📉 Expenses / Outflows",
         "invest_month": "📈 Investments",
@@ -391,6 +399,11 @@ TEXTOS = {
         "profile_success": "Profile updated successfully!",
         "profile_error": "Error updating profile.",
         "logout": "🚪 Log Out",
+        "context_pessoal": "Personal",
+        "context_profissional": "Professional / Business",
+        "sidebar_pessoal": "🏠 Personal",
+        "sidebar_profissional": "📊 Professional / Business",
+        "nav_novo_label": "New Entry",
         "types": ["Expense", "Income", "Investment"],
         "cat_pessoal": [
             "Rent",
@@ -442,7 +455,10 @@ TEXTOS = {
         "nav_profile": "👤 Mon Profil",
         "overview_title": "Contrôle Financier",
         "overview_sub": "Suivez vos flux et revenus.",
-        "no_data": "Aucune donnée pour l'instant. Allez dans '➕ Nouvelle Entrée'.",
+        "no_data": (
+            "Aucune donnée dans le panneau {context} pour l'instant. Allez dans"
+            " '➕ {nav_novo}'."
+        ),
         "total_rev": "📥 Entrées",
         "total_exp": "📉 Sorties",
         "invest_month": "📈 Investissements",
@@ -478,6 +494,11 @@ TEXTOS = {
         "profile_success": "Profil mis à jour avec succès !",
         "profile_error": "Erreur lors de la mise à jour.",
         "logout": "🚪 Se déconnecter",
+        "context_pessoal": "Personnel",
+        "context_profissional": "Professionnel / Commerce",
+        "sidebar_pessoal": "🏠 Personnel",
+        "sidebar_profissional": "📊 Professionnel / Commerce",
+        "nav_novo_label": "Nouvelle Entrée",
         "types": ["Dépense", "Revenu", "Investissement"],
         "cat_pessoal": [
             "Loyer",
@@ -527,7 +548,9 @@ TEXTOS = {
         "nav_profile": "👤 Mi Perfil",
         "overview_title": "Control Financiero",
         "overview_sub": "Sigue tus ingresos y gastos.",
-        "no_data": "No hay registros todavía. Ve a '➕ Nuevo Movimiento'.",
+        "no_data": (
+            "No hay registros en el panel {context} todavía. Ve a '➕ {nav_novo}'."
+        ),
         "total_rev": "📥 Entradas",
         "total_exp": "📉 Salidas",
         "invest_month": "📈 Inversiones",
@@ -561,6 +584,11 @@ TEXTOS = {
         "profile_success": "¡Perfil actualizado con éxito!",
         "profile_error": "Error al actualizar perfil.",
         "logout": "🚪 Cerrar Sesión",
+        "context_pessoal": "Personal",
+        "context_profissional": "Profesional / Comercio",
+        "sidebar_pessoal": "🏠 Personal",
+        "sidebar_profissional": "📊 Profesional / Comercio",
+        "nav_novo_label": "Nuevo Movimiento",
         "types": ["Gasto", "Ingreso", "Inversión"],
         "cat_pessoal": [
             "Alquiler",
@@ -610,7 +638,10 @@ TEXTOS = {
         "nav_profile": "👤 Il Mio Profilo",
         "overview_title": "Controllo Finanziario",
         "overview_sub": "Monitora flussi ed entrate.",
-        "no_data": "Nessun inserimento. Vai su '➕ Nuova Voce' per iniziare.",
+        "no_data": (
+            "Nessun inserimento nel pannello {context}. Vai su '➕ {nav_novo}'"
+            " per iniziare."
+        ),
         "total_rev": "📥 Entrate",
         "total_exp": "📉 Uscite",
         "invest_month": "📈 Investimenti",
@@ -644,6 +675,11 @@ TEXTOS = {
         "profile_success": "Profilo aggiornato!",
         "profile_error": "Errore durante l'aggiornamento.",
         "logout": "🚪 Disconnetti",
+        "context_pessoal": "Personale",
+        "context_profissional": "Professionale / Commerciale",
+        "sidebar_pessoal": "🏠 Personale",
+        "sidebar_profissional": "📊 Professionale / Commerciale",
+        "nav_novo_label": "Nuova Voce",
         "types": ["Spesa", "Entrata", "Investimento"],
         "cat_pessoal": [
             "Affitto",
@@ -693,7 +729,10 @@ TEXTOS = {
         "nav_profile": "👤 Mein Profil",
         "overview_title": "Finanzkontrolle",
         "overview_sub": "Verfolgen Sie Einnahmen und Ausgaben.",
-        "no_data": "Noch keine Einträge. Gehen Sie zu '➕ Neuer Eintrag'.",
+        "no_data": (
+            "Noch keine Einträge im Bereich {context}. Gehen Sie zu '➕"
+            " {nav_novo}'."
+        ),
         "total_rev": "📥 Einnahmen",
         "total_exp": "📉 Ausgaben",
         "invest_month": "📈 Investitionen",
@@ -727,6 +766,11 @@ TEXTOS = {
         "profile_success": "Profil erfolgreich aktualisiert!",
         "profile_error": "Fehler beim Aktualisieren.",
         "logout": "🚪 Abmelden",
+        "context_pessoal": "Persönlich",
+        "context_profissional": "Beruflich / Gewerbe",
+        "sidebar_pessoal": "🏠 Persönlich",
+        "sidebar_profissional": "📊 Beruflich / Gewerbe",
+        "nav_novo_label": "Neuer Eintrag",
         "types": ["Ausgabe", "Einnahme", "Investition"],
         "cat_pessoal": [
             "Miete",
@@ -864,6 +908,7 @@ else:
   foto_blob_user = dados_user[2] if dados_user and len(dados_user) > 2 else None
 
   simbolo_moeda = MOEDAS[st.session_state["moeda"]]
+  t = TEXTOS[st.session_state["idioma"]]
 
   with st.sidebar:
     if foto_blob_user:
@@ -879,7 +924,8 @@ else:
     st.markdown("---")
 
     contexto_atual = st.radio(
-        "💼 Painel de Gestão", ["🏠 Pessoal", "📊 Profissional / Comércio"]
+        "💼 Painel de Gestão",
+        [t["sidebar_pessoal"], t["sidebar_profissional"]],
     )
     contexto_limpo = (
         "Profissional" if "Profissional" in contexto_atual else "Pessoal"
@@ -909,37 +955,37 @@ else:
     menu = st.radio(
         "Navegação",
         [
-            TEXTOS[st.session_state["idioma"]]["nav_overview"],
-            TEXTOS[st.session_state["idioma"]]["nav_new"],
-            TEXTOS[st.session_state["idioma"]]["nav_manage"],
-            TEXTOS[st.session_state["idioma"]]["nav_profile"],
+            t["nav_overview"],
+            t["nav_new"],
+            t["nav_manage"],
+            t["nav_profile"],
         ],
     )
 
     st.markdown("<br><br>", unsafe_allow_html=True)
-    if st.button(
-        TEXTOS[st.session_state["idioma"]]["logout"], use_container_width=True
-    ):
+    if st.button(t["logout"], use_container_width=True):
       st.session_state["logged_in"] = False
       st.session_state["username"] = ""
       st.rerun()
 
-  t = TEXTOS[st.session_state["idioma"]]
   df_total = carregar_dados(st.session_state["username"])
-
   df = df_total[df_total["contexto"] == contexto_limpo].copy()
 
+  nome_contexto_traduzido = (
+      t["context_profissional"]
+      if contexto_limpo == "Profissional"
+      else t["context_pessoal"]
+  )
+
   if menu == t["nav_overview"]:
-    st.title(
-        f"{t['overview_title']} ({'Profissional / Comércio' if contexto_limpo == 'Profissional' else 'Pessoal'})"
-    )
+    st.title(f"{t['overview_title']} ({nome_contexto_traduzido})")
     st.write(t["overview_sub"])
 
     if df.empty:
-      st.info(
-          f"Nenhum lançamento no painel {contexto_limpo} ainda. Vá em '➕ Novo"
-          " Lançamento' para começar."
+      mensagem_vazia = t["no_data"].format(
+          context=nome_contexto_traduzido, nav_novo=t["nav_novo_label"]
       )
+      st.info(mensagem_vazia)
     else:
       df["data"] = pd.to_datetime(df["data"])
       df["mes_ano"] = df["data"].dt.strftime("%Y-%m")
@@ -1087,9 +1133,7 @@ else:
       st.dataframe(df_mes, use_container_width=True)
 
   elif menu == t["nav_new"]:
-    st.title(
-        f"{t['new_title']} ({'Profissional / Comércio' if contexto_limpo == 'Profissional' else 'Pessoal'})"
-    )
+    st.title(f"{t['new_title']} ({nome_contexto_traduzido})")
     st.write(t["new_sub"])
 
     with st.form("form_novo_lancamento"):
@@ -1125,16 +1169,11 @@ else:
           st.warning(t["warn_val"])
 
   elif menu == t["nav_manage"]:
-    st.title(
-        f"{t['manage_title']} ({'Profissional / Comércio' if contexto_limpo == 'Profissional' else 'Pessoal'})"
-    )
+    st.title(f"{t['manage_title']} ({nome_contexto_traduzido})")
     st.write(t["manage_sub"])
 
     if df.empty:
-      st.info(
-          f"Nenhum lançamento encontrado no painel {contexto_limpo} para"
-          " gerenciar."
-      )
+      st.info(f"Nenhum lançamento encontrado no painel {nome_contexto_traduzido}.")
     else:
       st.dataframe(df, use_container_width=True)
       id_del = st.selectbox("ID do lançamento para excluir", df["id"].tolist())
