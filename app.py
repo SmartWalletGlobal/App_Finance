@@ -194,10 +194,10 @@ TEXTOS = {
         "type_label": "Tipo",
         "value_label": "Valor",
         "cat_label": "Categoria Principal",
-        "desc_label": "Descrição Específica",
+        "desc_label": "Descrição Específica (Opcional)",
         "save_btn": "🚀 Salvar Lançamento",
         "success_msg": "Lançamento salvo com sucesso!",
-        "warn_desc": "Por favor, preencha a descrição.",
+        "warn_val": "Por favor, informe um valor maior que zero.",
         "manage_title": "✏️ Gerenciar e Editar Lançamentos",
         "manage_sub": "Visualize, filtre ou exclua lançamentos antigos.",
         "del_btn": "🗑️ Excluir Selecionado",
@@ -250,10 +250,10 @@ TEXTOS = {
         "type_label": "Type",
         "value_label": "Value",
         "cat_label": "Main Category",
-        "desc_label": "Description",
+        "desc_label": "Description (Optional)",
         "save_btn": "🚀 Save Entry",
         "success_msg": "Entry saved successfully!",
-        "warn_desc": "Please fill in the description.",
+        "warn_val": "Please enter a value greater than zero.",
         "manage_title": "✏️ Manage and Edit Entries",
         "manage_sub": "View, filter, or delete old entries.",
         "del_btn": "🗑️ Delete Selected",
@@ -306,10 +306,10 @@ TEXTOS = {
         "type_label": "Type",
         "value_label": "Valeur",
         "cat_label": "Catégorie Principale",
-        "desc_label": "Description",
+        "desc_label": "Description (Optionnel)",
         "save_btn": "🚀 Enregistrer",
         "success_msg": "Enregistré avec succès !",
-        "warn_desc": "Veuillez remplir la description.",
+        "warn_val": "Veuillez entrer une valeur supérieure à zéro.",
         "manage_title": "✏️ Gérer les Entrées",
         "manage_sub": "Visualisez ou supprimez vos entrées.",
         "del_btn": "🗑️ Supprimer la sélection",
@@ -362,10 +362,10 @@ TEXTOS = {
         "type_label": "Tipo",
         "value_label": "Valor",
         "cat_label": "Categoría Principal",
-        "desc_label": "Descripción",
+        "desc_label": "Descripción (Opcional)",
         "save_btn": "🚀 Guardar Movimiento",
         "success_msg": "¡Movimiento guardado com éxito!",
-        "warn_desc": "Por favor llena la descripción.",
+        "warn_val": "Por favor ingrese un valor mayor que cero.",
         "manage_title": "✏️ Gestionar Movimientos",
         "manage_sub": "Visualiza, filtra o elimina registros antiguos.",
         "del_btn": "🗑️ Eliminar Seleccionado",
@@ -418,10 +418,10 @@ TEXTOS = {
         "type_label": "Tipo",
         "value_label": "Valore",
         "cat_label": "Categoria Principale",
-        "desc_label": "Descrizione",
+        "desc_label": "Descrizione (Opzionale)",
         "save_btn": "🚀 Salva Voce",
         "success_msg": "Salvato con successo!",
-        "warn_desc": "Compila la descrizione.",
+        "warn_val": "Inserisci un valore maggiore di zero.",
         "manage_title": "✏️ Gestisci Voci",
         "manage_sub": "Visualizza o elimina voci.",
         "del_btn": "🗑️ Elimina Selezionato",
@@ -474,10 +474,10 @@ TEXTOS = {
         "type_label": "Typ",
         "value_label": "Wert",
         "cat_label": "Hauptkategorie",
-        "desc_label": "Beschreibung",
+        "desc_label": "Beschreibung (Optional)",
         "save_btn": "🚀 Eintrag Speichern",
         "success_msg": "Erfolgreich gespeichert!",
-        "warn_desc": "Bitte Beschreibung ausfüllen.",
+        "warn_val": "Bitte geben Sie einen Wert größer als Null ein.",
         "manage_title": "✏️ Einträge Verwalten",
         "manage_sub": "Einträge anzeigen oder löschen.",
         "del_btn": "🗑️ Ausgewählte Löschen",
@@ -500,6 +500,19 @@ MOEDAS = {
     "Euro (€)": "€",
     "Dólar ($)": "$"
 }
+
+CATEGORIAS_PADRAO = [
+    "Aluguel",
+    "Alimentação",
+    "Transporte",
+    "Moradia",
+    "Lazer",
+    "Saúde",
+    "Educação",
+    "Salário",
+    "Investimentos",
+    "Outros"
+]
 
 if 'logged_in' not in st.session_state:
     st.session_state['logged_in'] = False
@@ -636,17 +649,14 @@ else:
             resumo_meses = resumo_meses.sort_values("mes_ano")
             resumo_meses["saldo_acumulado"] = resumo_meses["saldo"].cumsum()
             
-            # Pega o saldo acumulado até o mês selecionado
             saldo_acumulado_atual = resumo_meses.loc[resumo_meses["mes_ano"] == mes_selecionado, "saldo_acumulado"].values[0] if not resumo_meses[resumo_meses["mes_ano"] == mes_selecionado].empty else 0.0
 
-            # Filtra os dados apenas para o mês selecionado
             df_mes = df[df["mes_ano"] == mes_selecionado]
 
             total_receitas = df_mes[df_mes['tipo'] == 'Receita']['valor'].sum()
             total_despesas = df_mes[df_mes['tipo'] == 'Despesa']['valor'].sum()
             saldo = total_receitas - total_despesas
 
-            # Métricas organizadas em duas linhas para excelente leitura no celular
             c_m1, c_m2 = st.columns(2)
             c_m1.metric(t['total_rev'], f"{simbolo_moeda} {total_receitas:,.2f}")
             c_m2.metric(t['total_exp'], f"{simbolo_moeda} {total_despesas:,.2f}")
@@ -685,16 +695,20 @@ else:
             data_lanc = st.date_input(t['date_label'], datetime.date.today())
             tipo_lanc = st.selectbox(t['type_label'], ["Despesa", "Receita"])
             valor_lanc = st.number_input(f"{t['value_label']} ({simbolo_moeda})", min_value=0.0, format="%.2f")
-            cat_lanc = st.text_input(t['cat_label'])
+            
+            # Categoria agora é um seletor (selectbox) padronizado
+            cat_lanc = st.selectbox(t['cat_label'], CATEGORIAS_PADRAO)
+            
+            # Descrição agora é opcional
             desc_lanc = st.text_input(t['desc_label'])
             
             submit_lanc = st.form_submit_button(t['save_btn'], use_container_width=True)
             if submit_lanc:
-                if desc_lanc.strip() != "":
+                if valor_lanc > 0:
                     salvar_lancamento(st.session_state['username'], str(data_lanc), desc_lanc, cat_lanc, tipo_lanc, valor_lanc)
                     st.success(t['success_msg'])
                 else:
-                    st.warning(t['warn_desc'])
+                    st.warning(t['warn_val'])
 
     elif menu == t['nav_manage']:
         st.title(t['manage_title'])
