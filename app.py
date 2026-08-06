@@ -13,6 +13,13 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+st.markdown("""
+    <head>
+        <meta property="og:title" content="Meu Financeiro - Sistema Multi-Usuário" />
+        <meta property="og:description" content="Gerencie suas finanças de forma simples e online." />
+        <meta property="og:image" content="URL_DA_SUA_IMAGEM" />
+    </head>
+""", unsafe_allow_html=True)
 
 def make_hash(password):
     return hashlib.sha256(str.encode(password)).hexdigest()
