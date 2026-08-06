@@ -1,51 +1,61 @@
-import streamlit as st
-import pandas as pd
-import sqlite3
 import datetime
-import plotly.express as px
 import hashlib
-from PIL import Image
 import io
+import pandas as pd
+from PIL import Image
+import plotly.express as px
+import streamlit as st
 
 st.set_page_config(
-    page_title="Meu Financeiro | Multi-Usuário",
-    page_icon="💶",
+    page_title="Smart Wallet | Multi-Usuário",
+    page_icon="💳",
     layout="centered",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
 )
 
-st.markdown("""
+st.markdown(
+    """
     <head>
-        <link rel="apple-touch-icon" sizes="180x180" href="https://streamlit.io/images/brand/streamlit-mark-color.png">
-        <link rel="icon" type="image/png" href="https://streamlit.io/images/brand/streamlit-mark-color.png">
+        <meta property="og:title" content="Smart Wallet | Multi-Usuário">
+        <meta property="og:description" content="Sistema de gestão financeira online, simples, rápido e seguro.">
+        <meta property="og:image" content="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?q=80&w=1200&auto=format&fit=crop">
+        <!-- Ícone personalizado para o atalho na Tela de Início do iPhone -->
+        <link rel="apple-touch-icon" href="https://images.unsplash.com/photo-1559526324-4b87b5e36e44?q=80&w=512&auto=format&fit=crop">
     </head>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
+
 
 def make_hash(password):
-    return hashlib.sha256(str.encode(password)).hexdigest()
+  return hashlib.sha256(str.encode(password)).hexdigest()
+
 
 def check_hash(password, hashed_text):
-    if make_hash(password) == hashed_text:
-        return True
-    return False
+  if make_hash(password) == hashed_text:
+    return True
+  return False
+
 
 def init_db():
-    conn = sqlite3.connect('financeiro.db')
-    cursor = conn.cursor()
-    cursor.execute('''
+  import sqlite3
+
+  conn = sqlite3.connect("financeiro.db")
+  cursor = conn.cursor()
+  cursor.execute("""
         CREATE TABLE IF NOT EXISTS usuarios (
             username TEXT PRIMARY KEY,
             nome_completo TEXT,
             senha TEXT
         )
-    ''')
-    for col, col_type in [("endereco", "TEXT"), ("foto_perfil", "BLOB")]:
-        try:
-            cursor.execute(f"ALTER TABLE usuarios ADD COLUMN {col} {col_type}")
-        except:
-            pass
+    """)
+  for col, col_type in [("endereco", "TEXT"), ("foto_perfil", "BLOB")]:
+    try:
+      cursor.execute(f"ALTER TABLE usuarios ADD COLUMN {col} {col_type}")
+    except:
+      pass
 
-    cursor.execute('''
+  cursor.execute("""
         CREATE TABLE IF NOT EXISTS lancamentos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT,
@@ -55,110 +65,174 @@ def init_db():
             tipo TEXT,
             valor REAL
         )
-    ''')
-    try:
-        cursor.execute("ALTER TABLE lancamentos ADD COLUMN username TEXT")
-    except:
-        pass
+    """)
+  try:
+    cursor.execute("ALTER TABLE lancamentos ADD COLUMN username TEXT")
+  except:
+    pass
 
-    conn.commit()
-    conn.close()
+  conn.commit()
+  conn.close()
+
 
 init_db()
 
-def cadastrar_usuario(username, nome_completo, senha):
-    conn = sqlite3.connect('financeiro.db')
-    cursor = conn.cursor()
-    try:
-        cursor.execute("INSERT INTO usuarios (username, nome_completo, senha) VALUES (?, ?, ?)", 
-                       (username, nome_completo, make_hash(senha)))
-        conn.commit()
-        conn.close()
-        return True
-    except:
-        conn.close()
-        return False
 
-def autenticar_usuario(username, senha):
-    conn = sqlite3.connect('financeiro.db')
-    cursor = conn.cursor()
-    cursor.execute("SELECT senha FROM usuarios WHERE username = ?", (username,))
-    result = cursor.fetchone()
+def cadastrar_usuario(username, nome_completo, senha):
+  import sqlite3
+
+  conn = sqlite3.connect("financeiro.db")
+  cursor = conn.cursor()
+  try:
+    cursor.execute(
+        "INSERT INTO usuarios (username, nome_completo, senha) VALUES (?, ?, ?)",
+        (username, nome_completo, make_hash(senha)),
+    )
+    conn.commit()
     conn.close()
-    if result:
-        return check_hash(senha, result[0])
+    return True
+  except:
+    conn.close()
     return False
 
+
+def autenticar_usuario(username, senha):
+  import sqlite3
+
+  conn = sqlite3.connect("financeiro.db")
+  cursor = conn.cursor()
+  cursor.execute("SELECT senha FROM usuarios WHERE username = ?", (username,))
+  result = cursor.fetchone()
+  conn.close()
+  if result:
+    return check_hash(senha, result[0])
+  return False
+
+
 def obter_dados_usuario(username):
-    conn = sqlite3.connect('financeiro.db')
-    cursor = conn.cursor()
-    cursor.execute("SELECT nome_completo, endereco, foto_perfil FROM usuarios WHERE username = ?", (username,))
-    result = cursor.fetchone()
+  import sqlite3
+
+  conn = sqlite3.connect("financeiro.db")
+  cursor = conn.cursor()
+  cursor.execute(
+      "SELECT nome_completo, endereco, foto_perfil FROM usuarios WHERE"
+      " username = ?",
+      (username,),
+  )
+  result = cursor.fetchone()
+  conn.close()
+  return result
+
+
+def atualizar_perfil(
+    username,
+    novo_nome,
+    novo_endereco,
+    nova_senha,
+    nova_foto_blob,
+    remover_foto=False,
+):
+  import sqlite3
+
+  conn = sqlite3.connect("financeiro.db")
+  cursor = conn.cursor()
+  try:
+    if remover_foto:
+      foto_sql = None
+    else:
+      foto_sql = nova_foto_blob
+
+    if nova_senha:
+      hash_senha = make_hash(nova_senha)
+      if remover_foto:
+        cursor.execute(
+            "UPDATE usuarios SET nome_completo = ?, endereco = ?, senha = ?,"
+            " foto_perfil = NULL WHERE username = ?",
+            (novo_nome, novo_endereco, hash_senha, username),
+        )
+      elif nova_foto_blob is not None:
+        cursor.execute(
+            "UPDATE usuarios SET nome_completo = ?, endereco = ?, senha = ?,"
+            " foto_perfil = ? WHERE username = ?",
+            (novo_nome, novo_endereco, hash_senha, nova_foto_blob, username),
+        )
+      else:
+        cursor.execute(
+            "UPDATE usuarios SET nome_completo = ?, endereco = ?, senha = ? WHERE"
+            " username = ?",
+            (novo_nome, novo_endereco, hash_senha, username),
+        )
+    else:
+      if remover_foto:
+        cursor.execute(
+            "UPDATE usuarios SET nome_completo = ?, endereco = ?, foto_perfil ="
+            " NULL WHERE username = ?",
+            (novo_nome, novo_endereco, username),
+        )
+      elif nova_foto_blob is not None:
+        cursor.execute(
+            "UPDATE usuarios SET nome_completo = ?, endereco = ?, foto_perfil ="
+            " ? WHERE username = ?",
+            (novo_nome, novo_endereco, nova_foto_blob, username),
+        )
+      else:
+        cursor.execute(
+            "UPDATE usuarios SET nome_completo = ?, endereco = ? WHERE"
+            " username = ?",
+            (novo_nome, novo_endereco, username),
+        )
+    conn.commit()
     conn.close()
-    return result
+    return True
+  except:
+    conn.close()
+    return False
 
-def atualizar_perfil(username, novo_nome, novo_endereco, nova_senha, nova_foto_blob, remover_foto=False):
-    conn = sqlite3.connect('financeiro.db')
-    cursor = conn.cursor()
-    try:
-        if remover_foto:
-            foto_sql = None
-        else:
-            foto_sql = nova_foto_blob
-
-        if nova_senha:
-            hash_senha = make_hash(nova_senha)
-            if remover_foto:
-                cursor.execute("UPDATE usuarios SET nome_completo = ?, endereco = ?, senha = ?, foto_perfil = NULL WHERE username = ?", 
-                               (novo_nome, novo_endereco, hash_senha, username))
-            elif nova_foto_blob is not None:
-                cursor.execute("UPDATE usuarios SET nome_completo = ?, endereco = ?, senha = ?, foto_perfil = ? WHERE username = ?", 
-                               (novo_nome, novo_endereco, hash_senha, nova_foto_blob, username))
-            else:
-                cursor.execute("UPDATE usuarios SET nome_completo = ?, endereco = ?, senha = ? WHERE username = ?", 
-                               (novo_nome, novo_endereco, hash_senha, username))
-        else:
-            if remover_foto:
-                cursor.execute("UPDATE usuarios SET nome_completo = ?, endereco = ?, foto_perfil = NULL WHERE username = ?", 
-                               (novo_nome, novo_endereco, username))
-            elif nova_foto_blob is not None:
-                cursor.execute("UPDATE usuarios SET nome_completo = ?, endereco = ?, foto_perfil = ? WHERE username = ?", 
-                               (novo_nome, novo_endereco, nova_foto_blob, username))
-            else:
-                cursor.execute("UPDATE usuarios SET nome_completo = ?, endereco = ? WHERE username = ?", 
-                               (novo_nome, novo_endereco, username))
-        conn.commit()
-        conn.close()
-        return True
-    except:
-        conn.close()
-        return False
 
 def carregar_dados(username):
-    conn = sqlite3.connect('financeiro.db')
-    df = pd.read_sql_query("SELECT * FROM lancamentos WHERE username = ?", conn, params=(username,))
-    conn.close()
-    return df
+  import sqlite3
+
+  conn = sqlite3.connect("financeiro.db")
+  df = pd.read_sql_query(
+      "SELECT * FROM lancamentos WHERE username = ?", conn, params=(username,)
+  )
+  conn.close()
+  return df
+
 
 def salvar_lancamento(username, data, descricao, categoria, tipo, valor):
-    conn = sqlite3.connect('financeiro.db')
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO lancamentos (username, data, descricao, categoria, tipo, valor) VALUES (?, ?, ?, ?, ?, ?)",
-                   (username, data, descricao, categoria, tipo, valor))
-    conn.commit()
-    conn.close()
+  import sqlite3
+
+  conn = sqlite3.connect("financeiro.db")
+  cursor = conn.cursor()
+  cursor.execute(
+      "INSERT INTO lancamentos (username, data, descricao, categoria, tipo,"
+      " valor) VALUES (?, ?, ?, ?, ?, ?)",
+      (username, data, descricao, categoria, tipo, valor),
+  )
+  conn.commit()
+  conn.close()
+
 
 def deletar_lancamento(id_lancamento, username):
-    conn = sqlite3.connect('financeiro.db')
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM lancamentos WHERE id = ? AND username = ?", (id_lancamento, username))
-    conn.commit()
-    conn.close()
+  import sqlite3
+
+  conn = sqlite3.connect("financeiro.db")
+  cursor = conn.cursor()
+  cursor.execute(
+      "DELETE FROM lancamentos WHERE id = ? AND username = ?",
+      (id_lancamento, username),
+  )
+  conn.commit()
+  conn.close()
+
 
 TEXTOS = {
     "Português": {
-        "login_title": "⚡ Acesso ao Meu Financeiro",
-        "login_sub": "Entre com sua conta ou cadastre-se com seu nome completo.",
+        "login_title": "⚡ Acesso ao Smart Wallet",
+        "login_sub": (
+            "Entre com sua conta ou cadastre-se com seu nome completo."
+        ),
         "tab_login": "🔑 Entrar",
         "tab_register": "📝 Criar Conta",
         "user_label": "Usuário (E-mail ou Apelido)",
@@ -172,23 +246,32 @@ TEXTOS = {
         "btn_reg_submit": "Cadastrar Nova Conta",
         "reg_warn": "Preencha todos os campos.",
         "reg_success": "Conta criada com sucesso! Vá na aba 'Entrar'.",
-        "reg_error": "Este usuário já existe ou ocorreu uma falha no cadastro.",
+        "reg_error": (
+            "Este usuário já existe ou ocorreu uma falha no cadastro."
+        ),
         "nav_overview": "📊 Visão Geral & Gráficos",
         "nav_new": "➕ Novo Lançamento",
         "nav_manage": "✏️ Gerenciar & Editar",
         "nav_profile": "👤 Meu Perfil",
         "overview_title": "Visão Geral Financeira",
         "overview_sub": "Acompanhe seus fluxos, receitas e despesas por mês.",
-        "no_data": "Nenhum lançamento cadastrado ainda. Vá em '➕ Novo Lançamento' para começar.",
-        "total_rev": "💰 Receitas do Mês",
-        "total_exp": "💸 Despesas do Mês",
-        "balance": "⚡ Saldo do Mês",
+        "no_data": (
+            "Nenhum lançamento cadastrado ainda. Vá em '➕ Novo Lançamento' para"
+            " começar."
+        ),
+        "total_rev": "📥 Receitas do Mês",
+        "total_exp": "📉 Despesas do Mês",
+        "invest_month": "📈 Investimentos do Mês",
+        "account_balance": "💰 Saldo da Conta",
         "accumulated_balance": "🏦 Saldo Acumulado na Conta",
         "pie_title": "📊 Despesas por Categoria",
         "bar_title": "📈 Evolução por Tipo",
         "recent_list": "📋 Lançamentos do Mês",
         "new_title": "➕ Novo Lançamento",
-        "new_sub": "Adicione uma nova receita ou despesa detalhando o que foi gasto.",
+        "new_sub": (
+            "Adicione uma nova receita, despesa ou investimento detalhando o"
+            " que foi gasto."
+        ),
         "date_label": "Data do Lançamento",
         "type_label": "Tipo",
         "value_label": "Valor",
@@ -201,7 +284,9 @@ TEXTOS = {
         "manage_sub": "Visualize, filtre ou exclua lançamentos antigos.",
         "del_btn": "🗑️ Excluir Selecionado",
         "profile_title": "👤 Meu Perfil de Usuário",
-        "profile_sub": "Atualize suas informações cadastrais, senha ou foto de perfil.",
+        "profile_sub": (
+            "Atualize suas informações cadastrais, senha ou foto de perfil."
+        ),
         "name_label": "Nome Completo",
         "address_label": "Endereço",
         "new_pass_label": "Nova Senha (deixe em branco para não alterar)",
@@ -210,10 +295,10 @@ TEXTOS = {
         "save_profile": "Salvar Alterações",
         "profile_success": "Perfil atualizado com sucesso!",
         "profile_error": "Erro ao atualizar perfil.",
-        "logout": "🚪 Sair da Conta"
+        "logout": "🚪 Sair da Conta",
     },
     "English": {
-        "login_title": "⚡ My Finance Access",
+        "login_title": "⚡ Smart Wallet Access",
         "login_sub": "Log in to your account or register.",
         "tab_login": "🔑 Log In",
         "tab_register": "📝 Register",
@@ -236,15 +321,16 @@ TEXTOS = {
         "overview_title": "Financial Overview",
         "overview_sub": "Track your cash flows, income, and expenses by month.",
         "no_data": "No entries yet. Go to '➕ New Entry' to start.",
-        "total_rev": "💰 Month Income",
-        "total_exp": "💸 Month Expenses",
-        "balance": "⚡ Month Balance",
+        "total_rev": "📥 Month Income",
+        "total_exp": "📉 Month Expenses",
+        "invest_month": "📈 Month Investments",
+        "account_balance": "💰 Account Balance",
         "accumulated_balance": "🏦 Accumulated Account Balance",
         "pie_title": "📊 Expenses by Category",
         "bar_title": "📈 Trend by Type",
         "recent_list": "📋 Month Entries",
         "new_title": "➕ New Entry",
-        "new_sub": "Add a new income or expense.",
+        "new_sub": "Add a new income, expense, or investment.",
         "date_label": "Entry Date",
         "type_label": "Type",
         "value_label": "Value",
@@ -266,10 +352,10 @@ TEXTOS = {
         "save_profile": "Save Changes",
         "profile_success": "Profile updated successfully!",
         "profile_error": "Error updating profile.",
-        "logout": "🚪 Log Out"
+        "logout": "🚪 Log Out",
     },
     "Français": {
-        "login_title": "⚡ Accès à Mon Financier",
+        "login_title": "⚡ Accès à Smart Wallet",
         "login_sub": "Connectez-vous ou créez un compte.",
         "tab_login": "🔑 Connexion",
         "tab_register": "📝 S'inscrire",
@@ -283,7 +369,9 @@ TEXTOS = {
         "reg_pass_label": "Choisir un mot de passe",
         "btn_reg_submit": "Créer le compte",
         "reg_warn": "Veuillez remplir tous les champs.",
-        "reg_success": "Compte créé avec succès ! Allez dans l'onglet 'Connexion'.",
+        "reg_success": (
+            "Compte créé avec succès ! Allez dans l'onglet 'Connexion'."
+        ),
         "reg_error": "Cet utilisateur existe déjà ou une erreur est survenue.",
         "nav_overview": "📊 Vue d'ensemble",
         "nav_new": "➕ Nouvelle Entrée",
@@ -292,15 +380,16 @@ TEXTOS = {
         "overview_title": "Vue d'ensemble financière",
         "overview_sub": "Suivez vos flux, revenus et dépenses par mois.",
         "no_data": "Aucune donnée pour l'instant. Allez dans '➕ Nouvelle Entrée'.",
-        "total_rev": "💰 Revenus du Mois",
-        "total_exp": "💸 Dépenses du Mois",
-        "balance": "⚡ Solde du Mois",
+        "total_rev": "📥 Revenus du Mois",
+        "total_exp": "📉 Dépenses du Mois",
+        "invest_month": "📈 Investissements du Mois",
+        "account_balance": "💰 Solde du Compte",
         "accumulated_balance": "🏦 Solde cumulé du compte",
         "pie_title": "📊 Dépenses par Catégorie",
         "bar_title": "📈 Évolution par Type",
         "recent_list": "📋 Entrées du Mois",
         "new_title": "➕ Nouvelle Entrée",
-        "new_sub": "Ajoutez un revenu ou une dépense.",
+        "new_sub": "Ajoutez un revenu, une dépense ou un investissement.",
         "date_label": "Date",
         "type_label": "Type",
         "value_label": "Valeur",
@@ -316,16 +405,18 @@ TEXTOS = {
         "profile_sub": "Mettez à jour vos informations.",
         "name_label": "Nom Complet",
         "address_label": "Adresse",
-        "new_pass_label": "Nouveau mot de passe (laisser vide pour ne pas changer)",
+        "new_pass_label": (
+            "Nouveau mot de passe (laisser vide pour ne pas changer)"
+        ),
         "photo_label": "Photo de profil",
         "remove_photo": "Supprimer la photo actuelle",
         "save_profile": "Enregistrer les modifications",
         "profile_success": "Profil mis à jour avec succès !",
         "profile_error": "Erreur lors de la mise à jour.",
-        "logout": "🚪 Se déconnecter"
+        "logout": "🚪 Se déconnecter",
     },
     "Español": {
-        "login_title": "⚡ Acceso a Mi Financiero",
+        "login_title": "⚡ Acceso a Smart Wallet",
         "login_sub": "Inicia sesión en tu cuenta o regístrate.",
         "tab_login": "🔑 Entrar",
         "tab_register": "📝 Registrarse",
@@ -348,15 +439,16 @@ TEXTOS = {
         "overview_title": "Resumen Financiero",
         "overview_sub": "Sigue tus ingresos y gastos por mes.",
         "no_data": "No hay registros todavía. Ve a '➕ Nuevo Movimiento'.",
-        "total_rev": "💰 Ingresos del Mes",
-        "total_exp": "💸 Gastos del Mes",
-        "balance": "⚡ Saldo del Mes",
+        "total_rev": "📥 Ingresos del Mes",
+        "total_exp": "📉 Gastos del Mes",
+        "invest_month": "📈 Inversiones del Mes",
+        "account_balance": "💰 Saldo de la Cuenta",
         "accumulated_balance": "🏦 Saldo Acumulado en Cuenta",
         "pie_title": "📊 Gastos por Categoría",
         "bar_title": "📈 Evolución por Tipo",
         "recent_list": "📋 Movimientos del Mes",
         "new_title": "➕ Nuevo Movimiento",
-        "new_sub": "Agrega un ingreso o gasto.",
+        "new_sub": "Agrega un ingreso, gasto o inversión.",
         "date_label": "Fecha del Movimiento",
         "type_label": "Tipo",
         "value_label": "Valor",
@@ -378,10 +470,10 @@ TEXTOS = {
         "save_profile": "Guardar Cambios",
         "profile_success": "¡Perfil actualizado con éxito!",
         "profile_error": "Error al actualizar perfil.",
-        "logout": "🚪 Cerrar Sesión"
+        "logout": "🚪 Cerrar Sesión",
     },
     "Italiano": {
-        "login_title": "⚡ Accesso a Il Mio Finanziario",
+        "login_title": "⚡ Accesso a Smart Wallet",
         "login_sub": "Accedi al tuo account o registrati.",
         "tab_login": "🔑 Accedi",
         "tab_register": "📝 Registrati",
@@ -404,15 +496,16 @@ TEXTOS = {
         "overview_title": "Panoramica Finanziaria",
         "overview_sub": "Monitora flussi, entrate e spese per mese.",
         "no_data": "Nessun inserimento. Vai su '➕ Nuova Voce' per iniziare.",
-        "total_rev": "💰 Entrate del Mese",
-        "total_exp": "💸 Spese del Mese",
-        "balance": "⚡ Saldo del Mese",
+        "total_rev": "📥 Entrate del Mese",
+        "total_exp": "📉 Spese del Mese",
+        "invest_month": "📈 Investimenti del Mese",
+        "account_balance": "💰 Saldo del Conto",
         "accumulated_balance": "🏦 Saldo Accumulato nel Conto",
         "pie_title": "📊 Spese per Categoria",
         "bar_title": "📈 Andamento per Tipo",
         "recent_list": "📋 Voci del Mese",
         "new_title": "➕ Nuova Voce",
-        "new_sub": "Aggiungi un'entrata o una spesa.",
+        "new_sub": "Aggiungi un'entrata, una spesa o un investimento.",
         "date_label": "Data",
         "type_label": "Tipo",
         "value_label": "Valore",
@@ -434,10 +527,10 @@ TEXTOS = {
         "save_profile": "Salva Modifiche",
         "profile_success": "Profilo aggiornato!",
         "profile_error": "Errore durante l'aggiornamento.",
-        "logout": "🚪 Disconnetti"
+        "logout": "🚪 Disconnetti",
     },
     "Deutsch": {
-        "login_title": "⚡ Mein Finanz-Zugang",
+        "login_title": "⚡ Smart Wallet Zugang",
         "login_sub": "Melden Sie sich an oder registrieren Sie sich.",
         "tab_login": "🔑 Anmelden",
         "tab_register": "📝 Registrieren",
@@ -460,15 +553,16 @@ TEXTOS = {
         "overview_title": "Finanzübersicht",
         "overview_sub": "Verfolgen Sie Einnahmen und Ausgaben nach Monat.",
         "no_data": "Noch keine Einträge. Gehen Sie zu '➕ Neuer Eintrag'.",
-        "total_rev": "💰 Einnahmen des Monats",
-        "total_exp": "💸 Ausgaben des Monats",
-        "balance": "⚡ Saldo des Monats",
+        "total_rev": "📥 Einnahmen des Monats",
+        "total_exp": "📉 Ausgaben des Monats",
+        "invest_month": "📈 Investitionen des Monats",
+        "account_balance": "💰 Kontostand",
         "accumulated_balance": "🏦 Akkumulierter Kontostand",
         "pie_title": "📊 Ausgaben nach Kategorie",
         "bar_title": "📈 Trend nach Typ",
         "recent_list": "📋 Einträge des Monats",
         "new_title": "➕ Neuer Eintrag",
-        "new_sub": "Fügen Sie eine Einnahme oder Ausgabe hinzu.",
+        "new_sub": "Fügen Sie eine Einnahme, Ausgabe oder Investition hinzu.",
         "date_label": "Datum",
         "type_label": "Typ",
         "value_label": "Wert",
@@ -490,15 +584,11 @@ TEXTOS = {
         "save_profile": "Änderungen Speichern",
         "profile_success": "Profil erfolgreich aktualisiert!",
         "profile_error": "Fehler beim Aktualisieren.",
-        "logout": "🚪 Abmelden"
-    }
+        "logout": "🚪 Abmelden",
+    },
 }
 
-MOEDAS = {
-    "Real (R$)": "R$",
-    "Euro (€)": "€",
-    "Dólar ($)": "$"
-}
+MOEDAS = {"Real (R$)": "R$", "Euro (€)": "€", "Dólar ($)": "$"}
 
 CATEGORIAS_PADRAO = [
     "Aluguel",
@@ -510,239 +600,365 @@ CATEGORIAS_PADRAO = [
     "Educação",
     "Salário",
     "Investimentos",
-    "Outros"
+    "Outros",
 ]
 
-if 'logged_in' not in st.session_state:
-    st.session_state['logged_in'] = False
-if 'username' not in st.session_state:
-    st.session_state['username'] = ""
-if 'idioma' not in st.session_state:
-    st.session_state['idioma'] = "Português"
-if 'moeda' not in st.session_state:
-    st.session_state['moeda'] = "Real (R$)"
+if "logged_in" not in st.session_state:
+  st.session_state["logged_in"] = False
+if "username" not in st.session_state:
+  st.session_state["username"] = ""
+if "idioma" not in st.session_state:
+  st.session_state["idioma"] = "Português"
+if "moeda" not in st.session_state:
+  st.session_state["moeda"] = "Real (R$)"
 
 lista_idiomas = list(TEXTOS.keys())
 
-if not st.session_state['logged_in']:
-    st.markdown("<br><br>", unsafe_allow_html=True)
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        st.markdown(f"<h2 style='text-align: center;'>{TEXTOS[st.session_state['idioma']]['login_title']}</h2>", unsafe_allow_html=True)
-        st.markdown(f"<p style='text-align: center; color: gray;'>{TEXTOS[st.session_state['idioma']]['login_sub']}</p>", unsafe_allow_html=True)
-        
-        tab_login, tab_reg = st.tabs([TEXTOS[st.session_state['idioma']]['tab_login'], TEXTOS[st.session_state['idioma']]['tab_register']])
-        
-        with tab_login:
-            with st.form("form_login"):
-                u_input = st.text_input(TEXTOS[st.session_state['idioma']]['user_label'])
-                p_input = st.text_input(TEXTOS[st.session_state['idioma']]['pass_label'], type="password")
-                submit_login = st.form_submit_button(TEXTOS[st.session_state['idioma']]['btn_login_submit'], use_container_width=True)
-                
-                if submit_login:
-                    if autenticar_usuario(u_input, p_input):
-                        st.session_state['logged_in'] = True
-                        st.session_state['username'] = u_input
-                        st.success(TEXTOS[st.session_state['idioma']]['login_success'])
-                        st.rerun()
-                    else:
-                        st.error(TEXTOS[st.session_state['idioma']]['login_error'])
-                        
-        with tab_reg:
-            with st.form("form_reg"):
-                reg_user = st.text_input(TEXTOS[st.session_state['idioma']]['reg_user_label'])
-                reg_name = st.text_input(TEXTOS[st.session_state['idioma']]['reg_name_label'])
-                reg_pass = st.text_input(TEXTOS[st.session_state['idioma']]['reg_pass_label'], type="password")
-                submit_reg = st.form_submit_button(TEXTOS[st.session_state['idioma']]['btn_reg_submit'], use_container_width=True)
-                
-                if submit_reg:
-                    if reg_user and reg_name and reg_pass:
-                        if cadastrar_usuario(reg_user, reg_name, reg_pass):
-                            st.success(TEXTOS[st.session_state['idioma']]['reg_success'])
-                        else:
-                            st.error(TEXTOS[st.session_state['idioma']]['reg_error'])
-                    else:
-                        st.warning(TEXTOS[st.session_state['idioma']]['reg_warn'])
+if not st.session_state["logged_in"]:
+  st.markdown("<br><br>", unsafe_allow_html=True)
+  col1, col2, col3 = st.columns([1, 2, 1])
+  with col2:
+    st.markdown(
+        f"<h2 style='text-align:"
+        f" center;'>{TEXTOS[st.session_state['idioma']]['login_title']}</h2>",
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        f"<p style='text-align: center;"
+        f" color: gray;'>{TEXTOS[st.session_state['idioma']]['login_sub']}</p>",
+        unsafe_allow_html=True,
+    )
 
-        st.markdown("<hr>", unsafe_allow_html=True)
-        sel_lang = st.selectbox("🌐 Idioma / Language", lista_idiomas, index=lista_idiomas.index(st.session_state['idioma']))
-        if sel_lang != st.session_state['idioma']:
-            st.session_state['idioma'] = sel_lang
-            st.rerun()
+    tab_login, tab_reg = st.tabs([
+        TEXTOS[st.session_state["idioma"]]["tab_login"],
+        TEXTOS[st.session_state["idioma"]]["tab_register"],
+    ])
 
-        sel_moeda = st.selectbox("💶 Moeda / Currency", list(MOEDAS.keys()), index=list(MOEDAS.keys()).index(st.session_state['moeda']))
-        if sel_moeda != st.session_state['moeda']:
-            st.session_state['moeda'] = sel_moeda
+    with tab_login:
+      with st.form("form_login"):
+        u_input = st.text_input(
+            TEXTOS[st.session_state["idioma"]]["user_label"]
+        )
+        p_input = st.text_input(
+            TEXTOS[st.session_state["idioma"]]["pass_label"], type="password"
+        )
+        submit_login = st.form_submit_button(
+            TEXTOS[st.session_state["idioma"]]["btn_login_submit"],
+            use_container_width=True,
+        )
+
+        if submit_login:
+          if autenticar_usuario(u_input, p_input):
+            st.session_state["logged_in"] = True
+            st.session_state["username"] = u_input
+            st.success(TEXTOS[st.session_state["idioma"]]["login_success"])
             st.rerun()
+          else:
+            st.error(TEXTOS[st.session_state["idioma"]]["login_error"])
+
+    with tab_reg:
+      with st.form("form_reg"):
+        reg_user = st.text_input(
+            TEXTOS[st.session_state["idioma"]]["reg_user_label"]
+        )
+        reg_name = st.text_input(
+            TEXTOS[st.session_state["idioma"]]["reg_name_label"]
+        )
+        reg_pass = st.text_input(
+            TEXTOS[st.session_state["idioma"]]["reg_pass_label"], type="password"
+        )
+        submit_reg = st.form_submit_button(
+            TEXTOS[st.session_state["idioma"]]["btn_reg_submit"],
+            use_container_width=True,
+        )
+
+        if submit_reg:
+          if reg_user and reg_name and reg_pass:
+            if cadastrar_usuario(reg_user, reg_name, reg_pass):
+              st.success(TEXTOS[st.session_state["idioma"]]["reg_success"])
+            else:
+              st.error(TEXTOS[st.session_state["idioma"]]["reg_error"])
+          else:
+            st.warning(TEXTOS[st.session_state["idioma"]]["reg_warn"])
+
+    st.markdown("<hr>", unsafe_allow_html=True)
+    sel_lang = st.selectbox(
+        "🌐 Idioma / Language",
+        lista_idiomas,
+        index=lista_idiomas.index(st.session_state["idioma"]),
+    )
+    if sel_lang != st.session_state["idioma"]:
+      st.session_state["idioma"] = sel_lang
+      st.rerun()
+
+    sel_moeda = st.selectbox(
+        "💶 Moeda / Currency",
+        list(MOEDAS.keys()),
+        index=list(MOEDAS.keys()).index(st.session_state["moeda"]),
+    )
+    if sel_moeda != st.session_state["moeda"]:
+      st.session_state["moeda"] = sel_moeda
+      st.rerun()
 
 else:
-    dados_user = obter_dados_usuario(st.session_state['username'])
-    nome_completo_user = dados_user[0] if dados_user and dados_user[0] else st.session_state['username']
-    foto_blob_user = dados_user[2] if dados_user and len(dados_user) > 2 else None
+  dados_user = obter_dados_usuario(st.session_state["username"])
+  nome_completo_user = (
+      dados_user[0]
+      if dados_user and dados_user[0]
+      else st.session_state["username"]
+  )
+  foto_blob_user = dados_user[2] if dados_user and len(dados_user) > 2 else None
 
-    simbolo_moeda = MOEDAS[st.session_state['moeda']]
+  simbolo_moeda = MOEDAS[st.session_state["moeda"]]
 
-    with st.sidebar:
-        if foto_blob_user:
-            try:
-                img = Image.open(io.BytesIO(foto_blob_user))
-                st.image(img, width=100)
-            except:
-                st.write("📷")
+  with st.sidebar:
+    if foto_blob_user:
+      try:
+        img = Image.open(io.BytesIO(foto_blob_user))
+        st.image(img, width=100)
+      except:
+        st.write("📷")
+    else:
+      st.write("👤")
+
+    st.markdown(f"### ⚡ Olá, {nome_completo_user}")
+    st.markdown("---")
+
+    sel_lang = st.selectbox(
+        "🌐 Idioma / Language",
+        lista_idiomas,
+        index=lista_idiomas.index(st.session_state["idioma"]),
+    )
+    if sel_lang != st.session_state["idioma"]:
+      st.session_state["idioma"] = sel_lang
+      st.rerun()
+
+    sel_moeda = st.selectbox(
+        "💶 Moeda / Currency",
+        list(MOEDAS.keys()),
+        index=list(MOEDAS.keys()).index(st.session_state["moeda"]),
+    )
+    if sel_moeda != st.session_state["moeda"]:
+      st.session_state["moeda"] = sel_moeda
+      st.rerun()
+
+    st.markdown("---")
+    menu = st.radio(
+        "Navegação",
+        [
+            TEXTOS[st.session_state["idioma"]]["nav_overview"],
+            TEXTOS[st.session_state["idioma"]]["nav_new"],
+            TEXTOS[st.session_state["idioma"]]["nav_manage"],
+            TEXTOS[st.session_state["idioma"]]["nav_profile"],
+        ],
+    )
+
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    if st.button(
+        TEXTOS[st.session_state["idioma"]]["logout"], use_container_width=True
+    ):
+      st.session_state["logged_in"] = False
+      st.session_state["username"] = ""
+      st.rerun()
+
+  t = TEXTOS[st.session_state["idioma"]]
+  df = carregar_dados(st.session_state["username"])
+
+  if menu == t["nav_overview"]:
+    st.title(t["overview_title"])
+    st.write(t["overview_sub"])
+
+    if df.empty:
+      st.info(t["no_data"])
+    else:
+      df["data"] = pd.to_datetime(df["data"])
+      df["mes_ano"] = df["data"].dt.strftime("%Y-%m")
+
+      meses_disponiveis = sorted(df["mes_ano"].unique(), reverse=True)
+      mes_selecionado = st.selectbox("📅 Selecione o Mês", meses_disponiveis)
+
+      df_sorted = df.sort_values("data")
+      resumo_meses = (
+          df_sorted.groupby("mes_ano")
+          .apply(
+              lambda x: pd.Series({
+                  "receitas": x[x["tipo"] == "Receita"]["valor"].sum(),
+                  "despesas": x[x["tipo"] == "Despesa"]["valor"].sum(),
+                  "investimentos": x[x["tipo"] == "Investimento"][
+                      "valor"
+                  ].sum(),
+                  "saldo_conta": (
+                      x[x["tipo"] == "Receita"]["valor"].sum()
+                      - x[x["tipo"] == "Despesa"]["valor"].sum()
+                      - x[x["tipo"] == "Investimento"]["valor"].sum()
+                  ),
+              })
+          )
+          .reset_index()
+      )
+
+      resumo_meses = resumo_meses.sort_values("mes_ano")
+      resumo_meses["saldo_acumulado"] = resumo_meses["saldo_conta"].cumsum()
+
+      saldo_acumulado_atual = (
+          resumo_meses.loc[
+              resumo_meses["mes_ano"] == mes_selecionado, "saldo_acumulado"
+          ].values[0]
+          if not resumo_meses[
+              resumo_meses["mes_ano"] == mes_selecionado
+          ].empty
+          else 0.0
+      )
+
+      df_mes = df[df["mes_ano"] == mes_selecionado]
+
+      total_receitas = df_mes[df_mes["tipo"] == "Receita"]["valor"].sum()
+      total_despesas = df_mes[df_mes["tipo"] == "Despesa"]["valor"].sum()
+      total_investimentos = df_mes[df_mes["tipo"] == "Investimento"][
+          "valor"
+      ].sum()
+      saldo_conta = total_receitas - total_despesas - total_investimentos
+
+      c_m1, c_m2 = st.columns(2)
+      c_m1.metric(t["total_rev"], f"{simbolo_moeda} {total_receitas:,.2f}")
+      c_m2.metric(t["total_exp"], f"{simbolo_moeda} {total_despesas:,.2f}")
+
+      c_m3, c_m4 = st.columns(2)
+      c_m3.metric(
+          t["invest_month"], f"{simbolo_moeda} {total_investimentos:,.2f}"
+      )
+      c_m4.metric(t["account_balance"], f"{simbolo_moeda} {saldo_conta:,.2f}")
+
+      st.metric(
+          t["accumulated_balance"],
+          f"{simbolo_moeda} {saldo_acumulado_atual:,.2f}",
+      )
+
+      st.markdown("---")
+      c1, c2 = st.columns(2)
+      with c1:
+        df_desp = df_mes[df_mes["tipo"] == "Despesa"]
+        if not df_desp.empty:
+          fig_pie = px.pie(
+              df_desp,
+              names="categoria",
+              values="valor",
+              title=t["pie_title"],
+              hole=0.4,
+          )
+          fig_pie.update_layout(dragmode=False)
+          st.plotly_chart(
+              fig_pie,
+              use_container_width=True,
+              config={"displayModeBar": False, "scrollZoom": False},
+          )
         else:
-            st.write("👤")
+          st.info("Sem despesas para exibir no gráfico neste mês.")
 
-        st.markdown(f"### ⚡ Olá, {nome_completo_user}")
-        st.markdown("---")
-
-        sel_lang = st.selectbox("🌐 Idioma / Language", lista_idiomas, index=lista_idiomas.index(st.session_state['idioma']))
-        if sel_lang != st.session_state['idioma']:
-            st.session_state['idioma'] = sel_lang
-            st.rerun()
-
-        sel_moeda = st.selectbox("💶 Moeda / Currency", list(MOEDAS.keys()), index=list(MOEDAS.keys()).index(st.session_state['moeda']))
-        if sel_moeda != st.session_state['moeda']:
-            st.session_state['moeda'] = sel_moeda
-            st.rerun()
-
-        st.markdown("---")
-        menu = st.radio("Navegação", [
-            TEXTOS[st.session_state['idioma']]['nav_overview'],
-            TEXTOS[st.session_state['idioma']]['nav_new'],
-            TEXTOS[st.session_state['idioma']]['nav_manage'],
-            TEXTOS[st.session_state['idioma']]['nav_profile']
-        ])
-
-        st.markdown("<br><br>", unsafe_allow_html=True)
-        if st.button(TEXTOS[st.session_state['idioma']]['logout'], use_container_width=True):
-            st.session_state['logged_in'] = False
-            st.session_state['username'] = ""
-            st.rerun()
-
-    t = TEXTOS[st.session_state['idioma']]
-    df = carregar_dados(st.session_state['username'])
-
-    if menu == t['nav_overview']:
-        st.title(t['overview_title'])
-        st.write(t['overview_sub'])
-
-        if df.empty:
-            st.info(t['no_data'])
+      with c2:
+        if not df_mes.empty:
+          fig_bar = px.bar(
+              df_mes,
+              x="data",
+              y="valor",
+              color="tipo",
+              title=t["bar_title"],
+              barmode="group",
+          )
+          fig_bar.update_layout(
+              dragmode=False,
+              xaxis=dict(fixedrange=True),
+              yaxis=dict(fixedrange=True),
+          )
+          st.plotly_chart(
+              fig_bar,
+              use_container_width=True,
+              config={"displayModeBar": False, "scrollZoom": False},
+          )
         else:
-            df["data"] = pd.to_datetime(df["data"])
-            df["mes_ano"] = df["data"].dt.strftime("%Y-%m")
-            
-            meses_disponiveis = sorted(df["mes_ano"].unique(), reverse=True)
-            mes_selecionado = st.selectbox("📅 Selecione o Mês", meses_disponiveis)
-            
-            df_sorted = df.sort_values("data")
-            resumo_meses = df_sorted.groupby("mes_ano").apply(
-                lambda x: pd.Series({
-                    "receitas": x[x['tipo'] == 'Receita']['valor'].sum(),
-                    "despesas": x[x['tipo'] == 'Despesa']['valor'].sum(),
-                    "saldo": x[x['tipo'] == 'Receita']['valor'].sum() - x[x['tipo'] == 'Despesa']['valor'].sum()
-                })
-            ).reset_index()
-            
-            resumo_meses = resumo_meses.sort_values("mes_ano")
-            resumo_meses["saldo_acumulado"] = resumo_meses["saldo"].cumsum()
-            
-            saldo_acumulado_atual = resumo_meses.loc[resumo_meses["mes_ano"] == mes_selecionado, "saldo_acumulado"].values[0] if not resumo_meses[resumo_meses["mes_ano"] == mes_selecionado].empty else 0.0
+          st.info("Sem dados para o gráfico.")
 
-            df_mes = df[df["mes_ano"] == mes_selecionado]
+      st.subheader(t["recent_list"])
+      st.dataframe(df_mes, use_container_width=True)
 
-            total_receitas = df_mes[df_mes['tipo'] == 'Receita']['valor'].sum()
-            total_despesas = df_mes[df_mes['tipo'] == 'Despesa']['valor'].sum()
-            saldo = total_receitas - total_despesas
+  elif menu == t["nav_new"]:
+    st.title(t["new_title"])
+    st.write(t["new_sub"])
 
-            c_m1, c_m2 = st.columns(2)
-            c_m1.metric(t['total_rev'], f"{simbolo_moeda} {total_receitas:,.2f}")
-            c_m2.metric(t['total_exp'], f"{simbolo_moeda} {total_despesas:,.2f}")
-            
-            c_m3, c_m4 = st.columns(2)
-            c_m3.metric(t['balance'], f"{simbolo_moeda} {saldo:,.2f}")
-            c_m4.metric(t['accumulated_balance'], f"{simbolo_moeda} {saldo_acumulado_atual:,.2f}")
+    with st.form("form_novo_lancamento"):
+      data_lanc = st.date_input(t["date_label"], datetime.date.today())
+      tipo_lanc = st.selectbox(
+          t["type_label"], ["Despesa", "Receita", "Investimento"]
+      )
+      valor_lanc = st.number_input(
+          f"{t['value_label']} ({simbolo_moeda})", min_value=0.0, format="%.2f"
+      )
+      cat_lanc = st.selectbox(t["cat_label"], CATEGORIAS_PADRAO)
+      desc_lanc = st.text_input(t["desc_label"])
 
-            st.markdown("---")
-            c1, c2 = st.columns(2)
-            with c1:
-                df_desp = df_mes[df_mes['tipo'] == 'Despesa']
-                if not df_desp.empty:
-                    fig_pie = px.pie(df_desp, names='categoria', values='valor', title=t['pie_title'], hole=0.4)
-                    fig_pie.update_layout(dragmode=False)
-                    st.plotly_chart(fig_pie, use_container_width=True, config={'displayModeBar': False, 'scrollZoom': False})
-                else:
-                    st.info("Sem despesas para exibir no gráfico neste mês.")
-
-            with c2:
-                if not df_mes.empty:
-                    fig_bar = px.bar(df_mes, x='data', y='valor', color='tipo', title=t['bar_title'], barmode='group')
-                    fig_bar.update_layout(dragmode=False, xaxis=dict(fixedrange=True), yaxis=dict(fixedrange=True))
-                    st.plotly_chart(fig_bar, use_container_width=True, config={'displayModeBar': False, 'scrollZoom': False})
-                else:
-                    st.info("Sem dados para o gráfico.")
-
-            st.subheader(t['recent_list'])
-            st.dataframe(df_mes, use_container_width=True)
-
-    elif menu == t['nav_new']:
-        st.title(t['new_title'])
-        st.write(t['new_sub'])
-
-        with st.form("form_novo_lancamento"):
-            data_lanc = st.date_input(t['date_label'], datetime.date.today())
-            tipo_lanc = st.selectbox(t['type_label'], ["Despesa", "Receita"])
-            valor_lanc = st.number_input(f"{t['value_label']} ({simbolo_moeda})", min_value=0.0, format="%.2f")
-            cat_lanc = st.selectbox(t['cat_label'], CATEGORIAS_PADRAO)
-            desc_lanc = st.text_input(t['desc_label'])
-            
-            submit_lanc = st.form_submit_button(t['save_btn'], use_container_width=True)
-            if submit_lanc:
-                if valor_lanc > 0:
-                    salvar_lancamento(st.session_state['username'], str(data_lanc), desc_lanc, cat_lanc, tipo_lanc, valor_lanc)
-                    st.success(t['success_msg'])
-                else:
-                    st.warning(t['warn_val'])
-
-    elif menu == t['nav_manage']:
-        st.title(t['manage_title'])
-        st.write(t['manage_sub'])
-
-        if df.empty:
-            st.info(t['no_data'])
+      submit_lanc = st.form_submit_button(t["save_btn"], use_container_width=True)
+      if submit_lanc:
+        if valor_lanc > 0:
+          salvar_lancamento(
+              st.session_state["username"],
+              str(data_lanc),
+              desc_lanc,
+              cat_lanc,
+              tipo_lanc,
+              valor_lanc,
+          )
+          st.success(t["success_msg"])
         else:
-            st.dataframe(df, use_container_width=True)
-            id_del = st.selectbox("ID do lançamento para excluir", df['id'].tolist())
-            if st.button(t['del_btn']):
-                deletar_lancamento(id_del, st.session_state['username'])
-                st.success("Lançamento excluído com sucesso!")
-                st.rerun()
+          st.warning(t["warn_val"])
 
-    elif menu == t['nav_profile']:
-        st.title(t['profile_title'])
-        st.write(t['profile_sub'])
+  elif menu == t["nav_manage"]:
+    st.title(t["manage_title"])
+    st.write(t["manage_sub"])
 
-        dados_atuais = obter_dados_usuario(st.session_state['username'])
-        nome_atual = dados_atuais[0] if dados_atuais and dados_atuais[0] else ""
-        end_atual = dados_atuais[1] if dados_atuais and dados_atuais[1] else ""
+    if df.empty:
+      st.info(t["no_data"])
+    else:
+      st.dataframe(df, use_container_width=True)
+      id_del = st.selectbox("ID do lançamento para excluir", df["id"].tolist())
+      if st.button(t["del_btn"]):
+        deletar_lancamento(id_del, st.session_state["username"])
+        st.success("Lançamento excluído com sucesso!")
+        st.rerun()
 
-        with st.form("form_perfil"):
-            novo_nome = st.text_input(t['name_label'], value=nome_atual)
-            novo_endereco = st.text_input(t['address_label'], value=end_atual)
-            nova_senha = st.text_input(t['new_pass_label'], type="password")
-            
-            foto_upload = st.file_uploader(t['photo_label'], type=["png", "jpg", "jpeg"])
-            remover_foto_check = st.checkbox(t['remove_photo'])
+  elif menu == t["nav_profile"]:
+    st.title(t["profile_title"])
+    st.write(t["profile_sub"])
 
-            submit_perfil = st.form_submit_button(t['save_profile'], use_container_width=True)
+    dados_atuais = obter_dados_usuario(st.session_state["username"])
+    nome_atual = dados_atuais[0] if dados_atuais and dados_atuais[0] else ""
+    end_atual = dados_atuais[1] if dados_atuais and dados_atuais[1] else ""
 
-            if submit_perfil:
-                foto_blob = None
-                if foto_upload is not None:
-                    foto_blob = foto_upload.read()
-                
-                if atualizar_perfil(st.session_state['username'], novo_nome, novo_endereco, nova_senha, foto_blob, remover_foto_check):
-                    st.success(t['profile_success'])
-                    st.rerun()
-                else:
-                    st.error(t['profile_error'])
+    with st.form("form_perfil"):
+      novo_nome = st.text_input(t["name_label"], value=nome_atual)
+      novo_endereco = st.text_input(t["address_label"], value=end_atual)
+      nova_senha = st.text_input(t["new_pass_label"], type="password")
+
+      foto_upload = st.file_uploader(t["photo_label"], type=["png", "jpg", "jpeg"])
+      remover_foto_check = st.checkbox(t["remove_photo"])
+
+      submit_perfil = st.form_submit_button(
+          t["save_profile"], use_container_width=True
+      )
+
+      if submit_perfil:
+        foto_blob = None
+        if foto_upload is not None:
+          foto_blob = foto_upload.read()
+
+        if atualizar_perfil(
+            st.session_state["username"],
+            novo_nome,
+            novo_endereco,
+            nova_senha,
+            foto_blob,
+            remover_foto_check,
+        ):
+          st.success(t["profile_success"])
+          st.rerun()
+        else:
+          st.error(t["profile_error"])
