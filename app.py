@@ -10,9 +10,11 @@ import io
 st.set_page_config(
     page_title="Meu Financeiro | Multi-Usuário",
     page_icon="💶",
-    layout="wide",
+    layout="centered",  # Ajustado para ficar perfeito também no celular
     initial_sidebar_state="expanded"
 )
+
+# Injeção das Meta Tags do Open Graph com a imagem limpa e clara de fundo
 st.markdown("""
     <head>
         <meta property="og:title" content="Meu Financeiro | Multi-Usuário">
@@ -167,7 +169,7 @@ TEXTOS = {
         "login_success": "Bem-vindo de volta!",
         "login_error": "Usuário ou senha incorretos.",
         "reg_user_label": "Defina um Usuário de Login (ex: seu e-mail)",
-        "reg_name_label": "Seu Nome Completo (ex: Denilson)",
+        "reg_name_label": "Seu Nome Completo",
         "reg_pass_label": "Escolha uma Senha",
         "btn_reg_submit": "Cadastrar Nova Conta",
         "reg_warn": "Preencha todos os campos.",
@@ -178,21 +180,21 @@ TEXTOS = {
         "nav_manage": "✏️ Gerenciar & Editar",
         "nav_profile": "👤 Meu Perfil",
         "overview_title": "Visão Geral Financeira",
-        "overview_sub": "Acompanhe seus fluxos, receitas e despesas em tempo real.",
+        "overview_sub": "Acompanhe seus fluxos, receitas e despesas por mês.",
         "no_data": "Nenhum lançamento cadastrado ainda. Vá em '➕ Novo Lançamento' para começar.",
-        "total_rev": "💰 Receitas Totais",
-        "total_exp": "💸 Despesas Totais",
-        "balance": "⚡ Saldo Atual",
+        "total_rev": "💰 Receitas do Mês",
+        "total_exp": "💸 Despesas do Mês",
+        "balance": "⚡ Saldo do Mês",
         "pie_title": "📊 Despesas por Categoria",
         "bar_title": "📈 Evolução por Tipo",
-        "recent_list": "📋 Últimos Lançamentos",
+        "recent_list": "📋 Lançamentos do Mês",
         "new_title": "➕ Novo Lançamento",
         "new_sub": "Adicione uma nova receita ou despesa detalhando o que foi gasto.",
         "date_label": "Data do Lançamento",
         "type_label": "Tipo",
         "value_label": "Valor",
         "cat_label": "Categoria Principal",
-        "desc_label": "Descrição Específica (ex: Supermercado, Aluguel)",
+        "desc_label": "Descrição Específica",
         "save_btn": "🚀 Salvar Lançamento",
         "success_msg": "Lançamento salvo com sucesso!",
         "warn_desc": "Por favor, preencha a descrição.",
@@ -233,14 +235,14 @@ TEXTOS = {
         "nav_manage": "✏️ Manage & Edit",
         "nav_profile": "👤 My Profile",
         "overview_title": "Financial Overview",
-        "overview_sub": "Track your cash flows, income, and expenses in real-time.",
+        "overview_sub": "Track your cash flows, income, and expenses by month.",
         "no_data": "No entries yet. Go to '➕ New Entry' to start.",
-        "total_rev": "💰 Total Income",
-        "total_exp": "💸 Total Expenses",
-        "balance": "⚡ Current Balance",
+        "total_rev": "💰 Month Income",
+        "total_exp": "💸 Month Expenses",
+        "balance": "⚡ Month Balance",
         "pie_title": "📊 Expenses by Category",
         "bar_title": "📈 Trend by Type",
-        "recent_list": "📋 Recent Entries",
+        "recent_list": "📋 Month Entries",
         "new_title": "➕ New Entry",
         "new_sub": "Add a new income or expense.",
         "date_label": "Entry Date",
@@ -288,14 +290,14 @@ TEXTOS = {
         "nav_manage": "✏️ Gérer & Éditer",
         "nav_profile": "👤 Mon Profil",
         "overview_title": "Vue d'ensemble financière",
-        "overview_sub": "Suivez vos flux, revenus et dépenses en temps réel.",
+        "overview_sub": "Suivez vos flux, revenus et dépenses par mois.",
         "no_data": "Aucune donnée pour l'instant. Allez dans '➕ Nouvelle Entrée'.",
-        "total_rev": "💰 Total Revenus",
-        "total_exp": "💸 Total Dépenses",
-        "balance": "⚡ Solde Actuel",
+        "total_rev": "💰 Revenus du Mois",
+        "total_exp": "💸 Dépenses du Mois",
+        "balance": "⚡ Solde du Mois",
         "pie_title": "📊 Dépenses par Catégorie",
         "bar_title": "📈 Évolution par Type",
-        "recent_list": "📋 Dernières Entrées",
+        "recent_list": "📋 Entrées du Mois",
         "new_title": "➕ Nouvelle Entrée",
         "new_sub": "Ajoutez un revenu ou une dépense.",
         "date_label": "Date",
@@ -343,14 +345,14 @@ TEXTOS = {
         "nav_manage": "✏️ Gestionar y Editar",
         "nav_profile": "👤 Mi Perfil",
         "overview_title": "Resumen Financiero",
-        "overview_sub": "Sigue tus ingresos y gastos en tiempo real.",
+        "overview_sub": "Sigue tus ingresos y gastos por mes.",
         "no_data": "No hay registros todavía. Ve a '➕ Nuevo Movimiento'.",
-        "total_rev": "💰 Ingresos Totales",
-        "total_exp": "💸 Gastos Totales",
-        "balance": "⚡ Saldo Actual",
+        "total_rev": "💰 Ingresos del Mes",
+        "total_exp": "💸 Gastos del Mes",
+        "balance": "⚡ Saldo del Mes",
         "pie_title": "📊 Gastos por Categoría",
         "bar_title": "📈 Evolución por Tipo",
-        "recent_list": "📋 Últimos Movimientos",
+        "recent_list": "📋 Movimientos del Mes",
         "new_title": "➕ Nuevo Movimiento",
         "new_sub": "Agrega un ingreso o gasto.",
         "date_label": "Fecha del Movimiento",
@@ -398,14 +400,14 @@ TEXTOS = {
         "nav_manage": "✏️ Gestisci & Modifica",
         "nav_profile": "👤 Il Mio Profilo",
         "overview_title": "Panoramica Finanziaria",
-        "overview_sub": "Monitora flussi, entrate e spese in tempo reale.",
+        "overview_sub": "Monitora flussi, entrate e spese per mese.",
         "no_data": "Nessun inserimento. Vai su '➕ Nuova Voce' per iniziare.",
-        "total_rev": "💰 Entrate Totali",
-        "total_exp": "💸 Spese Totali",
-        "balance": "⚡ Saldo Attuale",
+        "total_rev": "💰 Entrate del Mese",
+        "total_exp": "💸 Spese del Mese",
+        "balance": "⚡ Saldo del Mese",
         "pie_title": "📊 Spese per Categoria",
         "bar_title": "📈 Andamento per Tipo",
-        "recent_list": "📋 Ultime Voci",
+        "recent_list": "📋 Voci del Mese",
         "new_title": "➕ Nuova Voce",
         "new_sub": "Aggiungi un'entrata o una spesa.",
         "date_label": "Data",
@@ -453,14 +455,14 @@ TEXTOS = {
         "nav_manage": "✏️ Verwalten & Bearbeiten",
         "nav_profile": "👤 Mein Profil",
         "overview_title": "Finanzübersicht",
-        "overview_sub": "Verfolgen Sie Einnahmen und Ausgaben in Echtzeit.",
+        "overview_sub": "Verfolgen Sie Einnahmen und Ausgaben nach Monat.",
         "no_data": "Noch keine Einträge. Gehen Sie zu '➕ Neuer Eintrag'.",
-        "total_rev": "💰 Einnahmen Gesamt",
-        "total_exp": "💸 Ausgaben Gesamt",
-        "balance": "⚡ Aktueller Kontostand",
+        "total_rev": "💰 Einnahmen des Monats",
+        "total_exp": "💸 Ausgaben des Monats",
+        "balance": "⚡ Saldo des Monats",
         "pie_title": "📊 Ausgaben nach Kategorie",
         "bar_title": "📈 Trend nach Typ",
-        "recent_list": "📋 Letzte Einträge",
+        "recent_list": "📋 Einträge des Monats",
         "new_title": "➕ Neuer Eintrag",
         "new_sub": "Fügen Sie eine Einnahme oder Ausgabe hinzu.",
         "date_label": "Datum",
@@ -564,7 +566,6 @@ else:
     simbolo_moeda = MOEDAS[st.session_state['moeda']]
 
     with st.sidebar:
-        # FOTO DE PERFIL (Nome duplicado abaixo removido)
         if foto_blob_user:
             try:
                 img = Image.open(io.BytesIO(foto_blob_user))
@@ -574,11 +575,9 @@ else:
         else:
             st.write("👤")
 
-        # Saudação principal com o nome correto
         st.markdown(f"### ⚡ Olá, {nome_completo_user}")
         st.markdown("---")
 
-        # Configurações na Sidebar (Idiomas e Moedas completos)
         sel_lang = st.selectbox("🌐 Idioma / Language", lista_idiomas, index=lista_idiomas.index(st.session_state['idioma']))
         if sel_lang != st.session_state['idioma']:
             st.session_state['idioma'] = sel_lang
@@ -613,8 +612,18 @@ else:
         if df.empty:
             st.info(t['no_data'])
         else:
-            total_receitas = df[df['tipo'] == 'Receita']['valor'].sum()
-            total_despesas = df[df['tipo'] == 'Despesa']['valor'].sum()
+            # Tratamento de datas e filtro de mês para separar os lançamentos corretamente
+            df["data"] = pd.to_datetime(df["data"])
+            df["mes_ano"] = df["data"].dt.strftime("%Y-%m")
+            
+            meses_disponiveis = sorted(df["mes_ano"].unique(), reverse=True)
+            mes_selecionado = st.selectbox("📅 Selecione o Mês", meses_disponiveis)
+            
+            # Filtra os dados apenas para o mês selecionado
+            df_mes = df[df["mes_ano"] == mes_selecionado]
+
+            total_receitas = df_mes[df_mes['tipo'] == 'Receita']['valor'].sum()
+            total_despesas = df_mes[df_mes['tipo'] == 'Despesa']['valor'].sum()
             saldo = total_receitas - total_despesas
 
             col1, col2, col3 = st.columns(3)
@@ -625,19 +634,23 @@ else:
             st.markdown("---")
             c1, c2 = st.columns(2)
             with c1:
-                df_desp = df[df['tipo'] == 'Despesa']
+                df_desp = df_mes[df_mes['tipo'] == 'Despesa']
                 if not df_desp.empty:
                     fig_pie = px.pie(df_desp, names='categoria', values='valor', title=t['pie_title'], hole=0.4)
-                    st.plotly_chart(fig_pie, use_container_width=True)
+                    # Gráfico fixo sem a barra de ferramentas de zoom poluição
+                    st.plotly_chart(fig_pie, use_container_width=True, config={'displayModeBar': False})
                 else:
-                    st.info("Sem despesas para exibir no gráfico.")
+                    st.info("Sem despesas para exibir no gráfico neste mês.")
 
             with c2:
-                fig_bar = px.bar(df, x='data', y='valor', color='tipo', title=t['bar_title'], barmode='group')
-                st.plotly_chart(fig_bar, use_container_width=True)
+                if not df_mes.empty:
+                    fig_bar = px.bar(df_mes, x='data', y='valor', color='tipo', title=t['bar_title'], barmode='group')
+                    st.plotly_chart(fig_bar, use_container_width=True, config={'displayModeBar': False})
+                else:
+                    st.info("Sem dados para o gráfico.")
 
             st.subheader(t['recent_list'])
-            st.dataframe(df, use_container_width=True)
+            st.dataframe(df_mes, use_container_width=True)
 
     elif menu == t['nav_new']:
         st.title(t['new_title'])
