@@ -839,25 +839,26 @@ else:
       ].sum()
       saldo_conta = total_receitas - total_despesas - total_investimentos
 
-      c_m1, c_m2 = st.columns(2)
-      c_m1.metric(t["total_rev"], f"{simbolo_moeda} {total_receitas:,.2f}")
-      c_m2.metric(t["total_exp"], f"{simbolo_moeda} {total_despesas:,.2f}")
+      # Organizando as métricas em colunas lado a lado (Coluna A e Coluna B)
+      col_a, col_b = st.columns(2)
 
-      c_m3, c_m4 = st.columns(2)
-      c_m3.metric(
-          t["invest_month"], f"{simbolo_moeda} {total_investimentos:,.2f}"
-      )
-      c_m4.metric(t["account_balance"], f"{simbolo_moeda} {saldo_conta:,.2f}")
+      with col_a:
+        st.metric(t["total_rev"], f"{simbolo_moeda} {total_receitas:,.2f}")
+        st.metric(
+            t["invest_month"], f"{simbolo_moeda} {total_investimentos:,.2f}"
+        )
+        st.metric(
+            t["invest_accumulated"],
+            f"{simbolo_moeda} {investimento_acumulado_atual:,.2f}",
+        )
 
-      c_m5, c_m6 = st.columns(2)
-      c_m5.metric(
-          t["invest_accumulated"],
-          f"{simbolo_moeda} {investimento_acumulado_atual:,.2f}",
-      )
-      c_m6.metric(
-          t["accumulated_balance"],
-          f"{simbolo_moeda} {saldo_acumulado_atual:,.2f}",
-      )
+      with col_b:
+        st.metric(t["total_exp"], f"{simbolo_moeda} {total_despesas:,.2f}")
+        st.metric(t["account_balance"], f"{simbolo_moeda} {saldo_conta:,.2f}")
+        st.metric(
+            t["accumulated_balance"],
+            f"{simbolo_moeda} {saldo_acumulado_atual:,.2f}",
+        )
 
       st.markdown("---")
       c1, c2 = st.columns(2)
