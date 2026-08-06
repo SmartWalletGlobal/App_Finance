@@ -268,7 +268,7 @@ TEXTOS = {
             "Acompanhe suas entradas, saídas e resultados consolidados."
         ),
         "no_data": (
-            "Nenhum lançamento no painel {contexto} ainda. Vá em '➕"
+            "Nenhum lançamento no painel {context} ainda. Vá em '➕"
             " {nav_novo}' para começar."
         ),
         "total_rev": "📥 Entradas / Receitas",
