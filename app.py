@@ -7,7 +7,7 @@ import plotly.express as px
 import streamlit as st
 
 st.set_page_config(
-    page_title="Smart Wallet | Multi-Usuário",
+    page_title="Controle Financeiro | Multi-Usuário",
     page_icon="💳",
     layout="centered",
     initial_sidebar_state="expanded",
@@ -16,7 +16,7 @@ st.set_page_config(
 st.markdown(
     """
     <head>
-        <meta property="og:title" content="Smart Wallet | Multi-Usuário">
+        <meta property="og:title" content="Controle Financeiro | Multi-Usuário">
         <meta property="og:description" content="Sistema de gestão financeira online, simples, rápido e seguro.">
         <meta property="og:image" content="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?q=80&w=1200&auto=format&fit=crop">
         <!-- Ícone personalizado para o atalho na Tela de Início do iPhone -->
@@ -68,6 +68,13 @@ def init_db():
     """)
   try:
     cursor.execute("ALTER TABLE lancamentos ADD COLUMN username TEXT")
+  except:
+    pass
+
+  try:
+    cursor.execute(
+        "ALTER TABLE lancamentos ADD COLUMN contexto TEXT DEFAULT 'Pessoal'"
+    )
   except:
     pass
 
@@ -197,18 +204,22 @@ def carregar_dados(username):
       "SELECT * FROM lancamentos WHERE username = ?", conn, params=(username,)
   )
   conn.close()
+  if "contexto" not in df.columns:
+    df["contexto"] = "Pessoal"
   return df
 
 
-def salvar_lancamento(username, data, descricao, categoria, tipo, valor):
+def salvar_lancamento(
+    username, data, descricao, categoria, tipo, valor, contexto
+):
   import sqlite3
 
   conn = sqlite3.connect("financeiro.db")
   cursor = conn.cursor()
   cursor.execute(
       "INSERT INTO lancamentos (username, data, descricao, categoria, tipo,"
-      " valor) VALUES (?, ?, ?, ?, ?, ?)",
-      (username, data, descricao, categoria, tipo, valor),
+      " valor, contexto) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      (username, data, descricao, categoria, tipo, valor, contexto),
   )
   conn.commit()
   conn.close()
@@ -229,7 +240,7 @@ def deletar_lancamento(id_lancamento, username):
 
 TEXTOS = {
     "Português": {
-        "login_title": "⚡ Acesso ao Smart Wallet",
+        "login_title": "Acesso ao Controle Financeiro",
         "login_sub": (
             "Entre com sua conta ou cadastre-se com seu nome completo."
         ),
@@ -253,31 +264,32 @@ TEXTOS = {
         "nav_new": "➕ Novo Lançamento",
         "nav_manage": "✏️ Gerenciar & Editar",
         "nav_profile": "👤 Meu Perfil",
-        "overview_title": "Visão Geral Financeira",
-        "overview_sub": "Acompanhe seus fluxos, receitas e despesas por mês.",
+        "overview_title": "Controle Financeiro",
+        "overview_sub": (
+            "Acompanhe suas entradas, saídas e resultados consolidados."
+        ),
         "no_data": (
             "Nenhum lançamento cadastrado ainda. Vá em '➕ Novo Lançamento' para"
             " começar."
         ),
-        "total_rev": "📥 Receitas do Mês",
-        "total_exp": "📉 Despesas do Mês",
-        "invest_month": "📈 Investimentos do Mês",
+        "total_rev": "📥 Entradas / Receitas",
+        "total_exp": "📉 Saídas / Despesas",
+        "invest_month": "📈 Investimentos / Aportes",
         "invest_accumulated": "💎 Total Acumulado em Investimentos",
-        "account_balance": "💰 Saldo da Conta",
-        "accumulated_balance": "🏦 Saldo Acumulado na Conta",
+        "account_balance": "💰 Saldo do Período",
+        "accumulated_balance": "🏦 Saldo Acumulado Total",
         "pie_title": "📊 Despesas por Categoria",
-        "bar_title": "📈 Evolução por Tipo",
-        "recent_list": "📋 Lançamentos do Mês",
+        "bar_title": "📈 Evolução Diária / Mensal",
+        "recent_list": "📋 Lançamentos do Período",
         "new_title": "➕ Novo Lançamento",
         "new_sub": (
-            "Adicione uma nova receita, despesa ou investimento detalhando o"
-            " que foi gasto."
+            "Adicione uma nova entrada, saída ou investimento de forma rápida."
         ),
         "date_label": "Data do Lançamento",
-        "type_label": "Tipo",
+        "type_label": "Tipo de Movimentação",
         "value_label": "Valor",
-        "cat_label": "Categoria Principal",
-        "desc_label": "Descrição Específica (Opcional)",
+        "cat_label": "Categoria",
+        "desc_label": "Descrição / Observação (Opcional)",
         "save_btn": "🚀 Salvar Lançamento",
         "success_msg": "Lançamento salvo com sucesso!",
         "warn_val": "Por favor, informe um valor maior que zero.",
@@ -299,7 +311,7 @@ TEXTOS = {
         "logout": "🚪 Sair da Conta",
     },
     "English": {
-        "login_title": "⚡ Smart Wallet Access",
+        "login_title": "Financial Control Access",
         "login_sub": "Log in to your account or register.",
         "tab_login": "🔑 Log In",
         "tab_register": "📝 Register",
@@ -319,24 +331,24 @@ TEXTOS = {
         "nav_new": "➕ New Entry",
         "nav_manage": "✏️ Manage & Edit",
         "nav_profile": "👤 My Profile",
-        "overview_title": "Financial Overview",
-        "overview_sub": "Track your cash flows, income, and expenses by month.",
+        "overview_title": "Financial Control",
+        "overview_sub": "Track your cash flows, income, and expenses.",
         "no_data": "No entries yet. Go to '➕ New Entry' to start.",
-        "total_rev": "📥 Month Income",
-        "total_exp": "📉 Month Expenses",
-        "invest_month": "📈 Month Investments",
+        "total_rev": "📥 Income / Inflows",
+        "total_exp": "📉 Expenses / Outflows",
+        "invest_month": "📈 Investments",
         "invest_accumulated": "💎 Total Accumulated Investments",
-        "account_balance": "💰 Account Balance",
-        "accumulated_balance": "🏦 Accumulated Account Balance",
+        "account_balance": "💰 Period Balance",
+        "accumulated_balance": "🏦 Total Accumulated Balance",
         "pie_title": "📊 Expenses by Category",
         "bar_title": "📈 Trend by Type",
-        "recent_list": "📋 Month Entries",
+        "recent_list": "📋 Entries",
         "new_title": "➕ New Entry",
         "new_sub": "Add a new income, expense, or investment.",
         "date_label": "Entry Date",
         "type_label": "Type",
         "value_label": "Value",
-        "cat_label": "Main Category",
+        "cat_label": "Category",
         "desc_label": "Description (Optional)",
         "save_btn": "🚀 Save Entry",
         "success_msg": "Entry saved successfully!",
@@ -357,7 +369,7 @@ TEXTOS = {
         "logout": "🚪 Log Out",
     },
     "Français": {
-        "login_title": "⚡ Accès à Smart Wallet",
+        "login_title": "Accès au Contrôle Financier",
         "login_sub": "Connectez-vous ou créez un compte.",
         "tab_login": "🔑 Connexion",
         "tab_register": "📝 S'inscrire",
@@ -379,24 +391,24 @@ TEXTOS = {
         "nav_new": "➕ Nouvelle Entrée",
         "nav_manage": "✏️ Gérer & Éditer",
         "nav_profile": "👤 Mon Profil",
-        "overview_title": "Vue d'ensemble financière",
-        "overview_sub": "Suivez vos flux, revenus et dépenses par mois.",
+        "overview_title": "Contrôle Financier",
+        "overview_sub": "Suivez vos flux et revenus.",
         "no_data": "Aucune donnée pour l'instant. Allez dans '➕ Nouvelle Entrée'.",
-        "total_rev": "📥 Revenus du Mois",
-        "total_exp": "📉 Dépenses du Mois",
-        "invest_month": "📈 Investissements du Mois",
+        "total_rev": "📥 Entrées",
+        "total_exp": "📉 Sorties",
+        "invest_month": "📈 Investissements",
         "invest_accumulated": "💎 Total Cumulé des Investissements",
-        "account_balance": "💰 Solde du Compte",
-        "accumulated_balance": "🏦 Solde cumulé du compte",
+        "account_balance": "💰 Solde de la Période",
+        "accumulated_balance": "🏦 Solde cumulé total",
         "pie_title": "📊 Dépenses par Catégorie",
-        "bar_title": "📈 Évolution par Type",
-        "recent_list": "📋 Entrées du Mois",
+        "bar_title": "📈 Évolution",
+        "recent_list": "📋 Entrées",
         "new_title": "➕ Nouvelle Entrée",
-        "new_sub": "Ajoutez un revenu, une dépense ou un investissement.",
+        "new_sub": "Ajoutez un mouvement.",
         "date_label": "Date",
         "type_label": "Type",
         "value_label": "Valeur",
-        "cat_label": "Catégorie Principale",
+        "cat_label": "Catégorie",
         "desc_label": "Description (Optionnel)",
         "save_btn": "🚀 Enregistrer",
         "success_msg": "Enregistré avec succès !",
@@ -419,7 +431,7 @@ TEXTOS = {
         "logout": "🚪 Se déconnecter",
     },
     "Español": {
-        "login_title": "⚡ Acceso a Smart Wallet",
+        "login_title": "Acceso al Control Financiero",
         "login_sub": "Inicia sesión en tu cuenta o regístrate.",
         "tab_login": "🔑 Entrar",
         "tab_register": "📝 Registrarse",
@@ -431,7 +443,7 @@ TEXTOS = {
         "reg_user_label": "Define un nombre de usuario",
         "reg_name_label": "Tu Nombre Completo",
         "reg_pass_label": "Elige una Contraseña",
-        "reg_reg_submit": "Crear Cuenta Nueva",
+        "btn_reg_submit": "Crear Cuenta Nueva",
         "reg_warn": "Por favor llena todos los campos.",
         "reg_success": "¡Cuenta creada con éxito! Ve a la pestaña 'Entrar'.",
         "reg_error": "Este usuario ya existe o hubo un error.",
@@ -439,27 +451,27 @@ TEXTOS = {
         "nav_new": "➕ Nuevo Movimiento",
         "nav_manage": "✏️ Gestionar y Editar",
         "nav_profile": "👤 Mi Perfil",
-        "overview_title": "Resumen Financiero",
-        "overview_sub": "Sigue tus ingresos y gastos por mes.",
+        "overview_title": "Control Financiero",
+        "overview_sub": "Sigue tus ingresos y gastos.",
         "no_data": "No hay registros todavía. Ve a '➕ Nuevo Movimiento'.",
-        "total_rev": "📥 Ingresos del Mes",
-        "total_exp": "📉 Gastos del Mes",
-        "invest_month": "📈 Inversiones del Mes",
+        "total_rev": "📥 Entradas",
+        "total_exp": "📉 Salidas",
+        "invest_month": "📈 Inversiones",
         "invest_accumulated": "💎 Total Acumulado en Inversiones",
-        "account_balance": "💰 Saldo de la Cuenta",
-        "accumulated_balance": "🏦 Saldo Acumulado en Cuenta",
+        "account_balance": "💰 Saldo del Periodo",
+        "accumulated_balance": "🏦 Saldo Acumulado Total",
         "pie_title": "📊 Gastos por Categoría",
-        "bar_title": "📈 Evolución por Tipo",
-        "recent_list": "📋 Movimientos del Mes",
+        "bar_title": "📈 Evolución",
+        "recent_list": "📋 Movimientos",
         "new_title": "➕ Nuevo Movimiento",
-        "new_sub": "Agrega un ingreso, gasto o inversión.",
+        "new_sub": "Agrega un movimiento.",
         "date_label": "Fecha del Movimiento",
         "type_label": "Tipo",
         "value_label": "Valor",
-        "cat_label": "Categoría Principal",
+        "cat_label": "Categoría",
         "desc_label": "Descripción (Opcional)",
         "save_btn": "🚀 Guardar Movimiento",
-        "success_msg": "¡Movimiento guardado com éxito!",
+        "success_msg": "¡Movimiento guardado con éxito!",
         "warn_val": "Por favor ingrese un valor mayor que cero.",
         "manage_title": "✏️ Gestionar Movimientos",
         "manage_sub": "Visualiza, filtra o elimina registros antiguos.",
@@ -477,7 +489,7 @@ TEXTOS = {
         "logout": "🚪 Cerrar Sesión",
     },
     "Italiano": {
-        "login_title": "⚡ Accesso a Smart Wallet",
+        "login_title": "Accesso al Controllo Finanziario",
         "login_sub": "Accedi al tuo account o registrati.",
         "tab_login": "🔑 Accedi",
         "tab_register": "📝 Registrati",
@@ -485,7 +497,7 @@ TEXTOS = {
         "pass_label": "Password",
         "btn_login_submit": "Accedi al Sistema",
         "login_success": "Bentornato!",
-        "login_error": "Utente o password non errati.",
+        "login_error": "Utente o password errati.",
         "reg_user_label": "Definisci un nome utente",
         "reg_name_label": "Il tuo Nome Completo",
         "reg_pass_label": "Scegli una Password",
@@ -497,24 +509,24 @@ TEXTOS = {
         "nav_new": "➕ Nuova Voce",
         "nav_manage": "✏️ Gestisci & Modifica",
         "nav_profile": "👤 Il Mio Profilo",
-        "overview_title": "Panoramica Finanziaria",
-        "overview_sub": "Monitora flussi, entrate e spese per mese.",
+        "overview_title": "Controllo Finanziario",
+        "overview_sub": "Monitora flussi ed entrate.",
         "no_data": "Nessun inserimento. Vai su '➕ Nuova Voce' per iniziare.",
-        "total_rev": "📥 Entrate del Mese",
-        "total_exp": "📉 Spese del Mese",
-        "invest_month": "📈 Investimenti del Mese",
+        "total_rev": "📥 Entrate",
+        "total_exp": "📉 Uscite",
+        "invest_month": "📈 Investimenti",
         "invest_accumulated": "💎 Totale Accumulato in Investimenti",
-        "account_balance": "💰 Saldo del Conto",
-        "accumulated_balance": "🏦 Saldo Accumulato nel Conto",
+        "account_balance": "💰 Saldo del Periodo",
+        "accumulated_balance": "🏦 Saldo Accumulato Totale",
         "pie_title": "📊 Spese per Categoria",
-        "bar_title": "📈 Andamento per Tipo",
-        "recent_list": "📋 Voci del Mese",
+        "bar_title": "📈 Andamento",
+        "recent_list": "📋 Voci",
         "new_title": "➕ Nuova Voce",
-        "new_sub": "Aggiungi un'entrata, una spesa o un investimento.",
+        "new_sub": "Aggiungi una voce.",
         "date_label": "Data",
         "type_label": "Tipo",
         "value_label": "Valore",
-        "cat_label": "Categoria Principale",
+        "cat_label": "Categoria",
         "desc_label": "Descrizione (Opzionale)",
         "save_btn": "🚀 Salva Voce",
         "success_msg": "Salvato con successo!",
@@ -535,7 +547,7 @@ TEXTOS = {
         "logout": "🚪 Disconnetti",
     },
     "Deutsch": {
-        "login_title": "⚡ Smart Wallet Zugang",
+        "login_title": "Finanzkontrolle Zugang",
         "login_sub": "Melden Sie sich an oder registrieren Sie sich.",
         "tab_login": "🔑 Anmelden",
         "tab_register": "📝 Registrieren",
@@ -555,24 +567,24 @@ TEXTOS = {
         "nav_new": "➕ Neuer Eintrag",
         "nav_manage": "✏️ Verwalten & Bearbeiten",
         "nav_profile": "👤 Mein Profil",
-        "overview_title": "Finanzübersicht",
-        "overview_sub": "Verfolgen Sie Einnahmen und Ausgaben nach Monat.",
+        "overview_title": "Finanzkontrolle",
+        "overview_sub": "Verfolgen Sie Einnahmen und Ausgaben.",
         "no_data": "Noch keine Einträge. Gehen Sie zu '➕ Neuer Eintrag'.",
-        "total_rev": "📥 Einnahmen des Monats",
-        "total_exp": "📉 Ausgaben des Monats",
-        "invest_month": "📈 Investitionen des Monats",
+        "total_rev": "📥 Einnahmen",
+        "total_exp": "📉 Ausgaben",
+        "invest_month": "📈 Investitionen",
         "invest_accumulated": "💎 Gesamte Akkumulierte Investitionen",
-        "account_balance": "💰 Kontostand",
-        "accumulated_balance": "🏦 Akkumulierter Kontostand",
+        "account_balance": "💰 Saldo",
+        "accumulated_balance": "🏦 Akkumulierter Saldo",
         "pie_title": "📊 Ausgaben nach Kategorie",
-        "bar_title": "📈 Trend nach Typ",
-        "recent_list": "📋 Einträge des Monats",
+        "bar_title": "📈 Trend",
+        "recent_list": "📋 Einträge",
         "new_title": "➕ Neuer Eintrag",
-        "new_sub": "Fügen Sie eine Einnahme, Ausgabe oder Investition hinzu.",
+        "new_sub": "Fügen Sie einen Eintrag hinzu.",
         "date_label": "Datum",
         "type_label": "Typ",
         "value_label": "Wert",
-        "cat_label": "Hauptkategorie",
+        "cat_label": "Kategorie",
         "desc_label": "Beschreibung (Optional)",
         "save_btn": "🚀 Eintrag Speichern",
         "success_msg": "Erfolgreich gespeichert!",
@@ -596,7 +608,7 @@ TEXTOS = {
 
 MOEDAS = {"Real (R$)": "R$", "Euro (€)": "€", "Dólar ($)": "$"}
 
-CATEGORIAS_PADRAO = [
+CATEGORIAS_PESSOAL = [
     "Aluguel",
     "Alimentação",
     "Transporte",
@@ -604,9 +616,22 @@ CATEGORIAS_PADRAO = [
     "Lazer",
     "Saúde",
     "Educação",
-    "Salário",
+    "Salário Pessoal",
     "Investimentos",
     "Outros",
+]
+
+CATEGORIAS_PROFISSIONAL = [
+    "Faturamento de Vendas / Atendimentos",
+    "Prestação de Serviços / Comissões",
+    "Outras Receitas",
+    "Compra de Mercadorias / Insumos / Peças",
+    "Fornecedores e Parcerias",
+    "Operacional / Aluguel / Contas",
+    "Ferramentas e Equipamentos",
+    "Impostos, Taxas e Encargos",
+    "Investimento Comercial",
+    "Outras Despesas",
 ]
 
 if "logged_in" not in st.session_state:
@@ -727,7 +752,16 @@ else:
     else:
       st.write("👤")
 
-    st.markdown(f"### ⚡ Olá, {nome_completo_user}")
+    st.markdown(f"### Olá, {nome_completo_user}")
+    st.markdown("---")
+
+    contexto_atual = st.radio(
+        "💼 Painel de Gestão", ["🏠 Pessoal", "📊 Profissional / Comércio"]
+    )
+    contexto_limpo = (
+        "Profissional" if "Profissional" in contexto_atual else "Pessoal"
+    )
+
     st.markdown("---")
 
     sel_lang = st.selectbox(
@@ -768,14 +802,21 @@ else:
       st.rerun()
 
   t = TEXTOS[st.session_state["idioma"]]
-  df = carregar_dados(st.session_state["username"])
+  df_total = carregar_dados(st.session_state["username"])
+
+  df = df_total[df_total["contexto"] == contexto_limpo].copy()
 
   if menu == t["nav_overview"]:
-    st.title(t["overview_title"])
+    st.title(
+        f"{t['overview_title']} ({'Profissional / Comércio' if contexto_limpo == 'Profissional' else 'Pessoal'})"
+    )
     st.write(t["overview_sub"])
 
     if df.empty:
-      st.info(t["no_data"])
+      st.info(
+          f"Nenhum lançamento no painel {contexto_limpo} ainda. Vá em '➕ Novo"
+          " Lançamento' para começar."
+      )
     else:
       df["data"] = pd.to_datetime(df["data"])
       df["mes_ano"] = df["data"].dt.strftime("%Y-%m")
@@ -839,36 +880,36 @@ else:
       ].sum()
       saldo_conta = total_receitas - total_despesas - total_investimentos
 
-      # Forçando layout lado a lado via HTML flexbox para não empilhar no celular
+      # Painel completo com métricas avançadas (Flexbox responsivo)
       st.markdown(
           f"""
             <div style="display: flex; gap: 15px; margin-bottom: 12px;">
-                <div style="flex: 1; padding: 4px;">
-                    <p style="margin: 0; color: #555; font-size: 13px;">{t['total_rev']}</p>
-                    <h3 style="margin: 0; font-size: 20px;">{simbolo_moeda} {total_receitas:,.2f}</h3>
+                <div style="flex: 1; padding: 6px; background: rgba(255,255,255,0.03); border-radius: 8px;">
+                    <p style="margin: 0; color: #888; font-size: 13px;">{t['total_rev']}</p>
+                    <h3 style="margin: 0; font-size: 20px; color: #2ecc71;">{simbolo_moeda} {total_receitas:,.2f}</h3>
                 </div>
-                <div style="flex: 1; padding: 4px;">
-                    <p style="margin: 0; color: #555; font-size: 13px;">{t['total_exp']}</p>
-                    <h3 style="margin: 0; font-size: 20px;">{simbolo_moeda} {total_despesas:,.2f}</h3>
+                <div style="flex: 1; padding: 6px; background: rgba(255,255,255,0.03); border-radius: 8px;">
+                    <p style="margin: 0; color: #888; font-size: 13px;">{t['total_exp']}</p>
+                    <h3 style="margin: 0; font-size: 20px; color: #e74c3c;">{simbolo_moeda} {total_despesas:,.2f}</h3>
                 </div>
             </div>
             <div style="display: flex; gap: 15px; margin-bottom: 12px;">
-                <div style="flex: 1; padding: 4px;">
-                    <p style="margin: 0; color: #555; font-size: 13px;">{t['invest_month']}</p>
-                    <h3 style="margin: 0; font-size: 20px;">{simbolo_moeda} {total_investimentos:,.2f}</h3>
+                <div style="flex: 1; padding: 6px; background: rgba(255,255,255,0.03); border-radius: 8px;">
+                    <p style="margin: 0; color: #888; font-size: 13px;">{t['invest_month']}</p>
+                    <h3 style="margin: 0; font-size: 20px; color: #3498db;">{simbolo_moeda} {total_investimentos:,.2f}</h3>
                 </div>
-                <div style="flex: 1; padding: 4px;">
-                    <p style="margin: 0; color: #555; font-size: 13px;">{t['account_balance']}</p>
+                <div style="flex: 1; padding: 6px; background: rgba(255,255,255,0.03); border-radius: 8px;">
+                    <p style="margin: 0; color: #888; font-size: 13px;">{t['account_balance']}</p>
                     <h3 style="margin: 0; font-size: 20px;">{simbolo_moeda} {saldo_conta:,.2f}</h3>
                 </div>
             </div>
             <div style="display: flex; gap: 15px; margin-bottom: 12px;">
-                <div style="flex: 1; padding: 4px;">
-                    <p style="margin: 0; color: #555; font-size: 13px;">{t['invest_accumulated']}</p>
+                <div style="flex: 1; padding: 6px; background: rgba(255,255,255,0.03); border-radius: 8px;">
+                    <p style="margin: 0; color: #888; font-size: 13px;">{t['invest_accumulated']}</p>
                     <h3 style="margin: 0; font-size: 20px;">{simbolo_moeda} {investimento_acumulado_atual:,.2f}</h3>
                 </div>
-                <div style="flex: 1; padding: 4px;">
-                    <p style="margin: 0; color: #555; font-size: 13px;">{t['accumulated_balance']}</p>
+                <div style="flex: 1; padding: 6px; background: rgba(255,255,255,0.03); border-radius: 8px;">
+                    <p style="margin: 0; color: #888; font-size: 13px;">{t['accumulated_balance']}</p>
                     <h3 style="margin: 0; font-size: 20px;">{simbolo_moeda} {saldo_acumulado_atual:,.2f}</h3>
                 </div>
             </div>
@@ -924,7 +965,9 @@ else:
       st.dataframe(df_mes, use_container_width=True)
 
   elif menu == t["nav_new"]:
-    st.title(t["new_title"])
+    st.title(
+        f"{t['new_title']} ({'Profissional / Comércio' if contexto_limpo == 'Profissional' else 'Pessoal'})"
+    )
     st.write(t["new_sub"])
 
     with st.form("form_novo_lancamento"):
@@ -935,7 +978,14 @@ else:
       valor_lanc = st.number_input(
           f"{t['value_label']} ({simbolo_moeda})", min_value=0.0, format="%.2f"
       )
-      cat_lanc = st.selectbox(t["cat_label"], CATEGORIAS_PADRAO)
+
+      lista_cat_atual = (
+          CATEGORIAS_PROFISSIONAL
+          if contexto_limpo == "Profissional"
+          else CATEGORIAS_PESSOAL
+      )
+      cat_lanc = st.selectbox(t["cat_label"], lista_cat_atual)
+
       desc_lanc = st.text_input(t["desc_label"])
 
       submit_lanc = st.form_submit_button(t["save_btn"], use_container_width=True)
@@ -948,17 +998,23 @@ else:
               cat_lanc,
               tipo_lanc,
               valor_lanc,
+              contexto_limpo,
           )
           st.success(t["success_msg"])
         else:
           st.warning(t["warn_val"])
 
   elif menu == t["nav_manage"]:
-    st.title(t["manage_title"])
+    st.title(
+        f"{t['manage_title']} ({'Profissional / Comércio' if contexto_limpo == 'Profissional' else 'Pessoal'})"
+    )
     st.write(t["manage_sub"])
 
     if df.empty:
-      st.info(t["no_data"])
+      st.info(
+          f"Nenhum lançamento encontrado no painel {contexto_limpo} para"
+          " gerenciar."
+      )
     else:
       st.dataframe(df, use_container_width=True)
       id_del = st.selectbox("ID do lançamento para excluir", df["id"].tolist())
