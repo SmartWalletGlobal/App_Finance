@@ -19,7 +19,6 @@ st.markdown(
         <meta property="og:title" content="Controle Financeiro | Multi-Usuário">
         <meta property="og:description" content="Sistema de gestão financeira online, simples, rápido e seguro.">
         <meta property="og:image" content="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?q=80&w=1200&auto=format&fit=crop">
-        <!-- Ícone personalizado para o atalho na Tela de Início do iPhone -->
         <link rel="apple-touch-icon" href="https://images.unsplash.com/photo-1559526324-4b87b5e36e44?q=80&w=512&auto=format&fit=crop">
     </head>
 """,
@@ -309,6 +308,31 @@ TEXTOS = {
         "profile_success": "Perfil atualizado com sucesso!",
         "profile_error": "Erro ao atualizar perfil.",
         "logout": "🚪 Sair da Conta",
+        "types": ["Despesa", "Receita", "Investimento"],
+        "cat_pessoal": [
+            "Aluguel",
+            "Alimentação",
+            "Transporte",
+            "Moradia",
+            "Lazer",
+            "Saúde",
+            "Educação",
+            "Salário Pessoal",
+            "Investimentos",
+            "Outros",
+        ],
+        "cat_profissional": [
+            "Faturamento de Vendas / Atendimentos",
+            "Prestação de Serviços / Comissões",
+            "Outras Receitas",
+            "Compra de Mercadorias / Insumos / Peças",
+            "Fornecedores e Parcerias",
+            "Operacional / Aluguel / Contas",
+            "Ferramentas e Equipamentos",
+            "Impostos, Taxas e Encargos",
+            "Investimento Comercial",
+            "Outras Despesas",
+        ],
     },
     "English": {
         "login_title": "Financial Control Access",
@@ -367,6 +391,31 @@ TEXTOS = {
         "profile_success": "Profile updated successfully!",
         "profile_error": "Error updating profile.",
         "logout": "🚪 Log Out",
+        "types": ["Expense", "Income", "Investment"],
+        "cat_pessoal": [
+            "Rent",
+            "Food",
+            "Transport",
+            "Housing",
+            "Leisure",
+            "Health",
+            "Education",
+            "Personal Salary",
+            "Investments",
+            "Others",
+        ],
+        "cat_profissional": [
+            "Sales Revenue / Services",
+            "Commissions / Freelance",
+            "Other Income",
+            "Goods / Supplies / Parts Purchase",
+            "Suppliers & Partnerships",
+            "Operational / Rent / Utilities",
+            "Tools & Equipment",
+            "Taxes & Fees",
+            "Commercial Investment",
+            "Other Expenses",
+        ],
     },
     "Français": {
         "login_title": "Accès au Contrôle Financier",
@@ -429,6 +478,31 @@ TEXTOS = {
         "profile_success": "Profil mis à jour avec succès !",
         "profile_error": "Erreur lors de la mise à jour.",
         "logout": "🚪 Se déconnecter",
+        "types": ["Dépense", "Revenu", "Investissement"],
+        "cat_pessoal": [
+            "Loyer",
+            "Alimentation",
+            "Transport",
+            "Logement",
+            "Loisirs",
+            "Santé",
+            "Éducation",
+            "Salaire Personnel",
+            "Investissements",
+            "Autres",
+        ],
+        "cat_profissional": [
+            "Chiffre d'affaires / Ventes",
+            "Prestation de services / Commissions",
+            "Autres Revenus",
+            "Achat de marchandises / Fournitures / Pièces",
+            "Fournisseurs et Partenariats",
+            "Frais généraux / Loyer / Charges",
+            "Outils et Équipements",
+            "Impôts et Taxes",
+            "Investissement Commercial",
+            "Autres Dépenses",
+        ],
     },
     "Español": {
         "login_title": "Acceso al Control Financiero",
@@ -487,6 +561,31 @@ TEXTOS = {
         "profile_success": "¡Perfil actualizado con éxito!",
         "profile_error": "Error al actualizar perfil.",
         "logout": "🚪 Cerrar Sesión",
+        "types": ["Gasto", "Ingreso", "Inversión"],
+        "cat_pessoal": [
+            "Alquiler",
+            "Alimentación",
+            "Transporte",
+            "Vivienda",
+            "Ocio",
+            "Salud",
+            "Educación",
+            "Salario Personal",
+            "Inversiones",
+            "Otros",
+        ],
+        "cat_profissional": [
+            "Facturación de Ventas / Servicios",
+            "Prestación de Servicios / Comisiones",
+            "Otros Ingresos",
+            "Compra de Mercancías / Insumos / Piezas",
+            "Proveedores y Alianzas",
+            "Operacional / Alquiler / Cuentas",
+            "Herramientas y Equipos",
+            "Impuestos y Tasas",
+            "Inversión Comercial",
+            "Otros Gastos",
+        ],
     },
     "Italiano": {
         "login_title": "Accesso al Controllo Finanziario",
@@ -545,6 +644,31 @@ TEXTOS = {
         "profile_success": "Profilo aggiornato!",
         "profile_error": "Errore durante l'aggiornamento.",
         "logout": "🚪 Disconnetti",
+        "types": ["Spesa", "Entrata", "Investimento"],
+        "cat_pessoal": [
+            "Affitto",
+            "Cibo",
+            "Trasporto",
+            "Alloggio",
+            "Svago",
+            "Salute",
+            "Istruzione",
+            "Stipendio Personale",
+            "Investimenti",
+            "Altro",
+        ],
+        "cat_profissional": [
+            "Fatturato Vendite / Servizi",
+            "Prestazione di Servizi / Commissioni",
+            "Altre Entrate",
+            "Acquisto Merci / Forniture / Parti",
+            "Fornitori e Partnership",
+            "Spese Generali / Affitto / Utenze",
+            "Utensili e Attrezzature",
+            "Tasse e Commissioni",
+            "Investimento Commerciale",
+            "Altre Spese",
+        ],
     },
     "Deutsch": {
         "login_title": "Finanzkontrolle Zugang",
@@ -603,36 +727,35 @@ TEXTOS = {
         "profile_success": "Profil erfolgreich aktualisiert!",
         "profile_error": "Fehler beim Aktualisieren.",
         "logout": "🚪 Abmelden",
+        "types": ["Ausgabe", "Einnahme", "Investition"],
+        "cat_pessoal": [
+            "Miete",
+            "Essen",
+            "Transport",
+            "Wohnen",
+            "Freizeit",
+            "Gesundheit",
+            "Bildung",
+            "Persönliches Gehalt",
+            "Investitionen",
+            "Andere",
+        ],
+        "cat_profissional": [
+            "Umsatz / Verkäufe",
+            "Dienstleistungen / Provisionen",
+            "Sonstige Einnahmen",
+            "Wareneinkauf / Verbrauchsmaterial / Teile",
+            "Lieferanten & Partnerschaften",
+            "Betriebskosten / Miete / Nebenkosten",
+            "Werkzeuge & Ausrüstung",
+            "Steuern & Gebühren",
+            "Gewerbliche Investition",
+            "Sonstige Ausgaben",
+        ],
     },
 }
 
 MOEDAS = {"Real (R$)": "R$", "Euro (€)": "€", "Dólar ($)": "$"}
-
-CATEGORIAS_PESSOAL = [
-    "Aluguel",
-    "Alimentação",
-    "Transporte",
-    "Moradia",
-    "Lazer",
-    "Saúde",
-    "Educação",
-    "Salário Pessoal",
-    "Investimentos",
-    "Outros",
-]
-
-CATEGORIAS_PROFISSIONAL = [
-    "Faturamento de Vendas / Atendimentos",
-    "Prestação de Serviços / Comissões",
-    "Outras Receitas",
-    "Compra de Mercadorias / Insumos / Peças",
-    "Fornecedores e Parcerias",
-    "Operacional / Aluguel / Contas",
-    "Ferramentas e Equipamentos",
-    "Impostos, Taxas e Encargos",
-    "Investimento Comercial",
-    "Outras Despesas",
-]
 
 if "logged_in" not in st.session_state:
   st.session_state["logged_in"] = False
@@ -829,15 +952,15 @@ else:
           df_sorted.groupby("mes_ano")
           .apply(
               lambda x: pd.Series({
-                  "receitas": x[x["tipo"] == "Receita"]["valor"].sum(),
-                  "despesas": x[x["tipo"] == "Despesa"]["valor"].sum(),
-                  "investimentos": x[x["tipo"] == "Investimento"][
+                  "receitas": x[x["tipo"] == t["types"][1]]["valor"].sum(),
+                  "despesas": x[x["tipo"] == t["types"][0]]["valor"].sum(),
+                  "investimentos": x[x["tipo"] == t["types"][2]][
                       "valor"
                   ].sum(),
                   "saldo_conta": (
-                      x[x["tipo"] == "Receita"]["valor"].sum()
-                      - x[x["tipo"] == "Despesa"]["valor"].sum()
-                      - x[x["tipo"] == "Investimento"]["valor"].sum()
+                      x[x["tipo"] == t["types"][1]]["valor"].sum()
+                      - x[x["tipo"] == t["types"][0]]["valor"].sum()
+                      - x[x["tipo"] == t["types"][2]]["valor"].sum()
                   ),
               })
           )
@@ -873,14 +996,13 @@ else:
 
       df_mes = df[df["mes_ano"] == mes_selecionado]
 
-      total_receitas = df_mes[df_mes["tipo"] == "Receita"]["valor"].sum()
-      total_despesas = df_mes[df_mes["tipo"] == "Despesa"]["valor"].sum()
-      total_investimentos = df_mes[df_mes["tipo"] == "Investimento"][
+      total_receitas = df_mes[df_mes["tipo"] == t["types"][1]]["valor"].sum()
+      total_despesas = df_mes[df_mes["tipo"] == t["types"][0]]["valor"].sum()
+      total_investimentos = df_mes[df_mes["tipo"] == t["types"][2]][
           "valor"
       ].sum()
       saldo_conta = total_receitas - total_despesas - total_investimentos
 
-      # Painel completo com métricas avançadas (Flexbox responsivo)
       st.markdown(
           f"""
             <div style="display: flex; gap: 15px; margin-bottom: 12px;">
@@ -920,7 +1042,7 @@ else:
       st.markdown("---")
       c1, c2 = st.columns(2)
       with c1:
-        df_desp = df_mes[df_mes["tipo"] == "Despesa"]
+        df_desp = df_mes[df_mes["tipo"] == t["types"][0]]
         if not df_desp.empty:
           fig_pie = px.pie(
               df_desp,
@@ -972,17 +1094,15 @@ else:
 
     with st.form("form_novo_lancamento"):
       data_lanc = st.date_input(t["date_label"], datetime.date.today())
-      tipo_lanc = st.selectbox(
-          t["type_label"], ["Despesa", "Receita", "Investimento"]
-      )
+      tipo_lanc = st.selectbox(t["type_label"], t["types"])
       valor_lanc = st.number_input(
           f"{t['value_label']} ({simbolo_moeda})", min_value=0.0, format="%.2f"
       )
 
       lista_cat_atual = (
-          CATEGORIAS_PROFISSIONAL
+          t["cat_profissional"]
           if contexto_limpo == "Profissional"
-          else CATEGORIAS_PESSOAL
+          else t["cat_pessoal"]
       )
       cat_lanc = st.selectbox(t["cat_label"], lista_cat_atual)
 
