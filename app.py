@@ -262,6 +262,7 @@ TEXTOS = {
         "total_rev": "📥 Receitas do Mês",
         "total_exp": "📉 Despesas do Mês",
         "invest_month": "📈 Investimentos do Mês",
+        "invest_accumulated": "💎 Total Acumulado em Investimentos",
         "account_balance": "💰 Saldo da Conta",
         "accumulated_balance": "🏦 Saldo Acumulado na Conta",
         "pie_title": "📊 Despesas por Categoria",
@@ -324,6 +325,7 @@ TEXTOS = {
         "total_rev": "📥 Month Income",
         "total_exp": "📉 Month Expenses",
         "invest_month": "📈 Month Investments",
+        "invest_accumulated": "💎 Total Accumulated Investments",
         "account_balance": "💰 Account Balance",
         "accumulated_balance": "🏦 Accumulated Account Balance",
         "pie_title": "📊 Expenses by Category",
@@ -383,6 +385,7 @@ TEXTOS = {
         "total_rev": "📥 Revenus du Mois",
         "total_exp": "📉 Dépenses du Mois",
         "invest_month": "📈 Investissements du Mois",
+        "invest_accumulated": "💎 Total Cumulé des Investissements",
         "account_balance": "💰 Solde du Compte",
         "accumulated_balance": "🏦 Solde cumulé du compte",
         "pie_title": "📊 Dépenses par Catégorie",
@@ -442,6 +445,7 @@ TEXTOS = {
         "total_rev": "📥 Ingresos del Mes",
         "total_exp": "📉 Gastos del Mes",
         "invest_month": "📈 Inversiones del Mes",
+        "invest_accumulated": "💎 Total Acumulado en Inversiones",
         "account_balance": "💰 Saldo de la Cuenta",
         "accumulated_balance": "🏦 Saldo Acumulado en Cuenta",
         "pie_title": "📊 Gastos por Categoría",
@@ -499,6 +503,7 @@ TEXTOS = {
         "total_rev": "📥 Entrate del Mese",
         "total_exp": "📉 Spese del Mese",
         "invest_month": "📈 Investimenti del Mese",
+        "invest_accumulated": "💎 Totale Accumulato in Investimenti",
         "account_balance": "💰 Saldo del Conto",
         "accumulated_balance": "🏦 Saldo Accumulato nel Conto",
         "pie_title": "📊 Spese per Categoria",
@@ -556,6 +561,7 @@ TEXTOS = {
         "total_rev": "📥 Einnahmen des Monats",
         "total_exp": "📉 Ausgaben des Monats",
         "invest_month": "📈 Investitionen des Monats",
+        "invest_accumulated": "💎 Gesamte Akkumulierte Investitionen",
         "account_balance": "💰 Kontostand",
         "accumulated_balance": "🏦 Akkumulierter Kontostand",
         "pie_title": "📊 Ausgaben nach Kategorie",
@@ -799,10 +805,24 @@ else:
 
       resumo_meses = resumo_meses.sort_values("mes_ano")
       resumo_meses["saldo_acumulado"] = resumo_meses["saldo_conta"].cumsum()
+      resumo_meses["investimentos_acumulados"] = resumo_meses[
+          "investimentos"
+      ].cumsum()
 
       saldo_acumulado_atual = (
           resumo_meses.loc[
               resumo_meses["mes_ano"] == mes_selecionado, "saldo_acumulado"
+          ].values[0]
+          if not resumo_meses[
+              resumo_meses["mes_ano"] == mes_selecionado
+          ].empty
+          else 0.0
+      )
+
+      investimento_acumulado_atual = (
+          resumo_meses.loc[
+              resumo_meses["mes_ano"] == mes_selecionado,
+              "investimentos_acumulados",
           ].values[0]
           if not resumo_meses[
               resumo_meses["mes_ano"] == mes_selecionado
@@ -829,7 +849,12 @@ else:
       )
       c_m4.metric(t["account_balance"], f"{simbolo_moeda} {saldo_conta:,.2f}")
 
-      st.metric(
+      c_m5, c_m6 = st.columns(2)
+      c_m5.metric(
+          t["invest_accumulated"],
+          f"{simbolo_moeda} {investimento_acumulado_atual:,.2f}",
+      )
+      c_m6.metric(
           t["accumulated_balance"],
           f"{simbolo_moeda} {saldo_acumulado_atual:,.2f}",
       )
