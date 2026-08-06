@@ -16,11 +16,8 @@ st.set_page_config(
 
 st.markdown("""
     <head>
-        <meta property="og:title" content="Meu Financeiro | Multi-Usuário">
-        <meta property="og:description" content="Sistema de gestão financeira online, simples, rápido e seguro.">
-        <meta property="og:image" content="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?q=80&w=1200&auto=format&fit=crop">
-        <!-- Ícone personalizado para o atalho na Tela de Início do iPhone -->
-        <link rel="apple-touch-icon" href="https://images.unsplash.com/photo-1559526324-4b87b5e36e44?q=80&w=512&auto=format&fit=crop">
+        <link rel="apple-touch-icon" sizes="180x180" href="https://streamlit.io/images/brand/streamlit-mark-color.png">
+        <link rel="icon" type="image/png" href="https://streamlit.io/images/brand/streamlit-mark-color.png">
     </head>
 """, unsafe_allow_html=True)
 
