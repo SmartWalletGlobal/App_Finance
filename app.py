@@ -431,7 +431,7 @@ TEXTOS = {
         "reg_user_label": "Define un nombre de usuario",
         "reg_name_label": "Tu Nombre Completo",
         "reg_pass_label": "Elige una Contraseña",
-        "btn_reg_submit": "Crear Cuenta Nueva",
+        "reg_reg_submit": "Crear Cuenta Nueva",
         "reg_warn": "Por favor llena todos los campos.",
         "reg_success": "¡Cuenta creada con éxito! Ve a la pestaña 'Entrar'.",
         "reg_error": "Este usuario ya existe o hubo un error.",
@@ -839,26 +839,42 @@ else:
       ].sum()
       saldo_conta = total_receitas - total_despesas - total_investimentos
 
-      # Organizando as métricas em colunas lado a lado (Coluna A e Coluna B)
-      col_a, col_b = st.columns(2)
-
-      with col_a:
-        st.metric(t["total_rev"], f"{simbolo_moeda} {total_receitas:,.2f}")
-        st.metric(
-            t["invest_month"], f"{simbolo_moeda} {total_investimentos:,.2f}"
-        )
-        st.metric(
-            t["invest_accumulated"],
-            f"{simbolo_moeda} {investimento_acumulado_atual:,.2f}",
-        )
-
-      with col_b:
-        st.metric(t["total_exp"], f"{simbolo_moeda} {total_despesas:,.2f}")
-        st.metric(t["account_balance"], f"{simbolo_moeda} {saldo_conta:,.2f}")
-        st.metric(
-            t["accumulated_balance"],
-            f"{simbolo_moeda} {saldo_acumulado_atual:,.2f}",
-        )
+      # Forçando layout lado a lado via HTML flexbox para não empilhar no celular
+      st.markdown(
+          f"""
+            <div style="display: flex; gap: 15px; margin-bottom: 12px;">
+                <div style="flex: 1; padding: 4px;">
+                    <p style="margin: 0; color: #555; font-size: 13px;">{t['total_rev']}</p>
+                    <h3 style="margin: 0; font-size: 20px;">{simbolo_moeda} {total_receitas:,.2f}</h3>
+                </div>
+                <div style="flex: 1; padding: 4px;">
+                    <p style="margin: 0; color: #555; font-size: 13px;">{t['total_exp']}</p>
+                    <h3 style="margin: 0; font-size: 20px;">{simbolo_moeda} {total_despesas:,.2f}</h3>
+                </div>
+            </div>
+            <div style="display: flex; gap: 15px; margin-bottom: 12px;">
+                <div style="flex: 1; padding: 4px;">
+                    <p style="margin: 0; color: #555; font-size: 13px;">{t['invest_month']}</p>
+                    <h3 style="margin: 0; font-size: 20px;">{simbolo_moeda} {total_investimentos:,.2f}</h3>
+                </div>
+                <div style="flex: 1; padding: 4px;">
+                    <p style="margin: 0; color: #555; font-size: 13px;">{t['account_balance']}</p>
+                    <h3 style="margin: 0; font-size: 20px;">{simbolo_moeda} {saldo_conta:,.2f}</h3>
+                </div>
+            </div>
+            <div style="display: flex; gap: 15px; margin-bottom: 12px;">
+                <div style="flex: 1; padding: 4px;">
+                    <p style="margin: 0; color: #555; font-size: 13px;">{t['invest_accumulated']}</p>
+                    <h3 style="margin: 0; font-size: 20px;">{simbolo_moeda} {investimento_acumulado_atual:,.2f}</h3>
+                </div>
+                <div style="flex: 1; padding: 4px;">
+                    <p style="margin: 0; color: #555; font-size: 13px;">{t['accumulated_balance']}</p>
+                    <h3 style="margin: 0; font-size: 20px;">{simbolo_moeda} {saldo_acumulado_atual:,.2f}</h3>
+                </div>
+            </div>
+        """,
+          unsafe_allow_html=True,
+      )
 
       st.markdown("---")
       c1, c2 = st.columns(2)
