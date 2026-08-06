@@ -10,11 +10,10 @@ import io
 st.set_page_config(
     page_title="Meu Financeiro | Multi-Usuário",
     page_icon="💶",
-    layout="centered",  # Ajustado para ficar perfeito também no celular
+    layout="centered",
     initial_sidebar_state="expanded"
 )
 
-# Injeção das Meta Tags do Open Graph com a imagem limpa e clara de fundo
 st.markdown("""
     <head>
         <meta property="og:title" content="Meu Financeiro | Multi-Usuário">
@@ -185,6 +184,7 @@ TEXTOS = {
         "total_rev": "💰 Receitas do Mês",
         "total_exp": "💸 Despesas do Mês",
         "balance": "⚡ Saldo do Mês",
+        "accumulated_balance": "🏦 Saldo Acumulado na Conta",
         "pie_title": "📊 Despesas por Categoria",
         "bar_title": "📈 Evolução por Tipo",
         "recent_list": "📋 Lançamentos do Mês",
@@ -240,6 +240,7 @@ TEXTOS = {
         "total_rev": "💰 Month Income",
         "total_exp": "💸 Month Expenses",
         "balance": "⚡ Month Balance",
+        "accumulated_balance": "🏦 Accumulated Account Balance",
         "pie_title": "📊 Expenses by Category",
         "bar_title": "📈 Trend by Type",
         "recent_list": "📋 Month Entries",
@@ -295,6 +296,7 @@ TEXTOS = {
         "total_rev": "💰 Revenus du Mois",
         "total_exp": "💸 Dépenses du Mois",
         "balance": "⚡ Solde du Mois",
+        "accumulated_balance": "🏦 Solde cumulé du compte",
         "pie_title": "📊 Dépenses par Catégorie",
         "bar_title": "📈 Évolution par Type",
         "recent_list": "📋 Entrées du Mois",
@@ -350,6 +352,7 @@ TEXTOS = {
         "total_rev": "💰 Ingresos del Mes",
         "total_exp": "💸 Gastos del Mes",
         "balance": "⚡ Saldo del Mes",
+        "accumulated_balance": "🏦 Saldo Acumulado en Cuenta",
         "pie_title": "📊 Gastos por Categoría",
         "bar_title": "📈 Evolución por Tipo",
         "recent_list": "📋 Movimientos del Mes",
@@ -405,6 +408,7 @@ TEXTOS = {
         "total_rev": "💰 Entrate del Mese",
         "total_exp": "💸 Spese del Mese",
         "balance": "⚡ Saldo del Mese",
+        "accumulated_balance": "🏦 Saldo Accumulato nel Conto",
         "pie_title": "📊 Spese per Categoria",
         "bar_title": "📈 Andamento per Tipo",
         "recent_list": "📋 Voci del Mese",
@@ -460,6 +464,7 @@ TEXTOS = {
         "total_rev": "💰 Einnahmen des Monats",
         "total_exp": "💸 Ausgaben des Monats",
         "balance": "⚡ Saldo des Monats",
+        "accumulated_balance": "🏦 Akkumulierter Kontostand",
         "pie_title": "📊 Ausgaben nach Kategorie",
         "bar_title": "📈 Trend nach Typ",
         "recent_list": "📋 Einträge des Monats",
@@ -612,13 +617,28 @@ else:
         if df.empty:
             st.info(t['no_data'])
         else:
-            # Tratamento de datas e filtro de mês para separar os lançamentos corretamente
             df["data"] = pd.to_datetime(df["data"])
             df["mes_ano"] = df["data"].dt.strftime("%Y-%m")
             
             meses_disponiveis = sorted(df["mes_ano"].unique(), reverse=True)
             mes_selecionado = st.selectbox("📅 Selecione o Mês", meses_disponiveis)
             
+            # Cálculo do saldo acumulado histórico mês a mês
+            df_sorted = df.sort_values("data")
+            resumo_meses = df_sorted.groupby("mes_ano").apply(
+                lambda x: pd.Series({
+                    "receitas": x[x['tipo'] == 'Receita']['valor'].sum(),
+                    "despesas": x[x['tipo'] == 'Despesa']['valor'].sum(),
+                    "saldo": x[x['tipo'] == 'Receita']['valor'].sum() - x[x['tipo'] == 'Despesa']['valor'].sum()
+                })
+            ).reset_index()
+            
+            resumo_meses = resumo_meses.sort_values("mes_ano")
+            resumo_meses["saldo_acumulado"] = resumo_meses["saldo"].cumsum()
+            
+            # Pega o saldo acumulado até o mês selecionado
+            saldo_acumulado_atual = resumo_meses.loc[resumo_meses["mes_ano"] == mes_selecionado, "saldo_acumulado"].values[0] if not resumo_meses[resumo_meses["mes_ano"] == mes_selecionado].empty else 0.0
+
             # Filtra os dados apenas para o mês selecionado
             df_mes = df[df["mes_ano"] == mes_selecionado]
 
@@ -626,10 +646,14 @@ else:
             total_despesas = df_mes[df_mes['tipo'] == 'Despesa']['valor'].sum()
             saldo = total_receitas - total_despesas
 
-            col1, col2, col3 = st.columns(3)
-            col1.metric(t['total_rev'], f"{simbolo_moeda} {total_receitas:,.2f}")
-            col2.metric(t['total_exp'], f"{simbolo_moeda} {total_despesas:,.2f}")
-            col3.metric(t['balance'], f"{simbolo_moeda} {saldo:,.2f}")
+            # Métricas organizadas em duas linhas para excelente leitura no celular
+            c_m1, c_m2 = st.columns(2)
+            c_m1.metric(t['total_rev'], f"{simbolo_moeda} {total_receitas:,.2f}")
+            c_m2.metric(t['total_exp'], f"{simbolo_moeda} {total_despesas:,.2f}")
+            
+            c_m3, c_m4 = st.columns(2)
+            c_m3.metric(t['balance'], f"{simbolo_moeda} {saldo:,.2f}")
+            c_m4.metric(t['accumulated_balance'], f"{simbolo_moeda} {saldo_acumulado_atual:,.2f}")
 
             st.markdown("---")
             c1, c2 = st.columns(2)
@@ -637,15 +661,16 @@ else:
                 df_desp = df_mes[df_mes['tipo'] == 'Despesa']
                 if not df_desp.empty:
                     fig_pie = px.pie(df_desp, names='categoria', values='valor', title=t['pie_title'], hole=0.4)
-                    # Gráfico fixo sem a barra de ferramentas de zoom poluição
-                    st.plotly_chart(fig_pie, use_container_width=True, config={'displayModeBar': False})
+                    fig_pie.update_layout(dragmode=False)
+                    st.plotly_chart(fig_pie, use_container_width=True, config={'displayModeBar': False, 'scrollZoom': False})
                 else:
                     st.info("Sem despesas para exibir no gráfico neste mês.")
 
             with c2:
                 if not df_mes.empty:
                     fig_bar = px.bar(df_mes, x='data', y='valor', color='tipo', title=t['bar_title'], barmode='group')
-                    st.plotly_chart(fig_bar, use_container_width=True, config={'displayModeBar': False})
+                    fig_bar.update_layout(dragmode=False, xaxis=dict(fixedrange=True), yaxis=dict(fixedrange=True))
+                    st.plotly_chart(fig_bar, use_container_width=True, config={'displayModeBar': False, 'scrollZoom': False})
                 else:
                     st.info("Sem dados para o gráfico.")
 
