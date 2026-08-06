@@ -15,9 +15,9 @@ st.set_page_config(
 )
 st.markdown("""
     <head>
-        <meta property="og:title" content="Meu Financeiro - Sistema Multi-Usuário" />
-        <meta property="og:description" content="Gerencie suas finanças de forma simples e online." />
-        <meta property="og:image" content="URL_DA_SUA_IMAGEM" />
+        <meta property="og:title" content="Meu Financeiro | Multi-Usuário">
+        <meta property="og:description" content="Sistema de gestão financeira online, simples, rápido e seguro.">
+        <meta property="og:image" content="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?q=80&w=1200&auto=format&fit=crop">
     </head>
 """, unsafe_allow_html=True)
 
