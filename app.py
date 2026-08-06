@@ -19,6 +19,8 @@ st.markdown("""
         <meta property="og:title" content="Meu Financeiro | Multi-Usuário">
         <meta property="og:description" content="Sistema de gestão financeira online, simples, rápido e seguro.">
         <meta property="og:image" content="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?q=80&w=1200&auto=format&fit=crop">
+        <!-- Ícone personalizado para o atalho na Tela de Início do iPhone -->
+        <link rel="apple-touch-icon" href="https://images.unsplash.com/photo-1559526324-4b87b5e36e44?q=80&w=512&auto=format&fit=crop">
     </head>
 """, unsafe_allow_html=True)
 
@@ -636,7 +638,6 @@ else:
             meses_disponiveis = sorted(df["mes_ano"].unique(), reverse=True)
             mes_selecionado = st.selectbox("📅 Selecione o Mês", meses_disponiveis)
             
-            # Cálculo do saldo acumulado histórico mês a mês
             df_sorted = df.sort_values("data")
             resumo_meses = df_sorted.groupby("mes_ano").apply(
                 lambda x: pd.Series({
@@ -695,11 +696,7 @@ else:
             data_lanc = st.date_input(t['date_label'], datetime.date.today())
             tipo_lanc = st.selectbox(t['type_label'], ["Despesa", "Receita"])
             valor_lanc = st.number_input(f"{t['value_label']} ({simbolo_moeda})", min_value=0.0, format="%.2f")
-            
-            # Categoria agora é um seletor (selectbox) padronizado
             cat_lanc = st.selectbox(t['cat_label'], CATEGORIAS_PADRAO)
-            
-            # Descrição agora é opcional
             desc_lanc = st.text_input(t['desc_label'])
             
             submit_lanc = st.form_submit_button(t['save_btn'], use_container_width=True)
