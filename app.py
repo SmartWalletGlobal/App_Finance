@@ -5,6 +5,16 @@ import pandas as pd
 from PIL import Image
 import plotly.express as px
 import streamlit as st
+from supabase import Client, create_client
+
+# --- CONEXÃO COM O SUPABASE ---
+SUPABASE_URL = "https://zrabayrovzbkbdbjeuor.supabase.co"
+SUPABASE_KEY = (
+    "sb_secret_PaTy9z_z1eH2jxkV8m6_g_5sAUvBUR"  # Chave secreta do projeto
+)
+
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+# -----------------------------
 
 st.set_page_config(
     page_title="Controle Financeiro | Multi-Usuário",
@@ -36,98 +46,66 @@ def check_hash(password, hashed_text):
   return False
 
 
-def init_db():
-  import sqlite3
-
-  conn = sqlite3.connect("financeiro.db")
-  cursor = conn.cursor()
-  cursor.execute("""
-        CREATE TABLE IF NOT EXISTS usuarios (
-            username TEXT PRIMARY KEY,
-            nome_completo TEXT,
-            senha TEXT
-        )
-    """)
-  for col, col_type in [("endereco", "TEXT"), ("foto_perfil", "BLOB")]:
-    try:
-      cursor.execute(f"ALTER TABLE usuarios ADD COLUMN {col} {col_type}")
-    except:
-      pass
-
-  cursor.execute("""
-        CREATE TABLE IF NOT EXISTS lancamentos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT,
-            data TEXT,
-            descricao TEXT,
-            categoria TEXT,
-            tipo TEXT,
-            valor REAL
-        )
-    """)
-  try:
-    cursor.execute("ALTER TABLE lancamentos ADD COLUMN username TEXT")
-  except:
-    pass
-
-  try:
-    cursor.execute(
-        "ALTER TABLE lancamentos ADD COLUMN contexto TEXT DEFAULT 'Pessoal'"
-    )
-  except:
-    pass
-
-  conn.commit()
-  conn.close()
-
-
-init_db()
+# --- FUNÇÕES DE BANCO DE DADOS COM SUPABASE ---
 
 
 def cadastrar_usuario(username, nome_completo, senha):
-  import sqlite3
-
-  conn = sqlite3.connect("financeiro.db")
-  cursor = conn.cursor()
   try:
-    cursor.execute(
-        "INSERT INTO usuarios (username, nome_completo, senha) VALUES (?, ?, ?)",
-        (username, nome_completo, make_hash(senha)),
+    res = (
+        supabase.table("usuarios")
+        .select("username")
+        .eq("username", username)
+        .execute()
     )
-    conn.commit()
-    conn.close()
+    if res.data and len(res.data) > 0:
+      return False
+    supabase.table("usuarios").insert({
+        "username": username,
+        "nome_completo": nome_completo,
+        "senha": make_hash(senha),
+    }).execute()
     return True
-  except:
-    conn.close()
+  except Exception:
     return False
 
 
 def autenticar_usuario(username, senha):
-  import sqlite3
-
-  conn = sqlite3.connect("financeiro.db")
-  cursor = conn.cursor()
-  cursor.execute("SELECT senha FROM usuarios WHERE username = ?", (username,))
-  result = cursor.fetchone()
-  conn.close()
-  if result:
-    return check_hash(senha, result[0])
-  return False
+  try:
+    res = (
+        supabase.table("usuarios")
+        .select("senha")
+        .eq("username", username)
+        .execute()
+    )
+    if res.data and len(res.data) > 0:
+      return check_hash(senha, res.data[0]["senha"])
+    return False
+  except Exception:
+    return False
 
 
 def obter_dados_usuario(username):
-  import sqlite3
+  try:
+    res = (
+        supabase.table("usuarios")
+        .select("nome_completo, endereco, foto_perfil")
+        .eq("username", username)
+        .execute()
+    )
+    if res.data and len(res.data) > 0:
+      row = res.data[0]
+      foto = row.get("foto_perfil") if row.get("foto_perfil") else None
+      if foto and isinstance(foto, str):
+        import base64
 
-  conn = sqlite3.connect("financeiro.db")
-  cursor = conn.cursor()
-  cursor.execute(
-      "SELECT nome_completo, endereco, foto_perfil FROM usuarios WHERE"
-      " username = ?",
-      (username,),
-  )
-  result = cursor.fetchone()
-  conn.close()
-  return result
+        try:
+          foto = base64.b64decode(foto)
+        except Exception:
+          pass
+      return (row.get("nome_completo"), row.get("endereco"), foto)
+    return ("", "", None)
+  except Exception:
+    return ("", "", None)
 
 
 def atualizar_perfil(
@@ -138,104 +116,95 @@ def atualizar_perfil(
     nova_foto_blob,
     remover_foto=False,
 ):
-  import sqlite3
-
-  conn = sqlite3.connect("financeiro.db")
-  cursor = conn.cursor()
   try:
-    if remover_foto:
-      foto_sql = None
-    else:
-      foto_sql = nova_foto_blob
-
+    update_data = {"nome_completo": novo_nome, "endereco": novo_endereco}
     if nova_senha:
-      hash_senha = make_hash(nova_senha)
-      if remover_foto:
-        cursor.execute(
-            "UPDATE usuarios SET nome_completo = ?, endereco = ?, senha = ?,"
-            " foto_perfil = NULL WHERE username = ?",
-            (novo_nome, novo_endereco, hash_senha, username),
-        )
-      elif nova_foto_blob is not None:
-        cursor.execute(
-            "UPDATE usuarios SET nome_completo = ?, endereco = ?, senha = ?,"
-            " foto_perfil = ? WHERE username = ?",
-            (novo_nome, novo_endereco, hash_senha, nova_foto_blob, username),
-        )
-      else:
-        cursor.execute(
-            "UPDATE usuarios SET nome_completo = ?, endereco = ?, senha = ? WHERE"
-            " username = ?",
-            (novo_nome, novo_endereco, hash_senha, username),
-        )
-    else:
-      if remover_foto:
-        cursor.execute(
-            "UPDATE usuarios SET nome_completo = ?, endereco = ?, foto_perfil ="
-            " NULL WHERE username = ?",
-            (novo_nome, novo_endereco, username),
-        )
-      elif nova_foto_blob is not None:
-        cursor.execute(
-            "UPDATE usuarios SET nome_completo = ?, endereco = ?, foto_perfil ="
-            " ? WHERE username = ?",
-            (novo_nome, novo_endereco, nova_foto_blob, username),
-        )
-      else:
-        cursor.execute(
-            "UPDATE usuarios SET nome_completo = ?, endereco = ? WHERE"
-            " username = ?",
-            (novo_nome, novo_endereco, username),
-        )
-    conn.commit()
-    conn.close()
+      update_data["senha"] = make_hash(nova_senha)
+
+    if remover_foto:
+      update_data["foto_perfil"] = None
+    elif nova_foto_blob is not None:
+      import base64
+
+      update_data["foto_perfil"] = base64.b64encode(nova_foto_blob).decode(
+          "utf-8"
+      )
+
+    supabase.table("usuarios").update(update_data).eq(
+        "username", username
+    ).execute()
     return True
-  except:
-    conn.close()
+  except Exception:
     return False
 
 
 def carregar_dados(username):
-  import sqlite3
-
-  conn = sqlite3.connect("financeiro.db")
-  df = pd.read_sql_query(
-      "SELECT * FROM lancamentos WHERE username = ?", conn, params=(username,)
-  )
-  conn.close()
-  if "contexto" not in df.columns:
-    df["contexto"] = "Pessoal"
-  return df
+  try:
+    res = (
+        supabase.table("lancamentos")
+        .select("*")
+        .eq("username", username)
+        .execute()
+    )
+    if res.data:
+      df = pd.DataFrame(res.data)
+      if "contexto" not in df.columns:
+        df["contexto"] = "Pessoal"
+      return df
+    return pd.DataFrame(
+        columns=[
+            "id",
+            "username",
+            "data",
+            "descricao",
+            "categoria",
+            "tipo",
+            "valor",
+            "contexto",
+        ]
+    )
+  except Exception:
+    return pd.DataFrame(
+        columns=[
+            "id",
+            "username",
+            "data",
+            "descricao",
+            "categoria",
+            "tipo",
+            "valor",
+            "contexto",
+        ]
+    )
 
 
 def salvar_lancamento(
     username, data, descricao, categoria, tipo, valor, contexto
 ):
-  import sqlite3
-
-  conn = sqlite3.connect("financeiro.db")
-  cursor = conn.cursor()
-  cursor.execute(
-      "INSERT INTO lancamentos (username, data, descricao, categoria, tipo,"
-      " valor, contexto) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      (username, data, descricao, categoria, tipo, valor, contexto),
-  )
-  conn.commit()
-  conn.close()
+  try:
+    supabase.table("lancamentos").insert({
+        "username": username,
+        "data": str(data),
+        "descricao": descricao,
+        "categoria": categoria,
+        "tipo": tipo,
+        "valor": float(valor),
+        "contexto": contexto,
+    }).execute()
+  except Exception as e:
+    st.error(f"Erro ao salvar no Supabase: {e}")
 
 
 def deletar_lancamento(id_lancamento, username):
-  import sqlite3
+  try:
+    supabase.table("lancamentos").delete().eq("id", id_lancamento).eq(
+        "username", username
+    ).execute()
+  except Exception:
+    pass
 
-  conn = sqlite3.connect("financeiro.db")
-  cursor = conn.cursor()
-  cursor.execute(
-      "DELETE FROM lancamentos WHERE id = ? AND username = ?",
-      (id_lancamento, username),
-  )
-  conn.commit()
-  conn.close()
 
+# ---------------------------------------------
 
 TEXTOS = {
     "Português": {
@@ -313,6 +282,8 @@ TEXTOS = {
         "sidebar_pessoal": "🏠 Pessoal",
         "sidebar_profissional": "📊 Profissional / Comércio",
         "nav_novo_label": "Novo Lançamento",
+        "lang_label": "🌐 Idioma / Language",
+        "curr_label": "💶 Moeda / Currency",
         "types": ["Despesa", "Receita", "Investimento"],
         "cat_pessoal": [
             "Aluguel",
@@ -404,6 +375,8 @@ TEXTOS = {
         "sidebar_pessoal": "🏠 Personal",
         "sidebar_profissional": "📊 Professional / Business",
         "nav_novo_label": "New Entry",
+        "lang_label": "🌐 Language",
+        "curr_label": "💶 Currency",
         "types": ["Expense", "Income", "Investment"],
         "cat_pessoal": [
             "Rent",
@@ -499,6 +472,8 @@ TEXTOS = {
         "sidebar_pessoal": "🏠 Personnel",
         "sidebar_profissional": "📊 Professionnel / Commerce",
         "nav_novo_label": "Nouvelle Entrée",
+        "lang_label": "🌐 Langue",
+        "curr_label": "💶 Devise",
         "types": ["Dépense", "Revenu", "Investissement"],
         "cat_pessoal": [
             "Loyer",
@@ -589,6 +564,8 @@ TEXTOS = {
         "sidebar_pessoal": "🏠 Personal",
         "sidebar_profissional": "📊 Profesional / Comercio",
         "nav_novo_label": "Nuevo Movimiento",
+        "lang_label": "🌐 Idioma",
+        "curr_label": "💶 Moneda",
         "types": ["Gasto", "Ingreso", "Inversión"],
         "cat_pessoal": [
             "Alquiler",
@@ -680,6 +657,8 @@ TEXTOS = {
         "sidebar_pessoal": "🏠 Personale",
         "sidebar_profissional": "📊 Professionale / Commerciale",
         "nav_novo_label": "Nuova Voce",
+        "lang_label": "🌐 Lingua",
+        "curr_label": "💶 Valuta",
         "types": ["Spesa", "Entrata", "Investimento"],
         "cat_pessoal": [
             "Affitto",
@@ -771,6 +750,8 @@ TEXTOS = {
         "sidebar_pessoal": "🏠 Persönlich",
         "sidebar_profissional": "📊 Beruflich / Gewerbe",
         "nav_novo_label": "Neuer Eintrag",
+        "lang_label": "🌐 Sprache",
+        "curr_label": "💶 Währung",
         "types": ["Ausgabe", "Einnahme", "Investition"],
         "cat_pessoal": [
             "Miete",
@@ -885,19 +866,22 @@ if not st.session_state["logged_in"]:
             st.warning(TEXTOS[st.session_state["idioma"]]["reg_warn"])
 
     st.markdown("<hr>", unsafe_allow_html=True)
+    t_curr = TEXTOS[st.session_state["idioma"]]
     sel_lang = st.selectbox(
-        "🌐 Idioma / Language",
+        t_curr["lang_label"],
         lista_idiomas,
         index=lista_idiomas.index(st.session_state["idioma"]),
+        key="login_lang_selectbox",
     )
     if sel_lang != st.session_state["idioma"]:
       st.session_state["idioma"] = sel_lang
       st.rerun()
 
     sel_moeda = st.selectbox(
-        "💶 Moeda / Currency",
+        t_curr["curr_label"],
         list(MOEDAS.keys()),
         index=list(MOEDAS.keys()).index(st.session_state["moeda"]),
+        key="login_curr_selectbox",
     )
     if sel_moeda != st.session_state["moeda"]:
       st.session_state["moeda"] = sel_moeda
@@ -920,7 +904,7 @@ else:
       try:
         img = Image.open(io.BytesIO(foto_blob_user))
         st.image(img, width=100)
-      except:
+      except Exception:
         st.write("📷")
     else:
       st.write("👤")
@@ -931,6 +915,7 @@ else:
     contexto_atual = st.radio(
         "💼 Painel de Gestão",
         [t["sidebar_pessoal"], t["sidebar_profissional"]],
+        key="sidebar_context_radio",
     )
     contexto_limpo = (
         "Profissional" if "Profissional" in contexto_atual else "Pessoal"
@@ -939,18 +924,20 @@ else:
     st.markdown("---")
 
     sel_lang = st.selectbox(
-        "🌐 Idioma / Language",
+        t["lang_label"],
         lista_idiomas,
         index=lista_idiomas.index(st.session_state["idioma"]),
+        key="sidebar_lang_selectbox",
     )
     if sel_lang != st.session_state["idioma"]:
       st.session_state["idioma"] = sel_lang
       st.rerun()
 
     sel_moeda = st.selectbox(
-        "💶 Moeda / Currency",
+        t["curr_label"],
         list(MOEDAS.keys()),
         index=list(MOEDAS.keys()).index(st.session_state["moeda"]),
+        key="sidebar_curr_selectbox",
     )
     if sel_moeda != st.session_state["moeda"]:
       st.session_state["moeda"] = sel_moeda
@@ -965,6 +952,7 @@ else:
             t["nav_manage"],
             t["nav_profile"],
         ],
+        key="sidebar_menu_radio",
     )
 
     st.markdown("<br><br>", unsafe_allow_html=True)
@@ -974,7 +962,10 @@ else:
       st.rerun()
 
   df_total = carregar_dados(st.session_state["username"])
-  df = df_total[df_total["contexto"] == contexto_limpo].copy()
+  if not df_total.empty and "contexto" in df_total.columns:
+    df = df_total[df_total["contexto"] == contexto_limpo].copy()
+  else:
+    df = pd.DataFrame()
 
   nome_contexto_traduzido = (
       t["context_profissional"]
@@ -996,7 +987,9 @@ else:
       df["mes_ano"] = df["data"].dt.strftime("%Y-%m")
 
       meses_disponiveis = sorted(df["mes_ano"].unique(), reverse=True)
-      mes_selecionado = st.selectbox("📅 Selecione o Mês", meses_disponiveis)
+      mes_selecionado = st.selectbox(
+          "📅 Selecione o Mês", meses_disponiveis, key="overview_month_select"
+      )
 
       df_sorted = df.sort_values("data")
       resumo_meses = (
@@ -1154,7 +1147,6 @@ else:
           else t["cat_pessoal"]
       )
       cat_lanc = st.selectbox(t["cat_label"], lista_cat_atual)
-
       desc_lanc = st.text_input(t["desc_label"])
 
       submit_lanc = st.form_submit_button(t["save_btn"], use_container_width=True)
@@ -1170,6 +1162,7 @@ else:
               contexto_limpo,
           )
           st.success(t["success_msg"])
+          st.rerun()
         else:
           st.warning(t["warn_val"])
 
@@ -1181,7 +1174,11 @@ else:
       st.info(f"Nenhum lançamento encontrado no painel {nome_contexto_traduzido}.")
     else:
       st.dataframe(df, use_container_width=True)
-      id_del = st.selectbox("ID do lançamento para excluir", df["id"].tolist())
+      id_del = st.selectbox(
+          "ID do lançamento para excluir",
+          df["id"].tolist(),
+          key="manage_id_select",
+      )
       if st.button(t["del_btn"]):
         deletar_lancamento(id_del, st.session_state["username"])
         st.success("Lançamento excluído com sucesso!")
