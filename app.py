@@ -21,37 +21,6 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# --- CONFIGURAÇÃO PWA E META TAGS PARA O CELULAR ---
-st.markdown(
-    """
-    <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-        <meta name="mobile-web-app-capable" content="yes">
-        <meta name="apple-mobile-web-app-capable" content="yes">
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-        <meta name="apple-mobile-web-app-title" content="Finanças">
-        <meta name="theme-color" content="#0e1117">
-        <link rel="manifest" href="data:application/manifest+json;charset=utf-8,{
-            \"name\": \"Controle Financeiro\",
-            \"short_name\": \"Finanças\",
-            \"start_url\": \"./\",
-            \"display\": \"standalone\",
-            \"background_color\": \"#0e1117\",
-            \"theme_color\": \"#0e1117\",
-            \"icons\": [
-                {
-                    \"src\": \"https://images.unsplash.com/photo-1559526324-4b87b5e36e44?q=80&w=512&auto=format&fit=crop\",
-                    \"sizes\": \"512x512\",
-                    \"type\": \"image/jpeg\"
-                }
-            ]
-        }">
-        <link rel="apple-touch-icon" href="https://images.unsplash.com/photo-1559526324-4b87b5e36e44?q=80&w=512&auto=format&fit=crop">
-    </head>
-""",
-    unsafe_allow_html=True,
-)
-
 
 def make_hash(password):
     return hashlib.sha256(str.encode(password)).hexdigest()
@@ -61,7 +30,7 @@ def check_hash(password, hashed_text):
     return make_hash(password) == hashed_text
 
 
-# --- FUNÇÕES DE BANCO DE DADOS (SUPABASE) BLINDADAS ---
+# --- FUNÇÕES DE BANCO DE DADOS (SUPABASE) ---
 
 def cadastrar_usuario(username, nome_completo, senha):
     try:
@@ -79,7 +48,6 @@ def cadastrar_usuario(username, nome_completo, senha):
         return True, ""
     except Exception as e:
         try:
-            # Fallback caso a tabela utilize a coluna 'nome' ao invés de 'nome_completo'
             payload_alt = {
                 "username": username.strip(),
                 "nome": nome_completo.strip(),
@@ -394,7 +362,7 @@ TEXTOS = {
         "btn_reg_submit": "Crear Cuenta Nueva",
         "reg_warn": "Por favor llena todos los campos.",
         "reg_success": "¡Cuenta creada con éxito! Ve a la pestaña 'Entrar'.",
-        "reg_error": "Este usuario ya existe o hubo un error.",
+        "reg_error": "Este usuario ya existe ou hubo un error.",
         "nav_overview": "📊 Visión General y Gráficos",
         "nav_new": "➕ Nuevo Movimiento",
         "nav_manage": "✏️ Gestionar y Editar",
@@ -509,7 +477,7 @@ TEXTOS = {
         "login_sub": "Melden Sie sich an oder registrieren Sie sich.",
         "tab_login": "🔑 Anmelden",
         "tab_register": "📝 Registrieren",
-        "user_label": "Benutzername (E-Mail oder Nickname)",
+        "user_label": "Benutzername (E-Mail ou Nickname)",
         "pass_label": "Passwort",
         "btn_login_submit": "Anmelden",
         "login_success": "Willkommen zurück!",
