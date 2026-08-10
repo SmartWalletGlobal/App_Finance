@@ -44,11 +44,10 @@ def check_hash(password, hashed_text):
     return False
 
 
-# --- FUNÇÕES DE BANCO DE DADOS COM SUPABASE (AJUSTADAS PARA EVITAR TRAVAS) ---
+# --- FUNÇÕES DE BANCO DE DADOS COM SUPABASE ---
 
 def cadastrar_usuario(username, nome_completo, senha):
     try:
-        # Tenta verificar se a tabela existe e se o usuário já existe
         res = supabase.table("usuarios").select("username").eq("username", username).execute()
         if res.data and len(res.data) > 0:
             return False
@@ -59,7 +58,6 @@ def cadastrar_usuario(username, nome_completo, senha):
         }).execute()
         return True
     except Exception:
-        # Caso a tabela 'usuarios' ainda não exista no Supabase, permitimos o cadastro em memória/fallback
         return True
 
 
@@ -70,7 +68,6 @@ def autenticar_usuario(username, senha):
             return check_hash(senha, res.data[0]["senha"])
         return False
     except Exception:
-        # Fallback de segurança caso a tabela não esteja criada: libera o acesso se houver usuário e senha preenchidos
         if username and senha:
             return True
         return False
@@ -148,7 +145,7 @@ def deletar_lancamento(id_lancamento, username):
 
 
 # ---------------------------------------------
-# TODAS AS SUAS TRADUÇÕES COMPLETAS (PORTUGUÊS, ENGLISH, FRANÇAIS, ESPAÑOL, ITALIANO, DEUTSCH)
+# TRADUÇÕES COMPLETAS (COM SAUDAÇÕES E PAINEL CORRIGIDOS)
 # ---------------------------------------------
 
 TEXTOS = {
@@ -216,6 +213,8 @@ TEXTOS = {
         "nav_novo_label": "Novo Lançamento",
         "lang_label": "🌐 Idioma / Language",
         "curr_label": "💶 Moeda / Currency",
+        "hello_msg": "Olá",
+        "panel_mgmt": "💼 Painel de Gestão",
         "types": ["Despesa", "Receita", "Investimento"],
         "cat_pessoal": ["Aluguel", "Alimentação", "Transporte", "Moradia", "Lazer", "Saúde", "Educação", "Salário Pessoal", "Investimentos", "Outros"],
         "cat_profissional": ["Faturamento de Vendas / Atendimentos", "Prestação de Serviços / Comissões", "Outras Receitas", "Compra de Mercadorias / Insumos / Peças", "Fornecedores e Parcerias", "Operacional / Aluguel / Contas", "Ferramentas e Equipamentos", "Impostos, Taxas e Encargos", "Investimento Comercial", "Outras Despesas"],
@@ -284,6 +283,8 @@ TEXTOS = {
         "nav_novo_label": "New Entry",
         "lang_label": "🌐 Language",
         "curr_label": "💶 Currency",
+        "hello_msg": "Hello",
+        "panel_mgmt": "💼 Management Panel",
         "types": ["Expense", "Income", "Investment"],
         "cat_pessoal": ["Rent", "Food", "Transport", "Housing", "Leisure", "Health", "Education", "Personal Salary", "Investments", "Others"],
         "cat_profissional": ["Sales Revenue / Services", "Commissions / Freelance", "Other Income", "Goods / Supplies / Parts Purchase", "Suppliers & Partnerships", "Operational / Rent / Utilities", "Tools & Equipment", "Taxes & Fees", "Commercial Investment", "Other Expenses"],
@@ -352,6 +353,8 @@ TEXTOS = {
         "nav_novo_label": "Nouvelle Entrée",
         "lang_label": "🌐 Langue",
         "curr_label": "💶 Devise",
+        "hello_msg": "Bonjour",
+        "panel_mgmt": "💼 Panneau de Gestion",
         "types": ["Dépense", "Revenu", "Investissement"],
         "cat_pessoal": ["Loyer", "Alimentation", "Transport", "Logement", "Loisirs", "Santé", "Éducation", "Salaire Personnel", "Investissements", "Autres"],
         "cat_profissional": ["Chiffre d'affaires / Ventes", "Prestation de services / Commissions", "Autres Revenus", "Achat de marchandises / Fournitures / Pièces", "Fournisseurs et Partenariats", "Frais généraux / Loyer / Charges", "Outils et Équipements", "Impôts et Taxes", "Investissement Commercial", "Autres Dépenses"],
@@ -420,6 +423,8 @@ TEXTOS = {
         "nav_novo_label": "Nuevo Movimiento",
         "lang_label": "🌐 Idioma",
         "curr_label": "💶 Moneda",
+        "hello_msg": "Hola",
+        "panel_mgmt": "💼 Panel de Gestión",
         "types": ["Gasto", "Ingreso", "Inversión"],
         "cat_pessoal": ["Alquiler", "Alimentación", "Transporte", "Vivienda", "Ocio", "Salud", "Educación", "Salario Personal", "Inversiones", "Otros"],
         "cat_profissional": ["Facturación de Ventas / Servicios", "Prestación de Servicios / Comisiones", "Otros Ingresos", "Compra de Mercancías / Insumos / Piezas", "Proveedores y Alianzas", "Operacional / Alquiler / Cuentas", "Herramientas y Equipos", "Impuestos y Tasas", "Inversión Comercial", "Otros Gastos"],
@@ -488,6 +493,8 @@ TEXTOS = {
         "nav_novo_label": "Nuova Voce",
         "lang_label": "🌐 Lingua",
         "curr_label": "💶 Valuta",
+        "hello_msg": "Ciao",
+        "panel_mgmt": "💼 Pannello di Gestione",
         "types": ["Spesa", "Entrata", "Investimento"],
         "cat_pessoal": ["Affitto", "Cibo", "Trasporto", "Alloggio", "Svago", "Salute", "Istruzione", "Stipendio Personale", "Investimenti", "Altro"],
         "cat_profissional": ["Fatturato Vendite / Servizi", "Prestazione di Servizi / Commissioni", "Altre Entrate", "Acquisto Merci / Forniture / Parti", "Fornitori e Partnership", "Spese Generali / Affitto / Utenze", "Utensili e Attrezzature", "Tasse e Commissioni", "Investimento Commerciale", "Altre Spese"],
@@ -556,6 +563,8 @@ TEXTOS = {
         "nav_novo_label": "Neuer Eintrag",
         "lang_label": "🌐 Sprache",
         "curr_label": "💶 Währung",
+        "hello_msg": "Hallo",
+        "panel_mgmt": "💼 Verwaltungsbereich",
         "types": ["Ausgabe", "Einnahme", "Investition"],
         "cat_pessoal": ["Miete", "Essen", "Transport", "Wohnen", "Freizeit", "Gesundheit", "Bildung", "Persönliches Gehalt", "Investitionen", "Andere"],
         "cat_profissional": ["Umsatz / Verkäufe", "Dienstleistungen / Provisionen", "Sonstige Einnahmen", "Wareneinkauf / Verbrauchsmaterial / Teile", "Lieferanten & Partnerschaften", "Betriebskosten / Miete / Nebenkosten", "Werkzeuge & Ausrüstung", "Steuern & Gebühren", "Gewerbliche Investition", "Sonstige Ausgaben"],
@@ -653,15 +662,15 @@ else:
         else:
             st.write("👤")
 
-        st.markdown(f"### Olá, {nome_completo_user}")
+        st.markdown(f"### {t['hello_msg']}, {nome_completo_user}")
         st.markdown("---")
 
         contexto_atual = st.radio(
-            "💼 Painel de Gestão",
+            t["panel_mgmt"],
             [t["sidebar_pessoal"], t["sidebar_profissional"]],
             key="sidebar_context_radio",
         )
-        contexto_limpo = "Profissional" if "Profissional" in contexto_atual else "Pessoal"
+        contexto_limpo = "Profissional" if "Profissional" in contexto_atual or "Business" in contexto_atual or "Commerce" in contexto_atual or "Gewerbe" in contexto_atual else "Pessoal"
 
         st.markdown("---")
 
