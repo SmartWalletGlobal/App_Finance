@@ -7,12 +7,17 @@ import plotly.express as px
 import streamlit as st
 from supabase import Client, create_client
 
-# --- CONEXÃO COM O SUPABASE ---
-SUPABASE_URL = "https://zrabayrovzbkbdbjeuor.supabase.co"
-SUPABASE_KEY = "sb_secret_PaTy9z_z1eH2jxkV8m6_g_5sAUvBUR"
+# --- CONEXÃO COM O SUPABASE VIA SECRETS ---
+try:
+  SUPABASE_URL = st.secrets["SUPABASE_URL"]
+  SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
+except Exception:
+  # Fallback caso rode localmente sem o secrets.toml configurado
+  SUPABASE_URL = "https://zrabayrovzbkbdbjeuor.supabase.co"
+  SUPABASE_KEY = "sb_secret_PaTy9z_z1eH2jxkV8m6_g_5sAUvBUR"
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-# -----------------------------
+# ------------------------------------------
 
 st.set_page_config(
     page_title="Controle Financeiro | Multi-Usuário",
