@@ -32,7 +32,7 @@ def check_hash(password, hashed_text):
     return False
 
 def init_db():
-    conn = sqlite3.connect('financeiro.db', check_same_thread=False)
+    conn = sqlite3.connect('financeiro.db')
     cursor = conn.cursor()
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS usuarios (
@@ -69,7 +69,7 @@ def init_db():
 init_db()
 
 def cadastrar_usuario(username, nome_completo, senha):
-    conn = sqlite3.connect('financeiro.db', check_same_thread=False)
+    conn = sqlite3.connect('financeiro.db')
     cursor = conn.cursor()
     try:
         cursor.execute("INSERT INTO usuarios (username, nome_completo, senha) VALUES (?, ?, ?)", 
@@ -82,7 +82,7 @@ def cadastrar_usuario(username, nome_completo, senha):
         return False
 
 def autenticar_usuario(username, senha):
-    conn = sqlite3.connect('financeiro.db', check_same_thread=False)
+    conn = sqlite3.connect('financeiro.db')
     cursor = conn.cursor()
     cursor.execute("SELECT senha FROM usuarios WHERE username = ?", (username,))
     result = cursor.fetchone()
@@ -92,7 +92,7 @@ def autenticar_usuario(username, senha):
     return False
 
 def obter_dados_usuario(username):
-    conn = sqlite3.connect('financeiro.db', check_same_thread=False)
+    conn = sqlite3.connect('financeiro.db')
     cursor = conn.cursor()
     cursor.execute("SELECT nome_completo, endereco, foto_perfil FROM usuarios WHERE username = ?", (username,))
     result = cursor.fetchone()
@@ -100,7 +100,7 @@ def obter_dados_usuario(username):
     return result
 
 def atualizar_perfil(username, novo_nome, novo_endereco, nova_senha, nova_foto_blob, remover_foto=False):
-    conn = sqlite3.connect('financeiro.db', check_same_thread=False)
+    conn = sqlite3.connect('financeiro.db')
     cursor = conn.cursor()
     try:
         if remover_foto:
@@ -137,13 +137,13 @@ def atualizar_perfil(username, novo_nome, novo_endereco, nova_senha, nova_foto_b
         return False
 
 def carregar_dados(username):
-    conn = sqlite3.connect('financeiro.db', check_same_thread=False)
+    conn = sqlite3.connect('financeiro.db')
     df = pd.read_sql_query("SELECT * FROM lancamentos WHERE username = ?", conn, params=(username,))
     conn.close()
     return df
 
 def salvar_lancamento(username, data, descricao, categoria, tipo, valor):
-    conn = sqlite3.connect('financeiro.db', check_same_thread=False)
+    conn = sqlite3.connect('financeiro.db')
     cursor = conn.cursor()
     cursor.execute("INSERT INTO lancamentos (username, data, descricao, categoria, tipo, valor) VALUES (?, ?, ?, ?, ?, ?)",
                    (username, data, descricao, categoria, tipo, valor))
@@ -151,7 +151,7 @@ def salvar_lancamento(username, data, descricao, categoria, tipo, valor):
     conn.close()
 
 def deletar_lancamento(id_lancamento, username):
-    conn = sqlite3.connect('financeiro.db', check_same_thread=False)
+    conn = sqlite3.connect('financeiro.db')
     cursor = conn.cursor()
     cursor.execute("DELETE FROM lancamentos WHERE id = ? AND username = ?", (id_lancamento, username))
     conn.commit()
@@ -612,16 +612,18 @@ else:
         if df.empty:
             st.info(t['no_data'])
         else:
+            # Tratamento de datas e filtro de mês para separar os lançamentos corretamente
             df["data"] = pd.to_datetime(df["data"])
             df["mes_ano"] = df["data"].dt.strftime("%Y-%m")
             
             meses_disponiveis = sorted(df["mes_ano"].unique(), reverse=True)
             mes_selecionado = st.selectbox("📅 Selecione o Mês", meses_disponiveis)
             
+            # Filtra os dados apenas para o mês selecionado
             df_mes = df[df["mes_ano"] == mes_selecionado]
 
-            total_receitas = df_mes[df_mes['tipo'] == 'Receita']['valor'].sum() if not df_mes.empty else 0.0
-            total_despesas = df_mes[df_mes['tipo'] == 'Despesa']['valor'].sum() if not df_mes.empty else 0.0
+            total_receitas = df_mes[df_mes['tipo'] == 'Receita']['valor'].sum()
+            total_despesas = df_mes[df_mes['tipo'] == 'Despesa']['valor'].sum()
             saldo = total_receitas - total_despesas
 
             col1, col2, col3 = st.columns(3)
@@ -632,9 +634,10 @@ else:
             st.markdown("---")
             c1, c2 = st.columns(2)
             with c1:
-                df_desp = df_mes[df_mes['tipo'] == 'Despesa'] if not df_mes.empty else pd.DataFrame()
+                df_desp = df_mes[df_mes['tipo'] == 'Despesa']
                 if not df_desp.empty:
                     fig_pie = px.pie(df_desp, names='categoria', values='valor', title=t['pie_title'], hole=0.4)
+                    # Gráfico fixo sem a barra de ferramentas de zoom poluição
                     st.plotly_chart(fig_pie, use_container_width=True, config={'displayModeBar': False})
                 else:
                     st.info("Sem despesas para exibir no gráfico neste mês.")
