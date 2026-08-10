@@ -31,9 +31,6 @@ st.markdown(
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <meta name="apple-mobile-web-app-title" content="Finanças">
         <meta name="theme-color" content="#0e1117">
-        <meta property="og:title" content="Controle Financeiro | Multi-Usuário">
-        <meta property="og:description" content="Sistema de gestão financeira online na nuvem, simples, rápido e seguro.">
-        <meta property="og:image" content="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?q=80&w=1200&auto=format&fit=crop">
         <link rel="manifest" href="data:application/manifest+json;charset=utf-8,{
             \"name\": \"Controle Financeiro\",
             \"short_name\": \"Finanças\",
@@ -51,13 +48,6 @@ st.markdown(
         }">
         <link rel="apple-touch-icon" href="https://images.unsplash.com/photo-1559526324-4b87b5e36e44?q=80&w=512&auto=format&fit=crop">
     </head>
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                // Service worker leve para suporte PWA
-            });
-        }
-    </script>
 """,
     unsafe_allow_html=True,
 )
@@ -68,19 +58,18 @@ def make_hash(password):
 
 
 def check_hash(password, hashed_text):
-    if make_hash(password) == hashed_text:
-        return True
-    return False
+    return make_hash(password) == hashed_text
 
 
-# --- FUNÇÕES DE BANCO DE DADOS (SUPABASE) ---
+# --- FUNÇÕES DE BANCO DE DADOS (SUPABASE) COM TRATAMENTO DE ERROS CLARO ---
 
 def cadastrar_usuario(username, nome_completo, senha):
     try:
         res = supabase.table("usuarios").select("username").eq("username", username).execute()
         if res.data and len(res.data) > 0:
-            return False
+            return False, "Este usuário já existe."
         
+        # Tenta inserir considerando diferentes variações de nomes de colunas comuns
         try:
             supabase.table("usuarios").insert({
                 "username": username,
@@ -93,19 +82,20 @@ def cadastrar_usuario(username, nome_completo, senha):
                 "nome": nome_completo,
                 "senha": make_hash(senha),
             }).execute()
-        return True
-    except Exception:
-        return False
+        return True, ""
+    except Exception as e:
+        return False, str(e)
 
 
 def autenticar_usuario(username, senha):
     try:
         res = supabase.table("usuarios").select("senha").eq("username", username).execute()
         if res.data and len(res.data) > 0:
-            return check_hash(senha, res.data[0]["senha"])
-        return False
-    except Exception:
-        return False
+            stored_pass = res.data[0]["senha"]
+            return check_hash(senha, stored_pass), ""
+        return False, "Usuário não encontrado."
+    except Exception as e:
+        return False, str(e)
 
 
 def obter_dados_usuario(username):
@@ -147,9 +137,9 @@ def atualizar_perfil(username, novo_nome, novo_endereco, nova_senha, nova_foto_b
             update_data["nome"] = novo_nome
             update_data.pop("nome_completo", None)
             supabase.table("usuarios").update(update_data).eq("username", username).execute()
-        return True
-    except Exception:
-        return False
+        return True, ""
+    except Exception as e:
+        return False, str(e)
 
 
 def carregar_dados(username):
@@ -606,13 +596,17 @@ if not st.session_state['logged_in']:
                 submit_login = st.form_submit_button(TEXTOS[st.session_state['idioma']]['btn_login_submit'], use_container_width=True)
                 
                 if submit_login:
-                    if autenticar_usuario(u_input, p_input):
+                    ok, err = autenticar_usuario(u_input, p_input)
+                    if ok:
                         st.session_state['logged_in'] = True
                         st.session_state['username'] = u_input
                         st.success(TEXTOS[st.session_state['idioma']]['login_success'])
                         st.rerun()
                     else:
-                        st.error(TEXTOS[st.session_state['idioma']]['login_error'])
+                        if err:
+                            st.error(f"{TEXTOS[st.session_state['idioma']]['login_error']} (Detalhe: {err})")
+                        else:
+                            st.error(TEXTOS[st.session_state['idioma']]['login_error'])
                         
         with tab_reg:
             with st.form("form_reg"):
@@ -623,15 +617,15 @@ if not st.session_state['logged_in']:
                 
                 if submit_reg:
                     if reg_user and reg_name and reg_pass:
-                        if cadastrar_usuario(reg_user, reg_name, reg_pass):
+                        sucesso, err_msg = cadastrar_usuario(reg_user, reg_name, reg_pass)
+                        if sucesso:
                             st.success(TEXTOS[st.session_state['idioma']]['reg_success'])
                         else:
-                            st.error(TEXTOS[st.session_state['idioma']]['reg_error'])
+                            st.error(f"{TEXTOS[st.session_state['idioma']]['reg_error']} ({err_msg})")
                     else:
                         st.warning(TEXTOS[st.session_state['idioma']]['reg_warn'])
 
         st.markdown("<hr>", unsafe_allow_html=True)
-        t_curr = TEXTOS[st.session_state['idioma']]
         sel_lang = st.selectbox("🌐 Idioma / Language", lista_idiomas, index=lista_idiomas.index(st.session_state['idioma']), key="login_lang_sel")
         if sel_lang != st.session_state['idioma']:
             st.session_state['idioma'] = sel_lang
@@ -719,8 +713,8 @@ else:
             
             df_mes = df[df["mes_ano"] == mes_selecionado]
 
-            total_receitas = df_mes[df_mes['tipo'] == t['types'][1]]['valor'].sum()
-            total_despesas = df_mes[df_mes['tipo'] == t['types'][0]]['valor'].sum()
+            total_receitas = df_mes[df_mes['tipo'] == t['types'][1]]['valor'].sum() if not df_mes.empty else 0.0
+            total_despesas = df_mes[df_mes['tipo'] == t['types'][0]]['valor'].sum() if not df_mes.empty else 0.0
             saldo = total_receitas - total_despesas
 
             col1, col2, col3 = st.columns(3)
@@ -731,7 +725,7 @@ else:
             st.markdown("---")
             c1, c2 = st.columns(2)
             with c1:
-                df_desp = df_mes[df_mes['tipo'] == t['types'][0]]
+                df_desp = df_mes[df_mes['tipo'] == t['types'][0]] if not df_mes.empty else pd.DataFrame()
                 if not df_desp.empty:
                     fig_pie = px.pie(df_desp, names='categoria', values='valor', title=t['pie_title'], hole=0.4)
                     st.plotly_chart(fig_pie, use_container_width=True, config={'displayModeBar': False})
@@ -818,8 +812,9 @@ else:
                 if foto_upload is not None:
                     foto_blob = foto_upload.read()
                 
-                if atualizar_perfil(st.session_state['username'], novo_nome, novo_endereco, nova_senha, foto_blob, remover_foto_check):
+                sucesso_p, err_p = atualizar_perfil(st.session_state['username'], novo_nome, novo_endereco, nova_senha, foto_blob, remover_foto_check)
+                if sucesso_p:
                     st.success(t['profile_success'])
                     st.rerun()
                 else:
-                    st.error(t['profile_error'])
+                    st.error(f"{t['profile_error']} ({err_p})")
