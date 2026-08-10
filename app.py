@@ -44,21 +44,31 @@ def check_hash(password, hashed_text):
     return False
 
 
-# --- FUNÇÕES DE BANCO DE DADOS COM SUPABASE ---
+# --- FUNÇÕES DE BANCO DE DADOS COM SUPABASE ROBUSTAS ---
 
 def cadastrar_usuario(username, nome_completo, senha):
     try:
         res = supabase.table("usuarios").select("username").eq("username", username).execute()
         if res.data and len(res.data) > 0:
             return False
-        supabase.table("usuarios").insert({
-            "username": username,
-            "nome_completo": nome_completo,
-            "senha": make_hash(senha),
-        }).execute()
+        
+        # Tenta inserir com 'nome_completo', se falhar por coluna inexistente, tenta 'nome'
+        try:
+            supabase.table("usuarios").insert({
+                "username": username,
+                "nome_completo": nome_completo,
+                "senha": make_hash(senha),
+            }).execute()
+        except Exception:
+            supabase.table("usuarios").insert({
+                "username": username,
+                "nome": nome_completo,
+                "senha": make_hash(senha),
+            }).execute()
         return True
-    except Exception:
-        return True
+    except Exception as e:
+        st.error(f"Erro no cadastro: {e}")
+        return False
 
 
 def autenticar_usuario(username, senha):
@@ -75,17 +85,21 @@ def autenticar_usuario(username, senha):
 
 def obter_dados_usuario(username):
     try:
-        res = supabase.table("usuarios").select("nome_completo, endereco, foto_perfil").eq("username", username).execute()
+        res = supabase.table("usuarios").select("*").eq("username", username).execute()
         if res.data and len(res.data) > 0:
             row = res.data[0]
-            foto = row.get("foto_perfil") if row.get("foto_perfil") else None
+            # Pega o nome completo considerando diferentes nomes de colunas possíveis no Supabase
+            nome = row.get("nome_completo") or row.get("nome") or row.get("full_name") or username
+            endereco = row.get("endereco") or row.get("address") or ""
+            foto = row.get("foto_perfil") or row.get("foto") or None
+            
             if foto and isinstance(foto, str):
                 import base64
                 try:
                     foto = base64.b64decode(foto)
                 except Exception:
                     pass
-            return (row.get("nome_completo"), row.get("endereco"), foto)
+            return (nome, endereco, foto)
         return (username, "", None)
     except Exception:
         return (username, "", None)
@@ -103,10 +117,17 @@ def atualizar_perfil(username, novo_nome, novo_endereco, nova_senha, nova_foto_b
             import base64
             update_data["foto_perfil"] = base64.b64encode(nova_foto_blob).decode("utf-8")
 
-        supabase.table("usuarios").update(update_data).eq("username", username).execute()
+        try:
+            supabase.table("usuarios").update(update_data).eq("username", username).execute()
+        except Exception:
+            # Fallback para coluna 'nome' caso 'nome_completo' não exista na tabela
+            update_data["nome"] = novo_nome
+            update_data.pop("nome_completo", None)
+            supabase.table("usuarios").update(update_data).eq("username", username).execute()
         return True
-    except Exception:
-        return True
+    except Exception as e:
+        st.error(f"Erro ao atualizar perfil: {e}")
+        return False
 
 
 def carregar_dados(username):
@@ -133,8 +154,10 @@ def salvar_lancamento(username, data, descricao, categoria, tipo, valor, context
             "valor": float(valor),
             "contexto": contexto,
         }).execute()
+        return True
     except Exception as e:
         st.error(f"Erro ao salvar no Supabase: {e}")
+        return False
 
 
 def deletar_lancamento(id_lancamento, username):
@@ -145,7 +168,7 @@ def deletar_lancamento(id_lancamento, username):
 
 
 # ---------------------------------------------
-# TRADUÇÕES COMPLETAS (COM SAUDAÇÕES E PAINEL CORRIGIDOS)
+# DICIONÁRIO DE TRADUÇÕES COMPLETAS
 # ---------------------------------------------
 
 TEXTOS = {
@@ -819,7 +842,7 @@ else:
             submit_lanc = st.form_submit_button(t["save_btn"], use_container_width=True)
             if submit_lanc:
                 if valor_lanc > 0:
-                    salvar_lancamento(
+                    sucesso = salvar_lancamento(
                         st.session_state["username"],
                         str(data_lanc),
                         desc_lanc,
@@ -828,8 +851,9 @@ else:
                         valor_lanc,
                         contexto_limpo,
                     )
-                    st.success(t["success_msg"])
-                    st.rerun()
+                    if sucesso:
+                        st.success(t["success_msg"])
+                        st.rerun()
                 else:
                     st.warning(t["warn_val"])
 
