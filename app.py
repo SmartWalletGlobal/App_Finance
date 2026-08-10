@@ -44,7 +44,7 @@ def check_hash(password, hashed_text):
     return False
 
 
-# --- FUNÇÕES DE BANCO DE DADOS COM SUPABASE ---
+# --- FUNÇÕES DE BANCO DE DADOS COM SUPABASE (CORRIGIDAS) ---
 
 def cadastrar_usuario(username, nome_completo, senha):
     try:
@@ -57,8 +57,9 @@ def cadastrar_usuario(username, nome_completo, senha):
             "senha": make_hash(senha),
         }).execute()
         return True
-    except Exception:
-        return True
+    except Exception as e:
+        st.error(f"Erro ao cadastrar usuário: {e}")
+        return False
 
 
 def autenticar_usuario(username, senha):
@@ -67,9 +68,8 @@ def autenticar_usuario(username, senha):
         if res.data and len(res.data) > 0:
             return check_hash(senha, res.data[0]["senha"])
         return False
-    except Exception:
-        if username and senha:
-            return True
+    except Exception as e:
+        st.error(f"Erro ao autenticar: {e}")
         return False
 
 
@@ -105,8 +105,9 @@ def atualizar_perfil(username, novo_nome, novo_endereco, nova_senha, nova_foto_b
 
         supabase.table("usuarios").update(update_data).eq("username", username).execute()
         return True
-    except Exception:
-        return True
+    except Exception as e:
+        st.error(f"Erro ao atualizar perfil: {e}")
+        return False
 
 
 def carregar_dados(username):
@@ -118,13 +119,14 @@ def carregar_dados(username):
                 df["contexto"] = "Pessoal"
             return df
         return pd.DataFrame(columns=["id", "username", "data", "descricao", "categoria", "tipo", "valor", "contexto"])
-    except Exception:
+    except Exception as e:
+        st.error(f"Erro ao carregar dados: {e}")
         return pd.DataFrame(columns=["id", "username", "data", "descricao", "categoria", "tipo", "valor", "contexto"])
 
 
 def salvar_lancamento(username, data, descricao, categoria, tipo, valor, contexto):
     try:
-        supabase.table("lancamentos").insert({
+        response = supabase.table("lancamentos").insert({
             "username": username,
             "data": str(data),
             "descricao": descricao,
@@ -133,19 +135,23 @@ def salvar_lancamento(username, data, descricao, categoria, tipo, valor, context
             "valor": float(valor),
             "contexto": contexto,
         }).execute()
+        return True
     except Exception as e:
         st.error(f"Erro ao salvar no Supabase: {e}")
+        return False
 
 
 def deletar_lancamento(id_lancamento, username):
     try:
         supabase.table("lancamentos").delete().eq("id", id_lancamento).eq("username", username).execute()
-    except Exception:
-        pass
+        return True
+    except Exception as e:
+        st.error(f"Erro ao excluir lançamento: {e}")
+        return False
 
 
 # ---------------------------------------------
-# TRADUÇÕES COMPLETAS (COM SAUDAÇÕES E PAINEL CORRIGIDOS)
+# TRADUÇÕES COMPLETAS
 # ---------------------------------------------
 
 TEXTOS = {
@@ -819,7 +825,7 @@ else:
             submit_lanc = st.form_submit_button(t["save_btn"], use_container_width=True)
             if submit_lanc:
                 if valor_lanc > 0:
-                    salvar_lancamento(
+                    sucesso = salvar_lancamento(
                         st.session_state["username"],
                         str(data_lanc),
                         desc_lanc,
@@ -828,8 +834,9 @@ else:
                         valor_lanc,
                         contexto_limpo,
                     )
-                    st.success(t["success_msg"])
-                    st.rerun()
+                    if sucesso:
+                        st.success(t["success_msg"])
+                        st.rerun()
                 else:
                     st.warning(t["warn_val"])
 
@@ -843,9 +850,9 @@ else:
             st.dataframe(df, use_container_width=True)
             id_del = st.selectbox("ID do lançamento para excluir", df["id"].tolist(), key="manage_id_select")
             if st.button(t["del_btn"]):
-                deletar_lancamento(id_del, st.session_state["username"])
-                st.success("Lançamento excluído com sucesso!")
-                st.rerun()
+                if deletar_lancamento(id_del, st.session_state["username"]):
+                    st.success("Lançamento excluído com sucesso!")
+                    st.rerun()
 
     elif menu == t["nav_profile"]:
         st.title(t["profile_title"])
