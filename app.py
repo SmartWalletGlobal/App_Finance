@@ -7,28 +7,57 @@ import plotly.express as px
 import streamlit as st
 from supabase import Client, create_client
 
-# --- CONEXÃO DIRETA COM O SUPABASE ---
+# --- CONEXÃO COM O SUPABASE (NUVEM) ---
 SUPABASE_URL = "https://zrabayrovzbkbdbjeuor.supabase.co"
 SUPABASE_KEY = "sb_secret_PaTy9z_z1eH2jxkV8m6_g_5sAUvBUR"
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-# ------------------------------------------
+# --------------------------------------
 
 st.set_page_config(
     page_title="Controle Financeiro | Multi-Usuário",
-    page_icon="💳",
+    page_icon="💶",
     layout="centered",
     initial_sidebar_state="expanded",
 )
 
+# --- CONFIGURAÇÃO PWA E META TAGS PARA O CELULAR ---
 st.markdown(
     """
     <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <meta name="apple-mobile-web-app-title" content="Finanças">
+        <meta name="theme-color" content="#0e1117">
         <meta property="og:title" content="Controle Financeiro | Multi-Usuário">
-        <meta property="og:description" content="Sistema de gestão financeira online, simples, rápido e seguro.">
+        <meta property="og:description" content="Sistema de gestão financeira online na nuvem, simples, rápido e seguro.">
         <meta property="og:image" content="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?q=80&w=1200&auto=format&fit=crop">
+        <link rel="manifest" href="data:application/manifest+json;charset=utf-8,{
+            \"name\": \"Controle Financeiro\",
+            \"short_name\": \"Finanças\",
+            \"start_url\": \"./\",
+            \"display\": \"standalone\",
+            \"background_color\": \"#0e1117\",
+            \"theme_color\": \"#0e1117\",
+            \"icons\": [
+                {
+                    \"src\": \"https://images.unsplash.com/photo-1559526324-4b87b5e36e44?q=80&w=512&auto=format&fit=crop\",
+                    \"sizes\": \"512x512\",
+                    \"type\": \"image/jpeg\"
+                }
+            ]
+        }">
         <link rel="apple-touch-icon" href="https://images.unsplash.com/photo-1559526324-4b87b5e36e44?q=80&w=512&auto=format&fit=crop">
     </head>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                // Service worker leve para suporte PWA
+            });
+        }
+    </script>
 """,
     unsafe_allow_html=True,
 )
@@ -44,7 +73,7 @@ def check_hash(password, hashed_text):
     return False
 
 
-# --- FUNÇÕES DE BANCO DE DADOS COM SUPABASE ROBUSTAS ---
+# --- FUNÇÕES DE BANCO DE DADOS (SUPABASE) ---
 
 def cadastrar_usuario(username, nome_completo, senha):
     try:
@@ -52,7 +81,6 @@ def cadastrar_usuario(username, nome_completo, senha):
         if res.data and len(res.data) > 0:
             return False
         
-        # Tenta inserir com 'nome_completo', se falhar por coluna inexistente, tenta 'nome'
         try:
             supabase.table("usuarios").insert({
                 "username": username,
@@ -66,8 +94,7 @@ def cadastrar_usuario(username, nome_completo, senha):
                 "senha": make_hash(senha),
             }).execute()
         return True
-    except Exception as e:
-        st.error(f"Erro no cadastro: {e}")
+    except Exception:
         return False
 
 
@@ -78,8 +105,6 @@ def autenticar_usuario(username, senha):
             return check_hash(senha, res.data[0]["senha"])
         return False
     except Exception:
-        if username and senha:
-            return True
         return False
 
 
@@ -88,7 +113,6 @@ def obter_dados_usuario(username):
         res = supabase.table("usuarios").select("*").eq("username", username).execute()
         if res.data and len(res.data) > 0:
             row = res.data[0]
-            # Pega o nome completo considerando diferentes nomes de colunas possíveis no Supabase
             nome = row.get("nome_completo") or row.get("nome") or row.get("full_name") or username
             endereco = row.get("endereco") or row.get("address") or ""
             foto = row.get("foto_perfil") or row.get("foto") or None
@@ -120,13 +144,11 @@ def atualizar_perfil(username, novo_nome, novo_endereco, nova_senha, nova_foto_b
         try:
             supabase.table("usuarios").update(update_data).eq("username", username).execute()
         except Exception:
-            # Fallback para coluna 'nome' caso 'nome_completo' não exista na tabela
             update_data["nome"] = novo_nome
             update_data.pop("nome_completo", None)
             supabase.table("usuarios").update(update_data).eq("username", username).execute()
         return True
-    except Exception as e:
-        st.error(f"Erro ao atualizar perfil: {e}")
+    except Exception:
         return False
 
 
@@ -155,8 +177,7 @@ def salvar_lancamento(username, data, descricao, categoria, tipo, valor, context
             "contexto": contexto,
         }).execute()
         return True
-    except Exception as e:
-        st.error(f"Erro ao salvar no Supabase: {e}")
+    except Exception:
         return False
 
 
@@ -168,12 +189,12 @@ def deletar_lancamento(id_lancamento, username):
 
 
 # ---------------------------------------------
-# DICIONÁRIO DE TRADUÇÕES COMPLETAS
+# DICIONÁRIO DE IDIOMAS COMPLETOS
 # ---------------------------------------------
 
 TEXTOS = {
     "Português": {
-        "login_title": "Acesso ao Controle Financeiro",
+        "login_title": "⚡ Acesso ao Meu Financeiro",
         "login_sub": "Entre com sua conta ou cadastre-se com seu nome completo.",
         "tab_login": "🔑 Entrar",
         "tab_register": "📝 Criar Conta",
@@ -193,28 +214,25 @@ TEXTOS = {
         "nav_new": "➕ Novo Lançamento",
         "nav_manage": "✏️ Gerenciar & Editar",
         "nav_profile": "👤 Meu Perfil",
-        "overview_title": "Controle Financeiro",
-        "overview_sub": "Acompanhe suas entradas, saídas e resultados consolidados.",
-        "no_data": "Nenhum lançamento no painel {context} ainda. Vá em '➕ {nav_novo}' para começar.",
-        "total_rev": "📥 Entradas / Receitas",
-        "total_exp": "📉 Saídas / Despesas",
-        "invest_month": "📈 Investimentos / Aportes",
-        "invest_accumulated": "💎 Total Acumulado em Investimentos",
-        "account_balance": "💰 Saldo do Período",
-        "accumulated_balance": "🏦 Saldo Acumulado Total",
+        "overview_title": "Visão Geral Financeira",
+        "overview_sub": "Acompanhe seus fluxos, receitas e despesas por mês.",
+        "no_data": "Nenhum lançamento cadastrado ainda. Vá em '➕ Novo Lançamento' para começar.",
+        "total_rev": "💰 Receitas do Mês",
+        "total_exp": "💸 Despesas do Mês",
+        "balance": "⚡ Saldo do Mês",
         "pie_title": "📊 Despesas por Categoria",
-        "bar_title": "📈 Evolução Diária / Mensal",
-        "recent_list": "📋 Lançamentos do Período",
+        "bar_title": "📈 Evolução por Tipo",
+        "recent_list": "📋 Lançamentos do Mês",
         "new_title": "➕ Novo Lançamento",
-        "new_sub": "Adicione uma nova entrada, saída ou investimento de forma rápida.",
+        "new_sub": "Adicione uma nova receita ou despesa detalhando o que foi gasto.",
         "date_label": "Data do Lançamento",
-        "type_label": "Tipo de Movimentação",
+        "type_label": "Tipo",
         "value_label": "Valor",
-        "cat_label": "Categoria",
-        "desc_label": "Descrição / Observação (Opcional)",
+        "cat_label": "Categoria Principal",
+        "desc_label": "Descrição Específica",
         "save_btn": "🚀 Salvar Lançamento",
         "success_msg": "Lançamento salvo com sucesso!",
-        "warn_val": "Por favor, informe um valor maior que zero.",
+        "warn_desc": "Por favor, preencha a descrição.",
         "manage_title": "✏️ Gerenciar e Editar Lançamentos",
         "manage_sub": "Visualize, filtre ou exclua lançamentos antigos.",
         "del_btn": "🗑️ Excluir Selecionado",
@@ -233,17 +251,13 @@ TEXTOS = {
         "context_profissional": "Profissional / Comércio",
         "sidebar_pessoal": "🏠 Pessoal",
         "sidebar_profissional": "📊 Profissional / Comércio",
-        "nav_novo_label": "Novo Lançamento",
-        "lang_label": "🌐 Idioma / Language",
-        "curr_label": "💶 Moeda / Currency",
-        "hello_msg": "Olá",
         "panel_mgmt": "💼 Painel de Gestão",
-        "types": ["Despesa", "Receita", "Investimento"],
-        "cat_pessoal": ["Aluguel", "Alimentação", "Transporte", "Moradia", "Lazer", "Saúde", "Educação", "Salário Pessoal", "Investimentos", "Outros"],
-        "cat_profissional": ["Faturamento de Vendas / Atendimentos", "Prestação de Serviços / Comissões", "Outras Receitas", "Compra de Mercadorias / Insumos / Peças", "Fornecedores e Parcerias", "Operacional / Aluguel / Contas", "Ferramentas e Equipamentos", "Impostos, Taxas e Encargos", "Investimento Comercial", "Outras Despesas"],
+        "types": ["Despesa", "Receita"],
+        "cat_pessoal": ["Aluguel", "Alimentação", "Transporte", "Moradia", "Lazer", "Saúde", "Educação", "Salário", "Outros"],
+        "cat_profissional": ["Vendas / Serviços", "Comissões", "Outras Receitas", "Fornecedores / Peças", "Operacional / Aluguel", "Impostos e Taxas", "Outras Despesas"]
     },
     "English": {
-        "login_title": "Financial Control Access",
+        "login_title": "⚡ My Finance Access",
         "login_sub": "Log in to your account or register.",
         "tab_login": "🔑 Log In",
         "tab_register": "📝 Register",
@@ -263,28 +277,25 @@ TEXTOS = {
         "nav_new": "➕ New Entry",
         "nav_manage": "✏️ Manage & Edit",
         "nav_profile": "👤 My Profile",
-        "overview_title": "Financial Control",
-        "overview_sub": "Track your cash flows, income, and expenses.",
-        "no_data": "No entries in the {context} panel yet. Go to '➕ {nav_novo}' to start.",
-        "total_rev": "📥 Income / Inflows",
-        "total_exp": "📉 Expenses / Outflows",
-        "invest_month": "📈 Investments",
-        "invest_accumulated": "💎 Total Accumulated Investments",
-        "account_balance": "💰 Period Balance",
-        "accumulated_balance": "🏦 Total Accumulated Balance",
+        "overview_title": "Financial Overview",
+        "overview_sub": "Track your cash flows, income, and expenses by month.",
+        "no_data": "No entries yet. Go to '➕ New Entry' to start.",
+        "total_rev": "💰 Month Income",
+        "total_exp": "💸 Month Expenses",
+        "balance": "⚡ Month Balance",
         "pie_title": "📊 Expenses by Category",
         "bar_title": "📈 Trend by Type",
-        "recent_list": "📋 Entries",
+        "recent_list": "📋 Month Entries",
         "new_title": "➕ New Entry",
-        "new_sub": "Add a new income, expense, or investment.",
+        "new_sub": "Add a new income or expense.",
         "date_label": "Entry Date",
         "type_label": "Type",
         "value_label": "Value",
-        "cat_label": "Category",
-        "desc_label": "Description (Optional)",
+        "cat_label": "Main Category",
+        "desc_label": "Description",
         "save_btn": "🚀 Save Entry",
         "success_msg": "Entry saved successfully!",
-        "warn_val": "Please enter a value greater than zero.",
+        "warn_desc": "Please fill in the description.",
         "manage_title": "✏️ Manage and Edit Entries",
         "manage_sub": "View, filter, or delete old entries.",
         "del_btn": "🗑️ Delete Selected",
@@ -303,17 +314,13 @@ TEXTOS = {
         "context_profissional": "Professional / Business",
         "sidebar_pessoal": "🏠 Personal",
         "sidebar_profissional": "📊 Professional / Business",
-        "nav_novo_label": "New Entry",
-        "lang_label": "🌐 Language",
-        "curr_label": "💶 Currency",
-        "hello_msg": "Hello",
         "panel_mgmt": "💼 Management Panel",
-        "types": ["Expense", "Income", "Investment"],
-        "cat_pessoal": ["Rent", "Food", "Transport", "Housing", "Leisure", "Health", "Education", "Personal Salary", "Investments", "Others"],
-        "cat_profissional": ["Sales Revenue / Services", "Commissions / Freelance", "Other Income", "Goods / Supplies / Parts Purchase", "Suppliers & Partnerships", "Operational / Rent / Utilities", "Tools & Equipment", "Taxes & Fees", "Commercial Investment", "Other Expenses"],
+        "types": ["Expense", "Income"],
+        "cat_pessoal": ["Rent", "Food", "Transport", "Housing", "Leisure", "Health", "Education", "Salary", "Others"],
+        "cat_profissional": ["Sales / Services", "Commissions", "Other Income", "Suppliers / Parts", "Operational / Rent", "Taxes & Fees", "Other Expenses"]
     },
     "Français": {
-        "login_title": "Accès au Contrôle Financier",
+        "login_title": "⚡ Accès à Mon Financier",
         "login_sub": "Connectez-vous ou créez un compte.",
         "tab_login": "🔑 Connexion",
         "tab_register": "📝 S'inscrire",
@@ -333,28 +340,25 @@ TEXTOS = {
         "nav_new": "➕ Nouvelle Entrée",
         "nav_manage": "✏️ Gérer & Éditer",
         "nav_profile": "👤 Mon Profil",
-        "overview_title": "Contrôle Financier",
-        "overview_sub": "Suivez vos flux et revenus.",
-        "no_data": "Aucune donnée dans le panneau {context} pour l'instant. Allez dans '➕ {nav_novo}'.",
-        "total_rev": "📥 Entrées",
-        "total_exp": "📉 Sorties",
-        "invest_month": "📈 Investissements",
-        "invest_accumulated": "💎 Total Cumulé des Investissements",
-        "account_balance": "💰 Solde de la Période",
-        "accumulated_balance": "🏦 Solde cumulé total",
+        "overview_title": "Vue d'ensemble financière",
+        "overview_sub": "Suivez vos flux, revenus et dépenses par mois.",
+        "no_data": "Aucune donnée pour l'instant. Allez dans '➕ Nouvelle Entrée'.",
+        "total_rev": "💰 Revenus du Mois",
+        "total_exp": "💸 Dépenses du Mois",
+        "balance": "⚡ Solde du Mois",
         "pie_title": "📊 Dépenses par Catégorie",
-        "bar_title": "📈 Évolution",
-        "recent_list": "📋 Entrées",
+        "bar_title": "📈 Évolution par Type",
+        "recent_list": "📋 Entrées du Mois",
         "new_title": "➕ Nouvelle Entrée",
-        "new_sub": "Ajoutez un mouvement.",
+        "new_sub": "Ajoutez un revenu ou une dépense.",
         "date_label": "Date",
         "type_label": "Type",
         "value_label": "Valeur",
-        "cat_label": "Catégorie",
-        "desc_label": "Description (Optionnel)",
+        "cat_label": "Catégorie Principale",
+        "desc_label": "Description",
         "save_btn": "🚀 Enregistrer",
         "success_msg": "Enregistré avec succès !",
-        "warn_val": "Veuillez entrer une valeur supérieure à zéro.",
+        "warn_desc": "Veuillez remplir la description.",
         "manage_title": "✏️ Gérer les Entrées",
         "manage_sub": "Visualisez ou supprimez vos entrées.",
         "del_btn": "🗑️ Supprimer la sélection",
@@ -373,17 +377,13 @@ TEXTOS = {
         "context_profissional": "Professionnel / Commerce",
         "sidebar_pessoal": "🏠 Personnel",
         "sidebar_profissional": "📊 Professionnel / Commerce",
-        "nav_novo_label": "Nouvelle Entrée",
-        "lang_label": "🌐 Langue",
-        "curr_label": "💶 Devise",
-        "hello_msg": "Bonjour",
         "panel_mgmt": "💼 Panneau de Gestion",
-        "types": ["Dépense", "Revenu", "Investissement"],
-        "cat_pessoal": ["Loyer", "Alimentation", "Transport", "Logement", "Loisirs", "Santé", "Éducation", "Salaire Personnel", "Investissements", "Autres"],
-        "cat_profissional": ["Chiffre d'affaires / Ventes", "Prestation de services / Commissions", "Autres Revenus", "Achat de marchandises / Fournitures / Pièces", "Fournisseurs et Partenariats", "Frais généraux / Loyer / Charges", "Outils et Équipements", "Impôts et Taxes", "Investissement Commercial", "Autres Dépenses"],
+        "types": ["Dépense", "Revenu"],
+        "cat_pessoal": ["Loyer", "Alimentation", "Transport", "Logement", "Loisirs", "Santé", "Éducation", "Salaire", "Autres"],
+        "cat_profissional": ["Ventes / Services", "Commissions", "Autres Revenus", "Fournisseurs / Pièces", "Général / Loyer", "Impôts", "Autres Dépenses"]
     },
     "Español": {
-        "login_title": "Acceso al Control Financiero",
+        "login_title": "⚡ Acceso a Mi Financiero",
         "login_sub": "Inicia sesión en tu cuenta o regístrate.",
         "tab_login": "🔑 Entrar",
         "tab_register": "📝 Registrarse",
@@ -403,28 +403,25 @@ TEXTOS = {
         "nav_new": "➕ Nuevo Movimiento",
         "nav_manage": "✏️ Gestionar y Editar",
         "nav_profile": "👤 Mi Perfil",
-        "overview_title": "Control Financiero",
-        "overview_sub": "Sigue tus ingresos y gastos.",
-        "no_data": "No hay registros en el panel {context} todavía. Ve a '➕ {nav_novo}'.",
-        "total_rev": "📥 Entradas",
-        "total_exp": "📉 Salidas",
-        "invest_month": "📈 Inversiones",
-        "invest_accumulated": "💎 Total Acumulado en Inversiones",
-        "account_balance": "💰 Saldo del Periodo",
-        "accumulated_balance": "🏦 Saldo Acumulado Total",
+        "overview_title": "Resumen Financiero",
+        "overview_sub": "Sigue tus ingresos y gastos por mes.",
+        "no_data": "No hay registros todavía. Ve a '➕ Nuevo Movimiento'.",
+        "total_rev": "💰 Ingresos del Mes",
+        "total_exp": "💸 Gastos del Mes",
+        "balance": "⚡ Saldo del Mes",
         "pie_title": "📊 Gastos por Categoría",
-        "bar_title": "📈 Evolución",
-        "recent_list": "📋 Movimientos",
+        "bar_title": "📈 Evolución por Tipo",
+        "recent_list": "📋 Movimientos del Mes",
         "new_title": "➕ Nuevo Movimiento",
-        "new_sub": "Agrega un movimiento.",
+        "new_sub": "Agrega un ingreso o gasto.",
         "date_label": "Fecha del Movimiento",
         "type_label": "Tipo",
         "value_label": "Valor",
-        "cat_label": "Categoría",
-        "desc_label": "Descripción (Opcional)",
+        "cat_label": "Categoría Principal",
+        "desc_label": "Descripción",
         "save_btn": "🚀 Guardar Movimiento",
         "success_msg": "¡Movimiento guardado con éxito!",
-        "warn_val": "Por favor ingrese un valor mayor que cero.",
+        "warn_desc": "Por favor llena la descripción.",
         "manage_title": "✏️ Gestionar Movimientos",
         "manage_sub": "Visualiza, filtra o elimina registros antiguos.",
         "del_btn": "🗑️ Eliminar Seleccionado",
@@ -443,17 +440,13 @@ TEXTOS = {
         "context_profissional": "Profesional / Comercio",
         "sidebar_pessoal": "🏠 Personal",
         "sidebar_profissional": "📊 Profesional / Comercio",
-        "nav_novo_label": "Nuevo Movimiento",
-        "lang_label": "🌐 Idioma",
-        "curr_label": "💶 Moneda",
-        "hello_msg": "Hola",
         "panel_mgmt": "💼 Panel de Gestión",
-        "types": ["Gasto", "Ingreso", "Inversión"],
-        "cat_pessoal": ["Alquiler", "Alimentación", "Transporte", "Vivienda", "Ocio", "Salud", "Educación", "Salario Personal", "Inversiones", "Otros"],
-        "cat_profissional": ["Facturación de Ventas / Servicios", "Prestación de Servicios / Comisiones", "Otros Ingresos", "Compra de Mercancías / Insumos / Piezas", "Proveedores y Alianzas", "Operacional / Alquiler / Cuentas", "Herramientas y Equipos", "Impuestos y Tasas", "Inversión Comercial", "Otros Gastos"],
+        "types": ["Gasto", "Ingreso"],
+        "cat_pessoal": ["Alquiler", "Alimentación", "Transporte", "Vivienda", "Ocio", "Salud", "Educación", "Salario", "Otros"],
+        "cat_profissional": ["Ventas / Servicios", "Comisiones", "Otros Ingresos", "Proveedores / Piezas", "Operacional / Alquiler", "Impuestos", "Otros Gastos"]
     },
     "Italiano": {
-        "login_title": "Accesso al Controllo Finanziario",
+        "login_title": "⚡ Accesso a Il Mio Finanziario",
         "login_sub": "Accedi al tuo account o registrati.",
         "tab_login": "🔑 Accedi",
         "tab_register": "📝 Registrati",
@@ -473,28 +466,25 @@ TEXTOS = {
         "nav_new": "➕ Nuova Voce",
         "nav_manage": "✏️ Gestisci & Modifica",
         "nav_profile": "👤 Il Mio Profilo",
-        "overview_title": "Controllo Finanziario",
-        "overview_sub": "Monitora flussi ed entrate.",
-        "no_data": "Nessun inserimento nel pannello {context}. Vai su '➕ {nav_novo}' per iniziare.",
-        "total_rev": "📥 Entrate",
-        "total_exp": "📉 Uscite",
-        "invest_month": "📈 Investimenti",
-        "invest_accumulated": "💎 Totale Accumulato in Investimenti",
-        "account_balance": "💰 Saldo del Periodo",
-        "accumulated_balance": "🏦 Saldo Accumulato Totale",
+        "overview_title": "Panoramica Finanziaria",
+        "overview_sub": "Monitora flussi, entrate e spese per mese.",
+        "no_data": "Nessun inserimento. Vai su '➕ Nuova Voce' per iniziare.",
+        "total_rev": "💰 Entrate del Mese",
+        "total_exp": "💸 Spese del Mese",
+        "balance": "⚡ Saldo del Mese",
         "pie_title": "📊 Spese per Categoria",
-        "bar_title": "📈 Andamento",
-        "recent_list": "📋 Voci",
+        "bar_title": "📈 Andamento per Tipo",
+        "recent_list": "📋 Voci del Mese",
         "new_title": "➕ Nuova Voce",
-        "new_sub": "Aggiungi una voce.",
+        "new_sub": "Aggiungi un'entrata o una spesa.",
         "date_label": "Data",
         "type_label": "Tipo",
         "value_label": "Valore",
-        "cat_label": "Categoria",
-        "desc_label": "Descrizione (Opzionale)",
+        "cat_label": "Categoria Principale",
+        "desc_label": "Descrizione",
         "save_btn": "🚀 Salva Voce",
         "success_msg": "Salvato con successo!",
-        "warn_val": "Inserisci un valore maggiore di zero.",
+        "warn_desc": "Compila la descrizione.",
         "manage_title": "✏️ Gestisci Voci",
         "manage_sub": "Visualizza o elimina voci.",
         "del_btn": "🗑️ Elimina Selezionato",
@@ -513,17 +503,13 @@ TEXTOS = {
         "context_profissional": "Professionale / Commerciale",
         "sidebar_pessoal": "🏠 Personale",
         "sidebar_profissional": "📊 Professionale / Commerciale",
-        "nav_novo_label": "Nuova Voce",
-        "lang_label": "🌐 Lingua",
-        "curr_label": "💶 Valuta",
-        "hello_msg": "Ciao",
         "panel_mgmt": "💼 Pannello di Gestione",
-        "types": ["Spesa", "Entrata", "Investimento"],
-        "cat_pessoal": ["Affitto", "Cibo", "Trasporto", "Alloggio", "Svago", "Salute", "Istruzione", "Stipendio Personale", "Investimenti", "Altro"],
-        "cat_profissional": ["Fatturato Vendite / Servizi", "Prestazione di Servizi / Commissioni", "Altre Entrate", "Acquisto Merci / Forniture / Parti", "Fornitori e Partnership", "Spese Generali / Affitto / Utenze", "Utensili e Attrezzature", "Tasse e Commissioni", "Investimento Commerciale", "Altre Spese"],
+        "types": ["Spesa", "Entrata"],
+        "cat_pessoal": ["Affitto", "Cibo", "Trasporto", "Alloggio", "Svago", "Salute", "Istruzione", "Stipendio", "Altro"],
+        "cat_profissional": ["Vendite / Servizi", "Commissioni", "Altre Entrate", "Fornitori / Parti", "Operativo / Affitto", "Tasse", "Altre Spese"]
     },
     "Deutsch": {
-        "login_title": "Finanzkontrolle Zugang",
+        "login_title": "⚡ Mein Finanz-Zugang",
         "login_sub": "Melden Sie sich an oder registrieren Sie sich.",
         "tab_login": "🔑 Anmelden",
         "tab_register": "📝 Registrieren",
@@ -543,28 +529,25 @@ TEXTOS = {
         "nav_new": "➕ Neuer Eintrag",
         "nav_manage": "✏️ Verwalten & Bearbeiten",
         "nav_profile": "👤 Mein Profil",
-        "overview_title": "Finanzkontrolle",
-        "overview_sub": "Verfolgen Sie Einnahmen und Ausgaben.",
-        "no_data": "Noch keine Einträge im Bereich {context}. Gehen Sie zu '➕ {nav_novo}'.",
-        "total_rev": "📥 Einnahmen",
-        "total_exp": "📉 Ausgaben",
-        "invest_month": "📈 Investitionen",
-        "invest_accumulated": "💎 Gesamte Akkumulierte Investitionen",
-        "account_balance": "💰 Saldo",
-        "accumulated_balance": "🏦 Akkumulierter Saldo",
+        "overview_title": "Finanzübersicht",
+        "overview_sub": "Verfolgen Sie Einnahmen und Ausgaben nach Monat.",
+        "no_data": "Noch keine Einträge. Gehen Sie zu '➕ Neuer Eintrag'.",
+        "total_rev": "💰 Einnahmen des Monats",
+        "total_exp": "💸 Ausgaben des Monats",
+        "balance": "⚡ Saldo des Monats",
         "pie_title": "📊 Ausgaben nach Kategorie",
-        "bar_title": "📈 Trend",
-        "recent_list": "📋 Einträge",
+        "bar_title": "📈 Trend nach Typ",
+        "recent_list": "📋 Einträge des Monats",
         "new_title": "➕ Neuer Eintrag",
-        "new_sub": "Fügen Sie einen Eintrag hinzu.",
+        "new_sub": "Fügen Sie eine Einnahme oder Ausgabe hinzu.",
         "date_label": "Datum",
         "type_label": "Typ",
         "value_label": "Wert",
-        "cat_label": "Kategorie",
-        "desc_label": "Beschreibung (Optional)",
+        "cat_label": "Hauptkategorie",
+        "desc_label": "Beschreibung",
         "save_btn": "🚀 Eintrag Speichern",
         "success_msg": "Erfolgreich gespeichert!",
-        "warn_val": "Bitte geben Sie einen Wert größer als Null ein.",
+        "warn_desc": "Bitte Beschreibung ausfüllen.",
         "manage_title": "✏️ Einträge Verwalten",
         "manage_sub": "Einträge anzeigen oder löschen.",
         "del_btn": "🗑️ Ausgewählte Löschen",
@@ -583,97 +566,89 @@ TEXTOS = {
         "context_profissional": "Beruflich / Gewerbe",
         "sidebar_pessoal": "🏠 Persönlich",
         "sidebar_profissional": "📊 Beruflich / Gewerbe",
-        "nav_novo_label": "Neuer Eintrag",
-        "lang_label": "🌐 Sprache",
-        "curr_label": "💶 Währung",
-        "hello_msg": "Hallo",
         "panel_mgmt": "💼 Verwaltungsbereich",
-        "types": ["Ausgabe", "Einnahme", "Investition"],
-        "cat_pessoal": ["Miete", "Essen", "Transport", "Wohnen", "Freizeit", "Gesundheit", "Bildung", "Persönliches Gehalt", "Investitionen", "Andere"],
-        "cat_profissional": ["Umsatz / Verkäufe", "Dienstleistungen / Provisionen", "Sonstige Einnahmen", "Wareneinkauf / Verbrauchsmaterial / Teile", "Lieferanten & Partnerschaften", "Betriebskosten / Miete / Nebenkosten", "Werkzeuge & Ausrüstung", "Steuern & Gebühren", "Gewerbliche Investition", "Sonstige Ausgaben"],
-    },
+        "types": ["Ausgabe", "Einnahme"],
+        "cat_pessoal": ["Miete", "Essen", "Transport", "Wohnen", "Freizeit", "Gesundheit", "Bildung", "Gehalt", "Andere"],
+        "cat_profissional": ["Verkäufe / Dienste", "Provisionen", "Sonstige Einnahmen", "Lieferanten / Teile", "Betrieb / Miete", "Steuern", "Sonstige Ausgaben"]
+    }
 }
 
 MOEDAS = {
     "Real (R$)": "R$",
     "Euro (€)": "€",
-    "Dólar ($)": "$",
-    "Libra (£)": "£",
+    "Dólar ($)": "$"
 }
 
-if "logged_in" not in st.session_state:
-    st.session_state["logged_in"] = False
-if "username" not in st.session_state:
-    st.session_state["username"] = ""
-if "idioma" not in st.session_state:
-    st.session_state["idioma"] = "Português"
-if "moeda" not in st.session_state:
-    st.session_state["moeda"] = "Real (R$)"
+if 'logged_in' not in st.session_state:
+    st.session_state['logged_in'] = False
+if 'username' not in st.session_state:
+    st.session_state['username'] = ""
+if 'idioma' not in st.session_state:
+    st.session_state['idioma'] = "Português"
+if 'moeda' not in st.session_state:
+    st.session_state['moeda'] = "Real (R$)"
 
 lista_idiomas = list(TEXTOS.keys())
 
-if not st.session_state["logged_in"]:
+if not st.session_state['logged_in']:
     st.markdown("<br><br>", unsafe_allow_html=True)
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         st.markdown(f"<h2 style='text-align: center;'>{TEXTOS[st.session_state['idioma']]['login_title']}</h2>", unsafe_allow_html=True)
         st.markdown(f"<p style='text-align: center; color: gray;'>{TEXTOS[st.session_state['idioma']]['login_sub']}</p>", unsafe_allow_html=True)
-
-        tab_login, tab_reg = st.tabs([
-            TEXTOS[st.session_state["idioma"]]["tab_login"],
-            TEXTOS[st.session_state["idioma"]]["tab_register"],
-        ])
-
+        
+        tab_login, tab_reg = st.tabs([TEXTOS[st.session_state['idioma']]['tab_login'], TEXTOS[st.session_state['idioma']]['tab_register']])
+        
         with tab_login:
             with st.form("form_login"):
-                u_input = st.text_input(TEXTOS[st.session_state["idioma"]]["user_label"])
-                p_input = st.text_input(TEXTOS[st.session_state["idioma"]]["pass_label"], type="password")
-                submit_login = st.form_submit_button(TEXTOS[st.session_state["idioma"]]["btn_login_submit"], use_container_width=True)
-
+                u_input = st.text_input(TEXTOS[st.session_state['idioma']]['user_label'])
+                p_input = st.text_input(TEXTOS[st.session_state['idioma']]['pass_label'], type="password")
+                submit_login = st.form_submit_button(TEXTOS[st.session_state['idioma']]['btn_login_submit'], use_container_width=True)
+                
                 if submit_login:
                     if autenticar_usuario(u_input, p_input):
-                        st.session_state["logged_in"] = True
-                        st.session_state["username"] = u_input
-                        st.success(TEXTOS[st.session_state["idioma"]]["login_success"])
+                        st.session_state['logged_in'] = True
+                        st.session_state['username'] = u_input
+                        st.success(TEXTOS[st.session_state['idioma']]['login_success'])
                         st.rerun()
                     else:
-                        st.error(TEXTOS[st.session_state["idioma"]]["login_error"])
-
+                        st.error(TEXTOS[st.session_state['idioma']]['login_error'])
+                        
         with tab_reg:
             with st.form("form_reg"):
-                reg_user = st.text_input(TEXTOS[st.session_state["idioma"]]["reg_user_label"])
-                reg_name = st.text_input(TEXTOS[st.session_state["idioma"]]["reg_name_label"])
-                reg_pass = st.text_input(TEXTOS[st.session_state["idioma"]]["reg_pass_label"], type="password")
-                submit_reg = st.form_submit_button(TEXTOS[st.session_state["idioma"]]["btn_reg_submit"], use_container_width=True)
-
+                reg_user = st.text_input(TEXTOS[st.session_state['idioma']]['reg_user_label'])
+                reg_name = st.text_input(TEXTOS[st.session_state['idioma']]['reg_name_label'])
+                reg_pass = st.text_input(TEXTOS[st.session_state['idioma']]['reg_pass_label'], type="password")
+                submit_reg = st.form_submit_button(TEXTOS[st.session_state['idioma']]['btn_reg_submit'], use_container_width=True)
+                
                 if submit_reg:
                     if reg_user and reg_name and reg_pass:
                         if cadastrar_usuario(reg_user, reg_name, reg_pass):
-                            st.success(TEXTOS[st.session_state["idioma"]]["reg_success"])
+                            st.success(TEXTOS[st.session_state['idioma']]['reg_success'])
                         else:
-                            st.error(TEXTOS[st.session_state["idioma"]]["reg_error"])
+                            st.error(TEXTOS[st.session_state['idioma']]['reg_error'])
                     else:
-                        st.warning(TEXTOS[st.session_state["idioma"]]["reg_warn"])
+                        st.warning(TEXTOS[st.session_state['idioma']]['reg_warn'])
 
         st.markdown("<hr>", unsafe_allow_html=True)
-        t_curr = TEXTOS[st.session_state["idioma"]]
-        sel_lang = st.selectbox(t_curr["lang_label"], lista_idiomas, index=lista_idiomas.index(st.session_state["idioma"]), key="login_lang_selectbox")
-        if sel_lang != st.session_state["idioma"]:
-            st.session_state["idioma"] = sel_lang
+        t_curr = TEXTOS[st.session_state['idioma']]
+        sel_lang = st.selectbox("🌐 Idioma / Language", lista_idiomas, index=lista_idiomas.index(st.session_state['idioma']), key="login_lang_sel")
+        if sel_lang != st.session_state['idioma']:
+            st.session_state['idioma'] = sel_lang
             st.rerun()
 
-        sel_moeda = st.selectbox(t_curr["curr_label"], list(MOEDAS.keys()), index=list(MOEDAS.keys()).index(st.session_state["moeda"]), key="login_curr_selectbox")
-        if sel_moeda != st.session_state["moeda"]:
-            st.session_state["moeda"] = sel_moeda
+        sel_moeda = st.selectbox("💶 Moeda / Currency", list(MOEDAS.keys()), index=list(MOEDAS.keys()).index(st.session_state['moeda']), key="login_moeda_sel")
+        if sel_moeda != st.session_state['moeda']:
+            st.session_state['moeda'] = sel_moeda
             st.rerun()
 
 else:
-    dados_user = obter_dados_usuario(st.session_state["username"])
-    nome_completo_user = dados_user[0] if dados_user and dados_user[0] else st.session_state["username"]
+    dados_user = obter_dados_usuario(st.session_state['username'])
+    nome_completo_user = dados_user[0] if dados_user and dados_user[0] else st.session_state['username']
     foto_blob_user = dados_user[2] if dados_user and len(dados_user) > 2 else None
 
-    simbolo_moeda = MOEDAS[st.session_state["moeda"]]
-    t = TEXTOS[st.session_state["idioma"]]
+    simbolo_moeda = MOEDAS[st.session_state['moeda']]
+    t = TEXTOS[st.session_state['idioma']]
 
     with st.sidebar:
         if foto_blob_user:
@@ -685,7 +660,7 @@ else:
         else:
             st.write("👤")
 
-        st.markdown(f"### {t['hello_msg']}, {nome_completo_user}")
+        st.markdown(f"### ⚡ Olá, {nome_completo_user}")
         st.markdown("---")
 
         contexto_atual = st.radio(
@@ -697,30 +672,31 @@ else:
 
         st.markdown("---")
 
-        sel_lang = st.selectbox(t["lang_label"], lista_idiomas, index=lista_idiomas.index(st.session_state["idioma"]), key="sidebar_lang_selectbox")
-        if sel_lang != st.session_state["idioma"]:
-            st.session_state["idioma"] = sel_lang
+        sel_lang = st.selectbox("🌐 Idioma / Language", lista_idiomas, index=lista_idiomas.index(st.session_state['idioma']), key="side_lang_sel")
+        if sel_lang != st.session_state['idioma']:
+            st.session_state['idioma'] = sel_lang
             st.rerun()
 
-        sel_moeda = st.selectbox(t["curr_label"], list(MOEDAS.keys()), index=list(MOEDAS.keys()).index(st.session_state["moeda"]), key="sidebar_curr_selectbox")
-        if sel_moeda != st.session_state["moeda"]:
-            st.session_state["moeda"] = sel_moeda
+        sel_moeda = st.selectbox("💶 Moeda / Currency", list(MOEDAS.keys()), index=list(MOEDAS.keys()).index(st.session_state['moeda']), key="side_moeda_sel")
+        if sel_moeda != st.session_state['moeda']:
+            st.session_state['moeda'] = sel_moeda
             st.rerun()
 
         st.markdown("---")
-        menu = st.radio(
-            "Navegação",
-            [t["nav_overview"], t["nav_new"], t["nav_manage"], t["nav_profile"]],
-            key="sidebar_menu_radio",
-        )
+        menu = st.radio("Navegação", [
+            t['nav_overview'],
+            t['nav_new'],
+            t['nav_manage'],
+            t['nav_profile']
+        ], key="side_menu_radio")
 
         st.markdown("<br><br>", unsafe_allow_html=True)
-        if st.button(t["logout"], use_container_width=True):
-            st.session_state["logged_in"] = False
-            st.session_state["username"] = ""
+        if st.button(t['logout'], use_container_width=True):
+            st.session_state['logged_in'] = False
+            st.session_state['username'] = ""
             st.rerun()
 
-    df_total = carregar_dados(st.session_state["username"])
+    df_total = carregar_dados(st.session_state['username'])
     if not df_total.empty and "contexto" in df_total.columns:
         df = df_total[df_total["contexto"] == contexto_limpo].copy()
     else:
@@ -728,181 +704,122 @@ else:
 
     nome_contexto_traduzido = t["context_profissional"] if contexto_limpo == "Profissional" else t["context_pessoal"]
 
-    if menu == t["nav_overview"]:
+    if menu == t['nav_overview']:
         st.title(f"{t['overview_title']} ({nome_contexto_traduzido})")
-        st.write(t["overview_sub"])
+        st.write(t['overview_sub'])
 
         if df.empty:
-            mensagem_vazia = t["no_data"].format(context=nome_contexto_traduzido, nav_novo=t["nav_novo_label"])
-            st.info(mensagem_vazia)
+            st.info(t['no_data'])
         else:
             df["data"] = pd.to_datetime(df["data"])
             df["mes_ano"] = df["data"].dt.strftime("%Y-%m")
-
+            
             meses_disponiveis = sorted(df["mes_ano"].unique(), reverse=True)
-            mes_selecionado = st.selectbox("📅 Selecione o Mês", meses_disponiveis, key="overview_month_select")
-
-            df_sorted = df.sort_values("data")
-            resumo_meses = (
-                df_sorted.groupby("mes_ano")
-                .apply(lambda x: pd.Series({
-                    "receitas": x[x["tipo"] == t["types"][1]]["valor"].sum(),
-                    "despesas": x[x["tipo"] == t["types"][0]]["valor"].sum(),
-                    "investimentos": x[x["tipo"] == t["types"][2]]["valor"].sum(),
-                    "saldo_conta": x[x["tipo"] == t["types"][1]]["valor"].sum() - x[x["tipo"] == t["types"][0]]["valor"].sum() - x[x["tipo"] == t["types"][2]]["valor"].sum()
-                }))
-                .reset_index()
-            )
-
-            resumo_meses = resumo_meses.sort_values("mes_ano")
-            resumo_meses["saldo_acumulado"] = resumo_meses["saldo_conta"].cumsum()
-            resumo_meses["investimentos_acumulados"] = resumo_meses["investimentos"].cumsum()
-
-            saldo_acumulado_atual = resumo_meses.loc[resumo_meses["mes_ano"] == mes_selecionado, "saldo_acumulado"].values[0] if not resumo_meses[resumo_meses["mes_ano"] == mes_selecionado].empty else 0.0
-            investimento_acumulado_atual = resumo_meses.loc[resumo_meses["mes_ano"] == mes_selecionado, "investimentos_acumulados"].values[0] if not resumo_meses[resumo_meses["mes_ano"] == mes_selecionado].empty else 0.0
-
+            mes_selecionado = st.selectbox("📅 Selecione o Mês", meses_disponiveis)
+            
             df_mes = df[df["mes_ano"] == mes_selecionado]
 
-            total_receitas = df_mes[df_mes["tipo"] == t["types"][1]]["valor"].sum()
-            total_despesas = df_mes[df_mes["tipo"] == t["types"][0]]["valor"].sum()
-            total_investimentos = df_mes[df_mes["tipo"] == t["types"][2]]["valor"].sum()
-            saldo_conta = total_receitas - total_despesas - total_investimentos
+            total_receitas = df_mes[df_mes['tipo'] == t['types'][1]]['valor'].sum()
+            total_despesas = df_mes[df_mes['tipo'] == t['types'][0]]['valor'].sum()
+            saldo = total_receitas - total_despesas
 
-            st.markdown(
-                f"""
-                <div style="display: flex; gap: 15px; margin-bottom: 12px;">
-                    <div style="flex: 1; padding: 6px; background: rgba(255,255,255,0.03); border-radius: 8px;">
-                        <p style="margin: 0; color: #888; font-size: 13px;">{t['total_rev']}</p>
-                        <h3 style="margin: 0; font-size: 20px; color: #2ecc71;">{simbolo_moeda} {total_receitas:,.2f}</h3>
-                    </div>
-                    <div style="flex: 1; padding: 6px; background: rgba(255,255,255,0.03); border-radius: 8px;">
-                        <p style="margin: 0; color: #888; font-size: 13px;">{t['total_exp']}</p>
-                        <h3 style="margin: 0; font-size: 20px; color: #e74c3c;">{simbolo_moeda} {total_despesas:,.2f}</h3>
-                    </div>
-                </div>
-                <div style="display: flex; gap: 15px; margin-bottom: 12px;">
-                    <div style="flex: 1; padding: 6px; background: rgba(255,255,255,0.03); border-radius: 8px;">
-                        <p style="margin: 0; color: #888; font-size: 13px;">{t['invest_month']}</p>
-                        <h3 style="margin: 0; font-size: 20px; color: #3498db;">{simbolo_moeda} {total_investimentos:,.2f}</h3>
-                    </div>
-                    <div style="flex: 1; padding: 6px; background: rgba(255,255,255,0.03); border-radius: 8px;">
-                        <p style="margin: 0; color: #888; font-size: 13px;">{t['account_balance']}</p>
-                        <h3 style="margin: 0; font-size: 20px;">{simbolo_moeda} {saldo_conta:,.2f}</h3>
-                    </div>
-                </div>
-                <div style="display: flex; gap: 15px; margin-bottom: 12px;">
-                    <div style="flex: 1; padding: 6px; background: rgba(255,255,255,0.03); border-radius: 8px;">
-                        <p style="margin: 0; color: #888; font-size: 13px;">{t['invest_accumulated']}</p>
-                        <h3 style="margin: 0; font-size: 20px;">{simbolo_moeda} {investimento_acumulado_atual:,.2f}</h3>
-                    </div>
-                    <div style="flex: 1; padding: 6px; background: rgba(255,255,255,0.03); border-radius: 8px;">
-                        <p style="margin: 0; color: #888; font-size: 13px;">{t['accumulated_balance']}</p>
-                        <h3 style="margin: 0; font-size: 20px;">{simbolo_moeda} {saldo_acumulado_atual:,.2f}</h3>
-                    </div>
-                </div>
-            """,
-                unsafe_allow_html=True,
-            )
+            col1, col2, col3 = st.columns(3)
+            col1.metric(t['total_rev'], f"{simbolo_moeda} {total_receitas:,.2f}")
+            col2.metric(t['total_exp'], f"{simbolo_moeda} {total_despesas:,.2f}")
+            col3.metric(t['balance'], f"{simbolo_moeda} {saldo:,.2f}")
 
             st.markdown("---")
             c1, c2 = st.columns(2)
             with c1:
-                df_desp = df_mes[df_mes["tipo"] == t["types"][0]]
+                df_desp = df_mes[df_mes['tipo'] == t['types'][0]]
                 if not df_desp.empty:
-                    fig_pie = px.pie(df_desp, names="categoria", values="valor", title=t["pie_title"], hole=0.4)
-                    fig_pie.update_layout(dragmode=False)
-                    st.plotly_chart(fig_pie, use_container_width=True, config={"displayModeBar": False, "scrollZoom": False})
+                    fig_pie = px.pie(df_desp, names='categoria', values='valor', title=t['pie_title'], hole=0.4)
+                    st.plotly_chart(fig_pie, use_container_width=True, config={'displayModeBar': False})
                 else:
                     st.info("Sem despesas para exibir no gráfico neste mês.")
 
             with c2:
                 if not df_mes.empty:
-                    fig_bar = px.bar(df_mes, x="data", y="valor", color="tipo", title=t["bar_title"], barmode="group")
-                    fig_bar.update_layout(dragmode=False, xaxis=dict(fixedrange=True), yaxis=dict(fixedrange=True))
-                    st.plotly_chart(fig_bar, use_container_width=True, config={"displayModeBar": False, "scrollZoom": False})
+                    fig_bar = px.bar(df_mes, x='data', y='valor', color='tipo', title=t['bar_title'], barmode='group')
+                    st.plotly_chart(fig_bar, use_container_width=True, config={'displayModeBar': False})
                 else:
                     st.info("Sem dados para o gráfico.")
 
-            st.subheader(t["recent_list"])
+            st.subheader(t['recent_list'])
             st.dataframe(df_mes, use_container_width=True)
 
-    elif menu == t["nav_new"]:
+    elif menu == t['nav_new']:
         st.title(f"{t['new_title']} ({nome_contexto_traduzido})")
-        st.write(t["new_sub"])
+        st.write(t['new_sub'])
 
         with st.form("form_novo_lancamento"):
-            data_lanc = st.date_input(t["date_label"], datetime.date.today())
-            tipo_lanc = st.selectbox(t["type_label"], t["types"])
+            data_lanc = st.date_input(t['date_label'], datetime.date.today())
+            tipo_lanc = st.selectbox(t['type_label'], t['types'])
             valor_lanc = st.number_input(f"{t['value_label']} ({simbolo_moeda})", min_value=0.0, format="%.2f")
-
-            lista_cat_atual = t["cat_profissional"] if contexto_limpo == "Profissional" else t["cat_pessoal"]
-            cat_lanc = st.selectbox(t["cat_label"], lista_cat_atual)
-            desc_lanc = st.text_input(t["desc_label"])
-
-            submit_lanc = st.form_submit_button(t["save_btn"], use_container_width=True)
+            
+            lista_cat_atual = t['cat_profissional'] if contexto_limpo == "Profissional" else t['cat_pessoal']
+            cat_lanc = st.selectbox(t['cat_label'], lista_cat_atual)
+            desc_lanc = st.text_input(t['desc_label'])
+            
+            submit_lanc = st.form_submit_button(t['save_btn'], use_container_width=True)
             if submit_lanc:
                 if valor_lanc > 0:
                     sucesso = salvar_lancamento(
-                        st.session_state["username"],
+                        st.session_state['username'],
                         str(data_lanc),
                         desc_lanc,
                         cat_lanc,
                         tipo_lanc,
                         valor_lanc,
-                        contexto_limpo,
+                        contexto_limpo
                     )
                     if sucesso:
-                        st.success(t["success_msg"])
+                        st.success(t['success_msg'])
                         st.rerun()
+                    else:
+                        st.error("Erro ao salvar no Supabase.")
                 else:
-                    st.warning(t["warn_val"])
+                    st.warning("Por favor, informe um valor maior que zero.")
 
-    elif menu == t["nav_manage"]:
+    elif menu == t['nav_manage']:
         st.title(f"{t['manage_title']} ({nome_contexto_traduzido})")
-        st.write(t["manage_sub"])
+        st.write(t['manage_sub'])
 
         if df.empty:
-            st.info(f"Nenhum lançamento encontrado no painel {nome_contexto_traduzido}.")
+            st.info(t['no_data'])
         else:
             st.dataframe(df, use_container_width=True)
-            id_del = st.selectbox("ID do lançamento para excluir", df["id"].tolist(), key="manage_id_select")
-            if st.button(t["del_btn"]):
-                deletar_lancamento(id_del, st.session_state["username"])
+            id_del = st.selectbox("ID do lançamento para excluir", df['id'].tolist())
+            if st.button(t['del_btn']):
+                deletar_lancamento(id_del, st.session_state['username'])
                 st.success("Lançamento excluído com sucesso!")
                 st.rerun()
 
-    elif menu == t["nav_profile"]:
-        st.title(t["profile_title"])
-        st.write(t["profile_sub"])
+    elif menu == t['nav_profile']:
+        st.title(t['profile_title'])
+        st.write(t['profile_sub'])
 
-        dados_atuais = obter_dados_usuario(st.session_state["username"])
+        dados_atuais = obter_dados_usuario(st.session_state['username'])
         nome_atual = dados_atuais[0] if dados_atuais and dados_atuais[0] else ""
         end_atual = dados_atuais[1] if dados_atuais and dados_atuais[1] else ""
 
         with st.form("form_perfil"):
-            novo_nome = st.text_input(t["name_label"], value=nome_atual)
-            novo_endereco = st.text_input(t["address_label"], value=end_atual)
-            nova_senha = st.text_input(t["new_pass_label"], type="password")
+            novo_nome = st.text_input(t['name_label'], value=nome_atual)
+            novo_endereco = st.text_input(t['address_label'], value=end_atual)
+            nova_senha = st.text_input(t['new_pass_label'], type="password")
+            
+            foto_upload = st.file_uploader(t['photo_label'], type=["png", "jpg", "jpeg"])
+            remover_foto_check = st.checkbox(t['remove_photo'])
 
-            foto_upload = st.file_uploader(t["photo_label"], type=["png", "jpg", "jpeg"])
-            remover_foto_check = st.checkbox(t["remove_photo"])
-
-            submit_perfil = st.form_submit_button(t["save_profile"], use_container_width=True)
+            submit_perfil = st.form_submit_button(t['save_profile'], use_container_width=True)
 
             if submit_perfil:
                 foto_blob = None
                 if foto_upload is not None:
                     foto_blob = foto_upload.read()
-
-                if atualizar_perfil(
-                    st.session_state["username"],
-                    novo_nome,
-                    novo_endereco,
-                    nova_senha,
-                    foto_blob,
-                    remover_foto_check,
-                ):
-                    st.success(t["profile_success"])
+                
+                if atualizar_perfil(st.session_state['username'], novo_nome, novo_endereco, nova_senha, foto_blob, remover_foto_check):
+                    st.success(t['profile_success'])
                     st.rerun()
                 else:
-                    st.error(t["profile_error"])
+                    st.error(t['profile_error'])
