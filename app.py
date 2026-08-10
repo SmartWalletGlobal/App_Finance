@@ -11,7 +11,7 @@ from supabase import Client, create_client
 SUPABASE_URL = "https://zrabayrovzbkbdbjeuor.supabase.co"
 SUPABASE_KEY = "sb_secret_PaTy9z_z1eH2jxkV8m6_g_5sAUvBUR"
 
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+supabase: Client = create_client(https://zrabayrovzbkbdbjeuor.supabase.co, sb_secret_PaTy9z_z1eH2jxkV8m6_g_5sAUvBUR)
 # ------------------------------------------
 
 st.set_page_config(
