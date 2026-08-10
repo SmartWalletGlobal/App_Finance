@@ -61,35 +61,40 @@ def check_hash(password, hashed_text):
     return make_hash(password) == hashed_text
 
 
-# --- FUNÇÕES DE BANCO DE DADOS (SUPABASE) COM TRATAMENTO DE ERROS CLARO ---
+# --- FUNÇÕES DE BANCO DE DADOS (SUPABASE) BLINDADAS ---
 
 def cadastrar_usuario(username, nome_completo, senha):
     try:
-        res = supabase.table("usuarios").select("username").eq("username", username).execute()
+        cleaned_user = username.strip()
+        res = supabase.table("usuarios").select("username").eq("username", cleaned_user).execute()
         if res.data and len(res.data) > 0:
             return False, "Este usuário já existe."
         
-        # Tenta inserir considerando diferentes variações de nomes de colunas comuns
-        try:
-            supabase.table("usuarios").insert({
-                "username": username,
-                "nome_completo": nome_completo,
-                "senha": make_hash(senha),
-            }).execute()
-        except Exception:
-            supabase.table("usuarios").insert({
-                "username": username,
-                "nome": nome_completo,
-                "senha": make_hash(senha),
-            }).execute()
+        payload = {
+            "username": cleaned_user,
+            "nome_completo": nome_completo.strip(),
+            "senha": make_hash(senha),
+        }
+        supabase.table("usuarios").insert(payload).execute()
         return True, ""
     except Exception as e:
-        return False, str(e)
+        try:
+            # Fallback caso a tabela utilize a coluna 'nome' ao invés de 'nome_completo'
+            payload_alt = {
+                "username": username.strip(),
+                "nome": nome_completo.strip(),
+                "senha": make_hash(senha),
+            }
+            supabase.table("usuarios").insert(payload_alt).execute()
+            return True, ""
+        except Exception as e2:
+            return False, str(e2)
 
 
 def autenticar_usuario(username, senha):
     try:
-        res = supabase.table("usuarios").select("senha").eq("username", username).execute()
+        cleaned_user = username.strip()
+        res = supabase.table("usuarios").select("senha").eq("username", cleaned_user).execute()
         if res.data and len(res.data) > 0:
             stored_pass = res.data[0]["senha"]
             return check_hash(senha, stored_pass), ""
@@ -100,7 +105,7 @@ def autenticar_usuario(username, senha):
 
 def obter_dados_usuario(username):
     try:
-        res = supabase.table("usuarios").select("*").eq("username", username).execute()
+        res = supabase.table("usuarios").select("*").eq("username", username.strip()).execute()
         if res.data and len(res.data) > 0:
             row = res.data[0]
             nome = row.get("nome_completo") or row.get("nome") or row.get("full_name") or username
@@ -132,11 +137,11 @@ def atualizar_perfil(username, novo_nome, novo_endereco, nova_senha, nova_foto_b
             update_data["foto_perfil"] = base64.b64encode(nova_foto_blob).decode("utf-8")
 
         try:
-            supabase.table("usuarios").update(update_data).eq("username", username).execute()
+            supabase.table("usuarios").update(update_data).eq("username", username.strip()).execute()
         except Exception:
             update_data["nome"] = novo_nome
             update_data.pop("nome_completo", None)
-            supabase.table("usuarios").update(update_data).eq("username", username).execute()
+            supabase.table("usuarios").update(update_data).eq("username", username.strip()).execute()
         return True, ""
     except Exception as e:
         return False, str(e)
@@ -144,7 +149,7 @@ def atualizar_perfil(username, novo_nome, novo_endereco, nova_senha, nova_foto_b
 
 def carregar_dados(username):
     try:
-        res = supabase.table("lancamentos").select("*").eq("username", username).execute()
+        res = supabase.table("lancamentos").select("*").eq("username", username.strip()).execute()
         if res.data:
             df = pd.DataFrame(res.data)
             if "contexto" not in df.columns:
@@ -157,15 +162,16 @@ def carregar_dados(username):
 
 def salvar_lancamento(username, data, descricao, categoria, tipo, valor, contexto):
     try:
-        supabase.table("lancamentos").insert({
-            "username": username,
+        payload = {
+            "username": username.strip(),
             "data": str(data),
             "descricao": descricao,
             "categoria": categoria,
             "tipo": tipo,
             "valor": float(valor),
             "contexto": contexto,
-        }).execute()
+        }
+        supabase.table("lancamentos").insert(payload).execute()
         return True
     except Exception:
         return False
@@ -173,7 +179,7 @@ def salvar_lancamento(username, data, descricao, categoria, tipo, valor, context
 
 def deletar_lancamento(id_lancamento, username):
     try:
-        supabase.table("lancamentos").delete().eq("id", id_lancamento).eq("username", username).execute()
+        supabase.table("lancamentos").delete().eq("id", id_lancamento).eq("username", username.strip()).execute()
     except Exception:
         pass
 
@@ -514,7 +520,7 @@ TEXTOS = {
         "btn_reg_submit": "Konto erstellen",
         "reg_warn": "Bitte füllen Sie alle Felder aus.",
         "reg_success": "Konto erfolgreich erstellt! Gehen Sie zu 'Anmelden'.",
-        "reg_error": "Benutzer existiert bereits oder Fehler.",
+        "reg_error": "Benutzer existiert bereits ou Fehler.",
         "nav_overview": "📊 Übersicht & Diagramme",
         "nav_new": "➕ Neuer Eintrag",
         "nav_manage": "✏️ Verwalten & Bearbeiten",
@@ -599,14 +605,11 @@ if not st.session_state['logged_in']:
                     ok, err = autenticar_usuario(u_input, p_input)
                     if ok:
                         st.session_state['logged_in'] = True
-                        st.session_state['username'] = u_input
+                        st.session_state['username'] = u_input.strip()
                         st.success(TEXTOS[st.session_state['idioma']]['login_success'])
                         st.rerun()
                     else:
-                        if err:
-                            st.error(f"{TEXTOS[st.session_state['idioma']]['login_error']} (Detalhe: {err})")
-                        else:
-                            st.error(TEXTOS[st.session_state['idioma']]['login_error'])
+                        st.error(TEXTOS[st.session_state['idioma']]['login_error'])
                         
         with tab_reg:
             with st.form("form_reg"):
