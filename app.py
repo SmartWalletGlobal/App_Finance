@@ -158,7 +158,6 @@ def deletar_lancamento(id_lancamento, username):
     conn.commit()
     conn.close()
 
-# Dicionários traduzidos de cabo a rabo para Ramos e Categorias
 TRADUCOES_RAMOS = {
     "Português": {
         "mecanica": "🛠️ Mecânica / Oficina",
@@ -167,13 +166,13 @@ TRADUCOES_RAMOS = {
         "comercio": "🛍️ Comércio / Loja",
         "outros": "📋 Outros / Geral",
         "cat_mecanica_desp": ["Peças / Insumos", "Ferramentas", "Equipamentos", "Manutenção Predial", "Aluguel", "Impostos / Taxas", "Outras Despesas"],
-        "cat_mecanica_rec": ["Pagamento de Clientes", "Serviços Realizados", "Venda de Peças", "Orçamentos Aprovados", "Outras Receitas"],
+        "cat_mecanica_rec": ["Pagamento de Clientes", "Serviços Realizados", "Venda de Peças", "Orçamentos Aprovados", "Salário", "Outras Receitas"],
         "cat_obras_desp": ["Materiais de Construção", "Ferramentas", "Equipamentos", "Mão de Obra / Subcontratados", "Combustível / Frete", "Outras Despesas"],
-        "cat_obras_rec": ["Medição de Obra", "Pagamento de Clientes", "Adiantamento / Sinal", "Venda de Sobras", "Outras Receitas"],
+        "cat_obras_rec": ["Medição de Obra", "Pagamento de Clientes", "Adiantamento / Sinal", "Venda de Sobras", "Salário", "Outras Receitas"],
         "cat_ti_desp": ["Softwares / Assinaturas", "Hospedagem / Servidores", "Equipamentos", "Marketing", "Cursos / Capacitação", "Outras Despesas"],
-        "cat_ti_rec": ["Desenvolvimento de Projetos", "Consultoria", "Suporte Mensal (Retainer)", "Outras Receitas"],
+        "cat_ti_rec": ["Desenvolvimento de Projetos", "Consultoria", "Suporte Mensal (Retainer)", "Salário", "Outras Receitas"],
         "cat_comercio_desp": ["Aquisição de Mercadorias", "Embalagens", "Frete / Logística", "Marketing / Anúncios", "Aluguel", "Outras Despesas"],
-        "cat_comercio_rec": ["Vendas à Vista", "Vendas no Cartão / Pix", "Vendas Parceladas", "Outras Receitas"],
+        "cat_comercio_rec": ["Vendas à Vista", "Vendas no Cartão / Pix", "Vendas Parceladas", "Salário", "Outras Receitas"],
         "cat_outros_desp": ["Aluguel", "Alimentação", "Transporte", "Serviços", "Impostos", "Outras Despesas"],
         "cat_outros_rec": ["Salário", "Prestação de Serviços", "Vendas", "Outras Receitas"],
         "tipo_despesa": "Despesa",
@@ -186,13 +185,13 @@ TRADUCOES_RAMOS = {
         "comercio": "🛍️ Retail / Store",
         "outros": "📋 Others / General",
         "cat_mecanica_desp": ["Parts / Supplies", "Tools", "Equipment", "Building Maintenance", "Rent", "Taxes / Fees", "Other Expenses"],
-        "cat_mecanica_rec": ["Client Payments", "Services Rendered", "Parts Sales", "Approved Budgets", "Other Income"],
+        "cat_mecanica_rec": ["Client Payments", "Services Rendered", "Parts Sales", "Approved Budgets", "Salary", "Other Income"],
         "cat_obras_desp": ["Building Materials", "Tools", "Equipment", "Labor / Subcontractors", "Fuel / Freight", "Other Expenses"],
-        "cat_obras_rec": ["Construction Measurement", "Client Payments", "Advance / Deposit", "Surplus Sales", "Other Income"],
+        "cat_obras_rec": ["Construction Measurement", "Client Payments", "Advance / Deposit", "Surplus Sales", "Salary", "Other Income"],
         "cat_ti_desp": ["Software / Subscriptions", "Hosting / Servers", "Equipment", "Marketing", "Courses / Training", "Other Expenses"],
-        "cat_ti_rec": ["Project Development", "Consulting", "Monthly Support (Retainer)", "Other Income"],
+        "cat_ti_rec": ["Project Development", "Consulting", "Monthly Support (Retainer)", "Salary", "Other Income"],
         "cat_comercio_desp": ["Goods Acquisition", "Packaging", "Freight / Logistics", "Marketing / Ads", "Rent", "Other Expenses"],
-        "cat_comercio_rec": ["Cash Sales", "Card / Pix Sales", "Installment Sales", "Other Income"],
+        "cat_comercio_rec": ["Cash Sales", "Card / Pix Sales", "Installment Sales", "Salary", "Other Income"],
         "cat_outros_desp": ["Rent", "Food", "Transport", "Services", "Taxes", "Other Expenses"],
         "cat_outros_rec": ["Salary", "Service Provision", "Sales", "Other Income"],
         "tipo_despesa": "Expense",
@@ -205,13 +204,13 @@ TRADUCOES_RAMOS = {
         "comercio": "🛍️ Commerce / Magasin",
         "outros": "📋 Autres / Général",
         "cat_mecanica_desp": ["Pièces / Consommables", "Outils", "Équipement", "Maintenance des Locaux", "Loyer", "Impôts / Taxes", "Autres Dépenses"],
-        "cat_mecanica_rec": ["Paiement des Clients", "Services Réalisés", "Vente de Pièces", "Devis Approuvés", "Autres Revenus"],
+        "cat_mecanica_rec": ["Paiement des Clients", "Services Réalisés", "Vente de Pièces", "Devis Approuvés", "Salaire", "Autres Revenus"],
         "cat_obras_desp": ["Matériaux de Construction", "Outils", "Équipement", "Main-d'œuvre / Sous-traitants", "Carburant / Fret", "Autres Dépenses"],
-        "cat_obras_rec": ["Mesurage de Chantier", "Paiement des Clients", "Acompte / Avance", "Vente de Surplus", "Autres Revenus"],
+        "cat_obras_rec": ["Mesurage de Chantier", "Paiement des Clients", "Acompte / Avance", "Vente de Surplus", "Salaire", "Autres Revenus"],
         "cat_ti_desp": ["Logiciels / Abonnements", "Hébergement / Serveurs", "Équipement", "Marketing", "Formations", "Autres Dépenses"],
-        "cat_ti_rec": ["Développement de Projets", "Conseil", "Support Mensuel (Retainer)", "Autres Revenus"],
+        "cat_ti_rec": ["Développement de Projets", "Conseil", "Support Mensuel (Retainer)", "Salaire", "Autres Revenus"],
         "cat_comercio_desp": ["Achat de Marchandises", "Emballages", "Fret / Logistique", "Marketing / Publicité", "Loyer", "Autres Dépenses"],
-        "cat_comercio_rec": ["Ventes au Comptant", "Ventes Carte / Pix", "Ventes Échelonnées", "Autres Revenus"],
+        "cat_comercio_rec": ["Ventes au Comptant", "Ventes Carte / Pix", "Ventes Échelonnées", "Salaire", "Autres Revenus"],
         "cat_outros_desp": ["Loyer", "Alimentation", "Transport", "Services", "Impôts", "Autres Dépenses"],
         "cat_outros_rec": ["Salaire", "Prestation de Services", "Ventes", "Autres Revenus"],
         "tipo_despesa": "Dépense",
@@ -224,13 +223,13 @@ TRADUCOES_RAMOS = {
         "comercio": "🛍️ Comercio / Tienda",
         "outros": "📋 Otros / General",
         "cat_mecanica_desp": ["Piezas / Insumos", "Herramientas", "Equipos", "Mantenimiento", "Alquiler", "Impuestos / Tasas", "Otros Gastos"],
-        "cat_mecanica_rec": ["Pago de Clientes", "Servicios Realizados", "Venta de Piezas", "Presupuestos Aprobados", "Otros Ingresos"],
+        "cat_mecanica_rec": ["Pago de Clientes", "Servicios Realizados", "Venta de Piezas", "Presupuestos Aprobados", "Salario", "Otros Ingresos"],
         "cat_obras_desp": ["Materiales de Construcción", "Herramientas", "Equipos", "Mano de Obra / Subcontratados", "Combustible / Flete", "Otros Gastos"],
-        "cat_obras_rec": ["Medición de Obra", "Pago de Clientes", "Anticipo / Seña", "Venta de Sobrantes", "Otros Ingresos"],
+        "cat_obras_rec": ["Medición de Obra", "Pago de Clientes", "Anticipo / Seña", "Venta de Sobrantes", "Salario", "Otros Ingresos"],
         "cat_ti_desp": ["Software / Suscripciones", "Hosting / Servidores", "Equipos", "Marketing", "Cursos / Capacitación", "Otros Gastos"],
-        "cat_ti_rec": ["Desarrollo de Proyectos", "Consultoría", "Soporte Mensual", "Otros Ingresos"],
+        "cat_ti_rec": ["Desarrollo de Proyectos", "Consultoría", "Soporte Mensual", "Salario", "Otros Ingresos"],
         "cat_comercio_desp": ["Adquisición de Mercancías", "Embalajes", "Flete / Logística", "Marketing / Anuncios", "Alquiler", "Otros Gastos"],
-        "cat_comercio_rec": ["Ventas al Contado", "Ventas con Tarjeta / Pix", "Ventas en Cuotas", "Otros Ingresos"],
+        "cat_comercio_rec": ["Ventas al Contado", "Ventas con Tarjeta / Pix", "Ventas en Cuotas", "Salario", "Otros Ingresos"],
         "cat_outros_desp": ["Alquiler", "Alimentación", "Transporte", "Servicios", "Impuestos", "Otros Gastos"],
         "cat_outros_rec": ["Salario", "Prestación de Servicios", "Ventas", "Otros Ingresos"],
         "tipo_despesa": "Gasto",
@@ -243,13 +242,13 @@ TRADUCOES_RAMOS = {
         "comercio": "🛍️ Commercio / Negozio",
         "outros": "📋 Altro / Generale",
         "cat_mecanica_desp": ["Ricambi / Materiali", "Utensili", "Attrezzatura", "Manutenzione", "Affitto", "Tasse / Imposte", "Altre Spese"],
-        "cat_mecanica_rec": ["Pagamenti Clienti", "Servizi Eseguiti", "Vendita Ricambi", "Preventivi Approvati", "Altre Entrate"],
+        "cat_mecanica_rec": ["Pagamenti Clienti", "Servizi Eseguiti", "Vendita Ricambi", "Preventivi Approvati", "Stipendio", "Altre Entrate"],
         "cat_obras_desp": ["Materiali Edili", "Utensili", "Attrezzatura", "Manodopera / Subappalti", "Carburante / Trasporto", "Altre Spese"],
-        "cat_obras_rec": ["Stato Avanzamento Lavori", "Pagamenti Clienti", "Acconto", "Vendita Surplus", "Altre Entrate"],
+        "cat_obras_rec": ["Stato Avanzamento Lavori", "Pagamenti Clienti", "Acconto", "Vendita Surplus", "Stipendio", "Altre Entrate"],
         "cat_ti_desp": ["Software / Abbonamenti", "Hosting / Server", "Attrezzatura", "Marketing", "Corsi / Formazione", "Altre Spese"],
-        "cat_ti_rec": ["Sviluppo Progetti", "Consulenza", "Supporto Mensile", "Altre Entrate"],
+        "cat_ti_rec": ["Sviluppo Progetti", "Consulenza", "Supporto Mensile", "Stipendio", "Altre Entrate"],
         "cat_comercio_desp": ["Acquisto Merce", "Imballaggi", "Spedizione / Logistica", "Marketing / Annunci", "Affitto", "Altre Spese"],
-        "cat_comercio_rec": ["Vendite in Contanti", "Vendite Carta / Pix", "Vendite Rateali", "Altre Entrate"],
+        "cat_comercio_rec": ["Vendite in Contanti", "Vendite Carta / Pix", "Vendite Rateali", "Stipendio", "Altre Entrate"],
         "cat_outros_desp": ["Affitto", "Alimentazione", "Trasporto", "Servizi", "Tasse", "Altre Spese"],
         "cat_outros_rec": ["Stipendio", "Prestazione Servizi", "Vendite", "Altre Entrate"],
         "tipo_despesa": "Spesa",
@@ -262,13 +261,13 @@ TRADUCOES_RAMOS = {
         "comercio": "🛍️ Handel / Geschäft",
         "outros": "📋 Sonstiges / Allgemein",
         "cat_mecanica_desp": ["Teile / Verbrauchsmaterial", "Werkzeuge", "Ausstattung", "Gebäudewartung", "Miete", "Steuern / Gebühren", "Sonstige Ausgaben"],
-        "cat_mecanica_rec": ["Kundenzahlungen", "Erbrachte Dienstleistungen", "Teileverkauf", "Genehmigte Budgets", "Sonstige Einnahmen"],
+        "cat_mecanica_rec": ["Kundenzahlungen", "Erbrachte Dienstleistungen", "Teileverkauf", "Genehmigte Budgets", "Gehalt", "Sonstige Einnahmen"],
         "cat_obras_desp": ["Baumaterialien", "Werkzeuge", "Ausstattung", "Arbeitskräfte / Subunternehmer", "Kraftstoff / Fracht", "Sonstige Ausgaben"],
-        "cat_obras_rec": ["Bauabrechnung", "Kundenzahlungen", "Vorschuss / Anzahlung", "Restverkauf", "Sonstige Einnahmen"],
+        "cat_obras_rec": ["Bauabrechnung", "Kundenzahlungen", "Vorschuss / Anzahlung", "Restverkauf", "Gehalt", "Sonstige Einnahmen"],
         "cat_ti_desp": ["Software / Abonnements", "Hosting / Server", "Ausstattung", "Marketing", "Kurse / Schulungen", "Sonstige Ausgaben"],
-        "cat_ti_rec": ["Projektentwicklung", "Beratung", "Monatlicher Support", "Sonstige Einnahmen"],
+        "cat_ti_rec": ["Projektentwicklung", "Beratung", "Monatlicher Support", "Gehalt", "Sonstige Einnahmen"],
         "cat_comercio_desp": ["Warenerwerb", "Verpackung", "Fracht / Logistik", "Marketing / Werbung", "Miete", "Sonstige Ausgaben"],
-        "cat_comercio_rec": ["Barverkäufe", "Kartenzahlung / Pix", "Ratenverkäufe", "Sonstige Einnahmen"],
+        "cat_comercio_rec": ["Barverkäufe", "Kartenzahlung / Pix", "Ratenverkäufe", "Gehalt", "Sonstige Einnahmen"],
         "cat_outros_desp": ["Miete", "Verpflegung", "Transport", "Dienstleistungen", "Steuern", "Sonstige Ausgaben"],
         "cat_outros_rec": ["Gehalt", "Dienstleistung", "Verkäufe", "Sonstige Einnahmen"],
         "tipo_despesa": "Ausgabe",
@@ -761,7 +760,6 @@ if not st.session_state['logged_in']:
         st.markdown(f"<h2 style='text-align: center;'>{t_login['login_title']}</h2>", unsafe_allow_html=True)
         st.markdown(f"<p style='text-align: center; color: gray;'>{t_login['login_sub']}</p>", unsafe_allow_html=True)
         
-        # Abas traduzidas dinamicamente
         tab_login, tab_reg_pessoal, tab_reg_prof = st.tabs([
             t_login['tab_login'], 
             t_login['tab_register_pessoal'], 
@@ -1020,7 +1018,8 @@ else:
             
             valor_lanc = st.number_input(f"{t['value_label']} ({simbolo_moeda})", min_value=0.0, format="%.2f")
             
-            opcoes_cat = lista_desp_cat if tipo_lanc_ui == ramos_dict["tipo_despesa"] else lista_rec_cat
+            # Categorias separadas dinamicamente com base no tipo escolhido
+            opcoes_cat = lista_rec_cat if tipo_lanc_ui == ramos_dict["tipo_receita"] else lista_desp_cat
             cat_lanc = st.selectbox(t['cat_label'], opcoes_cat)
             
             desc_lanc = st.text_input(t['desc_label'])
@@ -1062,7 +1061,7 @@ else:
 
         opcoes_ramos_perfil = [
             ramos_dict["mecanica"],
-            ramos_dict["obrad"],
+            ramos_dict["obras"],
             ramos_dict["ti"],
             ramos_dict["comercio"],
             ramos_dict["outros"]
