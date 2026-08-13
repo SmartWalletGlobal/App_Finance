@@ -277,7 +277,7 @@ TRADUCOES_RAMOS = {
 
 TEXTOS = {
     "Português": {
-        "login_title": "⚡ Acesso ao Meu Financeiro",
+        "login_title": "Acesso ao Meu Financeiro",
         "login_sub": "Entre com sua conta ou cadastre-se com seu nome completo.",
         "tab_login": "🔑 Entrar",
         "tab_register": "📝 Criar Conta",
