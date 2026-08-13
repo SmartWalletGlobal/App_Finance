@@ -186,6 +186,7 @@ TRADUCOES_RAMOS = {
         "cat_outros_rec": [
             "Salário Base", 
             "Receitas Variáveis (Diárias / Bicos)", 
+            "Investimentos e Rendimentos",
             "Outros Ganhos / Outras Receitas"
         ],
         "tipo_despesa": "Despesa",
@@ -218,6 +219,7 @@ TRADUCOES_RAMOS = {
         "cat_outros_rec": [
             "Base Salary", 
             "Variable Income (Daily work / Extras)", 
+            "Investments & Yields",
             "Other Earnings"
         ],
         "tipo_despesa": "Expense",
@@ -250,6 +252,7 @@ TRADUCOES_RAMOS = {
         "cat_outros_rec": [
             "Salaire de Base", 
             "Revenus Variables (Journées / Extras)", 
+            "Investissements et Rendements",
             "Autres Gains"
         ],
         "tipo_despesa": "Dépense",
@@ -282,6 +285,7 @@ TRADUCOES_RAMOS = {
         "cat_outros_rec": [
             "Salario Base", 
             "Ingresos Variables (Diarias / Extras)", 
+            "Inversiones y Rendimientos",
             "Otros Ingresos"
         ],
         "tipo_despesa": "Gasto",
@@ -314,6 +318,7 @@ TRADUCOES_RAMOS = {
         "cat_outros_rec": [
             "Stipendio Base", 
             "Entrate Variabili (Giornate / Extra)", 
+            "Investimenti e Rendimenti",
             "Altri Guadagni"
         ],
         "tipo_despesa": "Spesa",
@@ -346,6 +351,7 @@ TRADUCOES_RAMOS = {
         "cat_outros_rec": [
             "Grundgehalt", 
             "Variables Einkommen (Tagelöhner / Extras)", 
+            "Investitionen und Renditen",
             "Sonstige Einnahmen"
         ],
         "tipo_despesa": "Ausgabe",
@@ -1088,30 +1094,36 @@ else:
             lista_desp_cat = ramos_dict["cat_outros_desp"]
             lista_rec_cat = ramos_dict["cat_outros_rec"]
 
-        with st.form("form_novo_lancamento"):
-            data_lanc = st.date_input(t['date_label'], datetime.date.today())
-            
-            tipo_opcoes = [ramos_dict["tipo_despesa"], ramos_dict["tipo_receita"]]
-            tipo_lanc_ui = st.selectbox(t['type_label'], tipo_opcoes)
-            
-            valor_lanc = st.number_input(f"{t['value_label']} ({simbolo_moeda})", min_value=0.0, format="%.2f")
-            
-            opcoes_cat = lista_rec_cat if tipo_lanc_ui == ramos_dict["tipo_receita"] else lista_desp_cat
-            cat_lanc = st.selectbox(t['cat_label'], opcoes_cat)
-            
-            desc_lanc = st.text_input(t['desc_label'])
-            
-            veiculo_lanc = ""
-            if ramo_usuario_db == "mecanica":
-                veiculo_lanc = st.text_input(t['veiculo_label'])
-            
-            submit_lanc = st.form_submit_button(t['save_btn'], use_container_width=True)
-            if submit_lanc:
-                if desc_lanc.strip() != "":
-                    salvar_lancamento(st.session_state['username'], str(data_lanc), desc_lanc, cat_lanc, tipo_lanc_ui, valor_lanc, veiculo_lanc)
-                    st.success(t['success_msg'])
-                else:
-                    st.warning(t['warn_desc'])
+        # Fragmento reativo para atualizar as categorias conforme o Tipo selecionado
+        @st.fragment
+        def render_form_dinamico():
+            with st.form("form_novo_lancamento"):
+                data_lanc = st.date_input(t['date_label'], datetime.date.today())
+                
+                tipo_opcoes = [ramos_dict["tipo_despesa"], ramos_dict["tipo_receita"]]
+                tipo_lanc_ui = st.selectbox(t['type_label'], tipo_opcoes)
+                
+                valor_lanc = st.number_input(f"{t['value_label']} ({simbolo_moeda})", min_value=0.0, format="%.2f")
+                
+                # Seleção isolada de categorias com base estrita no tipo escolhido
+                opcoes_cat = lista_rec_cat if tipo_lanc_ui == ramos_dict["tipo_receita"] else lista_desp_cat
+                cat_lanc = st.selectbox(t['cat_label'], opcoes_cat)
+                
+                desc_lanc = st.text_input(t['desc_label'])
+                
+                veiculo_lanc = ""
+                if ramo_usuario_db == "mecanica":
+                    veiculo_lanc = st.text_input(t['veiculo_label'])
+                
+                submit_lanc = st.form_submit_button(t['save_btn'], use_container_width=True)
+                if submit_lanc:
+                    if desc_lanc.strip() != "":
+                        salvar_lancamento(st.session_state['username'], str(data_lanc), desc_lanc, cat_lanc, tipo_lanc_ui, valor_lanc, veiculo_lanc)
+                        st.success(t['success_msg'])
+                    else:
+                        st.warning(t['warn_desc'])
+
+        render_form_dinamico()
 
     elif menu == t['nav_manage']:
         st.title(t['manage_title'])
