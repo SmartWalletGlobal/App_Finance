@@ -714,7 +714,7 @@ MOEDAS = {
     "Real (R$)": "R$",
     "Euro (€)": "€",
     "Dólar ($)": "$",
-    "Libra (£)": "£)
+    "Libra (£)": "£"
 }
 
 if 'logged_in' not in st.session_state:
