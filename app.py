@@ -1013,14 +1013,20 @@ else:
         with st.form("form_novo_lancamento"):
             data_lanc = st.date_input(t['date_label'], datetime.date.today())
             
+            # 1. Captura o tipo de lançamento selecionado pelo usuário
             tipo_opcoes = [ramos_dict["tipo_despesa"], ramos_dict["tipo_receita"]]
             tipo_lanc_ui = st.selectbox(t['type_label'], tipo_opcoes)
             
             valor_lanc = st.number_input(f"{t['value_label']} ({simbolo_moeda})", min_value=0.0, format="%.2f")
             
-            # Categorias separadas dinamicamente com base no tipo escolhido
-            opcoes_cat = lista_rec_cat if tipo_lanc_ui == ramos_dict["tipo_receita"] else lista_desp_cat
-            cat_lanc = st.selectbox(t['cat_label'], opcoes_cat)
+            # 2. Define as categorias com base no tipo escolhido (integrando o snippet solicitado)
+            if tipo_lanc_ui == ramos_dict["tipo_receita"]:
+                categorias_principais = lista_rec_cat
+            else:
+                categorias_principais = lista_desp_cat
+            
+            # 3. Renderiza o selectbox da categoria principal filtrado
+            cat_lanc = st.selectbox(t['cat_label'], categorias_principais)
             
             desc_lanc = st.text_input(t['desc_label'])
             
