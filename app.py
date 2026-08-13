@@ -14,7 +14,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Injeção das Meta Tags do Open Graph
 st.markdown("""
     <head>
         <meta property="og:title" content="Meu Financeiro | Multi-Usuário">
@@ -1094,36 +1093,36 @@ else:
             lista_desp_cat = ramos_dict["cat_outros_desp"]
             lista_rec_cat = ramos_dict["cat_outros_rec"]
 
-        # Fragmento reativo para atualizar as categorias conforme o Tipo selecionado
-        @st.fragment
-        def render_form_dinamico():
-            with st.form("form_novo_lancamento"):
-                data_lanc = st.date_input(t['date_label'], datetime.date.today())
-                
-                tipo_opcoes = [ramos_dict["tipo_despesa"], ramos_dict["tipo_receita"]]
-                tipo_lanc_ui = st.selectbox(t['type_label'], tipo_opcoes)
-                
-                valor_lanc = st.number_input(f"{t['value_label']} ({simbolo_moeda})", min_value=0.0, format="%.2f")
-                
-                # Seleção isolada de categorias com base estrita no tipo escolhido
-                opcoes_cat = lista_rec_cat if tipo_lanc_ui == ramos_dict["tipo_receita"] else lista_desp_cat
-                cat_lanc = st.selectbox(t['cat_label'], opcoes_cat)
-                
-                desc_lanc = st.text_input(t['desc_label'])
-                
-                veiculo_lanc = ""
-                if ramo_usuario_db == "mecanica":
-                    veiculo_lanc = st.text_input(t['veiculo_label'])
-                
-                submit_lanc = st.form_submit_button(t['save_btn'], use_container_width=True)
-                if submit_lanc:
-                    if desc_lanc.strip() != "":
-                        salvar_lancamento(st.session_state['username'], str(data_lanc), desc_lanc, cat_lanc, tipo_lanc_ui, valor_lanc, veiculo_lanc)
-                        st.success(t['success_msg'])
-                    else:
-                        st.warning(t['warn_desc'])
-
-        render_form_dinamico()
+        # Abordagem sem st.form para separar perfeitamente as categorias instantaneamente
+        data_lanc = st.date_input(t['date_label'], datetime.date.today())
+        
+        tipo_opcoes = [ramos_dict["tipo_despesa"], ramos_dict["tipo_receita"]]
+        tipo_lanc_ui = st.selectbox(t['type_label'], tipo_opcoes)
+        
+        valor_lanc = st.number_input(f"{t['value_label']} ({simbolo_moeda})", min_value=0.0, format="%.2f")
+        
+        # Filtro estrito de categorias separadas por Tipo
+        if tipo_lanc_ui == ramos_dict["tipo_receita"]:
+            opcoes_cat = lista_rec_cat
+        else:
+            opcoes_cat = lista_desp_cat
+            
+        cat_lanc = st.selectbox(t['cat_label'], opcoes_cat)
+        
+        desc_lanc = st.text_input(t['desc_label'])
+        
+        veiculo_lanc = ""
+        if ramo_usuario_db == "mecanica":
+            veiculo_lanc = st.text_input(t['veiculo_label'])
+            
+        st.markdown("<br>", unsafe_allow_html=True)
+        if st.button(t['save_btn'], use_container_width=True):
+            if desc_lanc.strip() != "":
+                salvar_lancamento(st.session_state['username'], str(data_lanc), desc_lanc, cat_lanc, tipo_lanc_ui, valor_lanc, veiculo_lanc)
+                st.success(t['success_msg'])
+                st.rerun()
+            else:
+                st.warning(t['warn_desc'])
 
     elif menu == t['nav_manage']:
         st.title(t['manage_title'])
