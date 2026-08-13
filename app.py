@@ -349,7 +349,9 @@ TEXTOS = {
         "highest_costs": "Maiores Custos por Categoria",
         "biz_report": "📋 Relatório Analítico de Lançamentos do Negócio",
         "id_del_label": "ID do lançamento para excluir",
-        "del_success": "Lançamento excluído com sucesso!"
+        "del_success": "Lançamento excluído com sucesso!",
+        "info_pessoal": "Criação de conta estritamente pessoal (sem exigência de ramo profissional ou oficina).",
+        "info_prof": "Criação de conta profissional voltada para o seu setor de mercado."
     },
     "English": {
         "login_title": "⚡ My Finance Access",
@@ -423,7 +425,9 @@ TEXTOS = {
         "highest_costs": "Highest Costs by Category",
         "biz_report": "📋 Business Analytical Entry Report",
         "id_del_label": "Entry ID to delete",
-        "del_success": "Entry deleted successfully!"
+        "del_success": "Entry deleted successfully!",
+        "info_pessoal": "Strictly personal account creation (no professional or workshop branch required).",
+        "info_prof": "Professional account creation tailored to your market sector."
     },
     "Français": {
         "login_title": "⚡ Accès à Mon Financier",
@@ -497,7 +501,9 @@ TEXTOS = {
         "highest_costs": "Coûts les Plus Élevés par Catégorie",
         "biz_report": "📋 Rapport Analytique des Entrées Business",
         "id_del_label": "ID de l'entrée à supprimer",
-        "del_success": "Entrée supprimée avec succès !"
+        "del_success": "Entrée supprimée avec succès !",
+        "info_pessoal": "Création de compte strictement personnel (sans exigence de secteur professionnel ou d'atelier).",
+        "info_prof": "Création de compte professionnel adapté à votre secteur de marché."
     },
     "Español": {
         "login_title": "⚡ Acceso a Mi Financiero",
@@ -571,7 +577,9 @@ TEXTOS = {
         "highest_costs": "Mayores Costos por Categoría",
         "biz_report": "📋 Reporte Analítico de Movimientos del Negocio",
         "id_del_label": "ID del movimiento a eliminar",
-        "del_success": "¡Movimiento eliminado con éxito!"
+        "del_success": "¡Movimiento eliminado con éxito!",
+        "info_pessoal": "Creación de cuenta estrictamente personal (sin requerir sector profesional o taller).",
+        "info_prof": "Creación de cuenta profesional adaptada a tu sector de mercado."
     },
     "Italiano": {
         "login_title": "⚡ Accesso a Il Mio Finanziario",
@@ -645,7 +653,9 @@ TEXTOS = {
         "highest_costs": "Costi Maggiori per Categoria",
         "biz_report": "📋 Report Analitico Voci Business",
         "id_del_label": "ID voce da eliminare",
-        "del_success": "Voce eliminata con successo!"
+        "del_success": "Voce eliminata con successo!",
+        "info_pessoal": "Creazione account strettamente personale (senza requisiti di settore professionale o officina).",
+        "info_prof": "Creazione account professionale su misura per il tuo settore di mercato."
     },
     "Deutsch": {
         "login_title": "⚡ Mein Finanz-Zugang",
@@ -719,7 +729,9 @@ TEXTOS = {
         "highest_costs": "Höchste Kosten nach Kategorie",
         "biz_report": "📋 Analytischer Business-Eintragsbericht",
         "id_del_label": "Eintrags-ID zum Löschen",
-        "del_success": "Eintrag erfolgreich gelöscht!"
+        "del_success": "Eintrag erfolgreich gelöscht!",
+        "info_pessoal": "Streng persönliches Konto (kein Berufszweig oder Werkstatt erforderlich).",
+        "info_prof": "Professionelles Konto zugeschnitten auf Ihre Branche."
     }
 }
 
@@ -749,7 +761,7 @@ if not st.session_state['logged_in']:
         st.markdown(f"<h2 style='text-align: center;'>{t_login['login_title']}</h2>", unsafe_allow_html=True)
         st.markdown(f"<p style='text-align: center; color: gray;'>{t_login['login_sub']}</p>", unsafe_allow_html=True)
         
-        # Abas separadas explicitamente conforme solicitado pelo usuário
+        # Abas traduzidas dinamicamente
         tab_login, tab_reg_pessoal, tab_reg_prof = st.tabs([
             t_login['tab_login'], 
             t_login['tab_register_pessoal'], 
@@ -773,7 +785,7 @@ if not st.session_state['logged_in']:
                         
         with tab_reg_pessoal:
             with st.form("form_reg_pessoal"):
-                st.info("Criação de conta estritamente pessoal (sem exigência de ramo profissional ou oficina).")
+                st.info(t_login['info_pessoal'])
                 reg_user_p = st.text_input(t_login['reg_user_label'], key="reg_u_p")
                 reg_name_p = st.text_input(t_login['reg_name_label'], key="reg_n_p")
                 reg_pass_p = st.text_input(t_login['reg_pass_label'], type="password", key="reg_p_p")
@@ -782,7 +794,6 @@ if not st.session_state['logged_in']:
                 
                 if submit_reg_p:
                     if reg_user_p and reg_name_p and reg_pass_p:
-                        # Perfil pessoal usa o ramo padrão "outros" sem forçar mecânica/trabalho
                         if cadastrar_usuario(reg_user_p, reg_name_p, reg_pass_p, "outros"):
                             st.success(t_login['reg_success'])
                         else:
@@ -792,7 +803,7 @@ if not st.session_state['logged_in']:
 
         with tab_reg_prof:
             with st.form("form_reg_prof"):
-                st.info("Criação de conta profissional voltada para o seu setor de mercado.")
+                st.info(t_login['info_prof'])
                 reg_user_prof = st.text_input(t_login['reg_user_label'], key="reg_u_prof")
                 reg_name_prof = st.text_input(t_login['reg_name_label'], key="reg_n_prof")
                 reg_pass_prof = st.text_input(t_login['reg_pass_label'], type="password", key="reg_p_prof")
@@ -1051,7 +1062,7 @@ else:
 
         opcoes_ramos_perfil = [
             ramos_dict["mecanica"],
-            ramos_dict["obras"],
+            ramos_dict["obrad"],
             ramos_dict["ti"],
             ramos_dict["comercio"],
             ramos_dict["outros"]
