@@ -279,9 +279,10 @@ TRADUCOES_RAMOS = {
 TEXTOS = {
     "Português": {
         "login_title": "⚡ Acesso ao Meu Financeiro",
-        "login_sub": "Entre com sua conta ou cadastre-se com seu nome completo.",
+        "login_sub": "Entre com sua conta ou cadastre-se escolhendo o seu perfil.",
         "tab_login": "🔑 Entrar",
-        "tab_register": "📝 Criar Conta",
+        "tab_register_pessoal": "👤 Perfil Pessoal",
+        "tab_register_prof": "🛠️ Perfil Profissional",
         "user_label": "Usuário (E-mail ou Apelido)",
         "pass_label": "Senha",
         "btn_login_submit": "Entrar no Sistema",
@@ -352,9 +353,10 @@ TEXTOS = {
     },
     "English": {
         "login_title": "⚡ My Finance Access",
-        "login_sub": "Log in to your account or register.",
+        "login_sub": "Log in to your account or choose your profile type to register.",
         "tab_login": "🔑 Log In",
-        "tab_register": "📝 Register",
+        "tab_register_pessoal": "👤 Personal Profile",
+        "tab_register_prof": "🛠️ Professional Profile",
         "user_label": "Username (Email or Nickname)",
         "pass_label": "Password",
         "btn_login_submit": "Log In",
@@ -425,9 +427,10 @@ TEXTOS = {
     },
     "Français": {
         "login_title": "⚡ Accès à Mon Financier",
-        "login_sub": "Connectez-vous ou créez un compte.",
+        "login_sub": "Connectez-vous ou choisissez votre profil pour vous inscrire.",
         "tab_login": "🔑 Connexion",
-        "tab_register": "📝 S'inscrire",
+        "tab_register_pessoal": "👤 Profil Personnel",
+        "tab_register_prof": "🛠️ Profil Professionnel",
         "user_label": "Utilisateur (E-mail ou Pseudo)",
         "pass_label": "Mot de passe",
         "btn_login_submit": "Se connecter",
@@ -498,9 +501,10 @@ TEXTOS = {
     },
     "Español": {
         "login_title": "⚡ Acceso a Mi Financiero",
-        "login_sub": "Inicia sesión en tu cuenta o regístrate.",
+        "login_sub": "Inicia sesión o regístrese seleccionando su perfil.",
         "tab_login": "🔑 Entrar",
-        "tab_register": "📝 Registrarse",
+        "tab_register_pessoal": "👤 Perfil Personal",
+        "tab_register_prof": "🛠️ Perfil Profesional",
         "user_label": "Usuario (Correo o Apodo)",
         "pass_label": "Contraseña",
         "btn_login_submit": "Iniciar Sesión",
@@ -571,9 +575,10 @@ TEXTOS = {
     },
     "Italiano": {
         "login_title": "⚡ Accesso a Il Mio Finanziario",
-        "login_sub": "Accedi al tuo account o registrati.",
+        "login_sub": "Accedi al tuo account o registrati scegliendo il profilo.",
         "tab_login": "🔑 Accedi",
-        "tab_register": "📝 Registrati",
+        "tab_register_pessoal": "👤 Profilo Personale",
+        "tab_register_prof": "🛠️ Profilo Professionale",
         "user_label": "Utente (Email o Nickname)",
         "pass_label": "Password",
         "btn_login_submit": "Accedi al Sistema",
@@ -644,9 +649,10 @@ TEXTOS = {
     },
     "Deutsch": {
         "login_title": "⚡ Mein Finanz-Zugang",
-        "login_sub": "Melden Sie sich an oder registrieren Sie sich.",
+        "login_sub": "Melden Sie sich an oder wählen Sie Ihr Profil zur Registrierung.",
         "tab_login": "🔑 Anmelden",
-        "tab_register": "📝 Registrieren",
+        "tab_register_pessoal": "👤 Persönliches Profil",
+        "tab_register_prof": "🛠️ Professionelles Profil",
         "user_label": "Benutzername (E-Mail oder Nickname)",
         "pass_label": "Passwort",
         "btn_login_submit": "Anmelden",
@@ -743,7 +749,12 @@ if not st.session_state['logged_in']:
         st.markdown(f"<h2 style='text-align: center;'>{t_login['login_title']}</h2>", unsafe_allow_html=True)
         st.markdown(f"<p style='text-align: center; color: gray;'>{t_login['login_sub']}</p>", unsafe_allow_html=True)
         
-        tab_login, tab_reg = st.tabs([t_login['tab_login'], t_login['tab_register']])
+        # Abas separadas explicitamente conforme solicitado pelo usuário
+        tab_login, tab_reg_pessoal, tab_reg_prof = st.tabs([
+            t_login['tab_login'], 
+            t_login['tab_register_pessoal'], 
+            t_login['tab_register_prof']
+        ])
         
         with tab_login:
             with st.form("form_login"):
@@ -760,11 +771,31 @@ if not st.session_state['logged_in']:
                     else:
                         st.error(t_login['login_error'])
                         
-        with tab_reg:
-            with st.form("form_reg"):
-                reg_user = st.text_input(t_login['reg_user_label'])
-                reg_name = st.text_input(t_login['reg_name_label'])
-                reg_pass = st.text_input(t_login['reg_pass_label'], type="password")
+        with tab_reg_pessoal:
+            with st.form("form_reg_pessoal"):
+                st.info("Criação de conta estritamente pessoal (sem exigência de ramo profissional ou oficina).")
+                reg_user_p = st.text_input(t_login['reg_user_label'], key="reg_u_p")
+                reg_name_p = st.text_input(t_login['reg_name_label'], key="reg_n_p")
+                reg_pass_p = st.text_input(t_login['reg_pass_label'], type="password", key="reg_p_p")
+                
+                submit_reg_p = st.form_submit_button(t_login['btn_reg_submit'], use_container_width=True)
+                
+                if submit_reg_p:
+                    if reg_user_p and reg_name_p and reg_pass_p:
+                        # Perfil pessoal usa o ramo padrão "outros" sem forçar mecânica/trabalho
+                        if cadastrar_usuario(reg_user_p, reg_name_p, reg_pass_p, "outros"):
+                            st.success(t_login['reg_success'])
+                        else:
+                            st.error(t_login['reg_error'])
+                    else:
+                        st.warning(t_login['reg_warn'])
+
+        with tab_reg_prof:
+            with st.form("form_reg_prof"):
+                st.info("Criação de conta profissional voltada para o seu setor de mercado.")
+                reg_user_prof = st.text_input(t_login['reg_user_label'], key="reg_u_prof")
+                reg_name_prof = st.text_input(t_login['reg_name_label'], key="reg_n_prof")
+                reg_pass_prof = st.text_input(t_login['reg_pass_label'], type="password", key="reg_p_prof")
                 
                 opcoes_ramos_reg = [
                     ramos_atuais_dict["mecanica"],
@@ -773,18 +804,18 @@ if not st.session_state['logged_in']:
                     ramos_atuais_dict["comercio"],
                     ramos_atuais_dict["outros"]
                 ]
-                reg_branch_ui = st.selectbox(t_login['reg_branch_label'], opcoes_ramos_reg)
+                reg_branch_ui = st.selectbox(t_login['reg_branch_label'], opcoes_ramos_reg, key="reg_branch_prof")
                 
-                submit_reg = st.form_submit_button(t_login['btn_reg_submit'], use_container_width=True)
+                submit_reg_prof = st.form_submit_button(t_login['btn_reg_submit'], use_container_width=True)
                 
-                if submit_reg:
-                    if reg_user and reg_name and reg_pass:
+                if submit_reg_prof:
+                    if reg_user_prof and reg_name_prof and reg_pass_prof:
                         chave_ramo = "outros"
                         for k, v in ramos_atuais_dict.items():
                             if v == reg_branch_ui:
                                 chave_ramo = k
                                 break
-                        if cadastrar_usuario(reg_user, reg_name, reg_pass, chave_ramo):
+                        if cadastrar_usuario(reg_user_prof, reg_name_prof, reg_pass_prof, chave_ramo):
                             st.success(t_login['reg_success'])
                         else:
                             st.error(t_login['reg_error'])
@@ -828,12 +859,12 @@ else:
         st.caption(f"💼 {ramo_usuario_exibicao}")
         st.markdown("---")
 
-        sel_lang = st.selectbox(t['lang_label'], lista_idiomas, index=lista_idiomas.index(st.session_state['idioma']))
+        sel_lang = st.selectbox(t['lang_label'], lista_idiomas, index=lista_idiomas.index(st.session_state['idioma']), key="sb_lang")
         if sel_lang != st.session_state['idioma']:
             st.session_state['idioma'] = sel_lang
             st.rerun()
 
-        sel_moeda = st.selectbox(t['curr_label'], list(MOEDAS.keys()), index=list(MOEDAS.keys()).index(st.session_state['moeda']))
+        sel_moeda = st.selectbox(t['curr_label'], list(MOEDAS.keys()), index=list(MOEDAS.keys()).index(st.session_state['moeda']), key="sb_curr")
         if sel_moeda != st.session_state['moeda']:
             st.session_state['moeda'] = sel_moeda
             st.rerun()
@@ -983,7 +1014,6 @@ else:
             
             desc_lanc = st.text_input(t['desc_label'])
             
-            # Campo extra exclusivo para identificação de veículo/frota se for oficina mecânica
             veiculo_lanc = ""
             if ramo_usuario_db == "mecanica":
                 veiculo_lanc = st.text_input(t['veiculo_label'])
