@@ -349,7 +349,7 @@ TEXTOS = {
         "del_success": "Lançamento excluído com sucesso!"
     },
     "English": {
-        "login_title": "⚡ My Finance Access",
+        "login_title": "My Finance Access",
         "login_sub": "Log in to your account or register.",
         "tab_login": "🔑 Log In",
         "tab_register": "📝 Register",
@@ -421,7 +421,7 @@ TEXTOS = {
         "del_success": "Entry deleted successfully!"
     },
     "Français": {
-        "login_title": "⚡ Accès à Mon Financier",
+        "login_title": "Accès à Mon Financier",
         "login_sub": "Connectez-vous ou créez un compte.",
         "tab_login": "🔑 Connexion",
         "tab_register": "📝 S'inscrire",
@@ -493,7 +493,7 @@ TEXTOS = {
         "del_success": "Entrée supprimée avec succès !"
     },
     "Español": {
-        "login_title": "⚡ Acceso a Mi Financiero",
+        "login_title": "Acceso a Mi Financiero",
         "login_sub": "Inicia sesión en tu cuenta o regístrate.",
         "tab_login": "🔑 Entrar",
         "tab_register": "📝 Registrarse",
@@ -565,7 +565,7 @@ TEXTOS = {
         "del_success": "¡Movimiento eliminado con éxito!"
     },
     "Italiano": {
-        "login_title": "⚡ Accesso a Il Mio Finanziario",
+        "login_title": "Accesso a Il Mio Finanziario",
         "login_sub": "Accedi al tuo account o registrati.",
         "tab_login": "🔑 Accedi",
         "tab_register": "📝 Registrati",
@@ -637,7 +637,7 @@ TEXTOS = {
         "del_success": "Voce eliminata con successo!"
     },
     "Deutsch": {
-        "login_title": "⚡ Mein Finanz-Zugang",
+        "login_title": "Mein Finanz-Zugang",
         "login_sub": "Melden Sie sich an oder registrieren Sie sich.",
         "tab_login": "🔑 Anmelden",
         "tab_register": "📝 Registrieren",
@@ -713,7 +713,8 @@ TEXTOS = {
 MOEDAS = {
     "Real (R$)": "R$",
     "Euro (€)": "€",
-    "Dólar ($)": "$"
+    "Dólar ($)": "$",
+    "Libra (£)": "£)
 }
 
 if 'logged_in' not in st.session_state:
