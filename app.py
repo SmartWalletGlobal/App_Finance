@@ -58,10 +58,11 @@ def init_db():
             valor REAL
         )
     ''')
-    try:
-        cursor.execute("ALTER TABLE lancamentos ADD COLUMN username TEXT")
-    except:
-        pass
+    for col, col_type in [("username", "TEXT"), ("veiculo", "TEXT")]:
+        try:
+            cursor.execute(f"ALTER TABLE lancamentos ADD COLUMN {col} {col_type}")
+        except:
+            pass
 
     conn.commit()
     conn.close()
@@ -142,11 +143,11 @@ def carregar_dados(username):
     conn.close()
     return df
 
-def salvar_lancamento(username, data, descricao, categoria, tipo, valor):
+def salvar_lancamento(username, data, descricao, categoria, tipo, valor, veiculo=""):
     conn = sqlite3.connect('financeiro.db')
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO lancamentos (username, data, descricao, categoria, tipo, valor) VALUES (?, ?, ?, ?, ?, ?)",
-                   (username, data, descricao, categoria, tipo, valor))
+    cursor.execute("INSERT INTO lancamentos (username, data, descricao, categoria, tipo, valor, veiculo) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                   (username, data, descricao, categoria, tipo, valor, veiculo))
     conn.commit()
     conn.close()
 
@@ -277,7 +278,7 @@ TRADUCOES_RAMOS = {
 
 TEXTOS = {
     "Português": {
-        "login_title": "Acesso ao Meu Financeiro",
+        "login_title": "⚡ Acesso ao Meu Financeiro",
         "login_sub": "Entre com sua conta ou cadastre-se com seu nome completo.",
         "tab_login": "🔑 Entrar",
         "tab_register": "📝 Criar Conta",
@@ -317,6 +318,7 @@ TEXTOS = {
         "value_label": "Valor",
         "cat_label": "Categoria Principal",
         "desc_label": "Descrição Específica",
+        "veiculo_label": "Veículo / Frota / Placa (Opcional)",
         "save_btn": "🚀 Salvar Lançamento",
         "success_msg": "Lançamento salvo com sucesso!",
         "warn_desc": "Por favor, preencha a descrição.",
@@ -349,7 +351,7 @@ TEXTOS = {
         "del_success": "Lançamento excluído com sucesso!"
     },
     "English": {
-        "login_title": "My Finance Access",
+        "login_title": "⚡ My Finance Access",
         "login_sub": "Log in to your account or register.",
         "tab_login": "🔑 Log In",
         "tab_register": "📝 Register",
@@ -389,6 +391,7 @@ TEXTOS = {
         "value_label": "Value",
         "cat_label": "Main Category",
         "desc_label": "Description",
+        "veiculo_label": "Vehicle / Fleet / Plate (Optional)",
         "save_btn": "🚀 Save Entry",
         "success_msg": "Entry saved successfully!",
         "warn_desc": "Please fill in the description.",
@@ -421,7 +424,7 @@ TEXTOS = {
         "del_success": "Entry deleted successfully!"
     },
     "Français": {
-        "login_title": "Accès à Mon Financier",
+        "login_title": "⚡ Accès à Mon Financier",
         "login_sub": "Connectez-vous ou créez un compte.",
         "tab_login": "🔑 Connexion",
         "tab_register": "📝 S'inscrire",
@@ -461,6 +464,7 @@ TEXTOS = {
         "value_label": "Valeur",
         "cat_label": "Catégorie Principale",
         "desc_label": "Description",
+        "veiculo_label": "Véhicule / Flotte / Plaque (Optionnel)",
         "save_btn": "🚀 Enregistrer",
         "success_msg": "Enregistré avec succès !",
         "warn_desc": "Veuillez remplir la description.",
@@ -493,7 +497,7 @@ TEXTOS = {
         "del_success": "Entrée supprimée avec succès !"
     },
     "Español": {
-        "login_title": "Acceso a Mi Financiero",
+        "login_title": "⚡ Acceso a Mi Financiero",
         "login_sub": "Inicia sesión en tu cuenta o regístrate.",
         "tab_login": "🔑 Entrar",
         "tab_register": "📝 Registrarse",
@@ -533,6 +537,7 @@ TEXTOS = {
         "value_label": "Valor",
         "cat_label": "Categoría Principal",
         "desc_label": "Descripción",
+        "veiculo_label": "Vehículo / Flota / Patente (Opcional)",
         "save_btn": "🚀 Guardar Movimiento",
         "success_msg": "¡Movimiento guardado con éxito!",
         "warn_desc": "Por favor llena la descripción.",
@@ -565,7 +570,7 @@ TEXTOS = {
         "del_success": "¡Movimiento eliminado con éxito!"
     },
     "Italiano": {
-        "login_title": "Accesso a Il Mio Finanziario",
+        "login_title": "⚡ Accesso a Il Mio Finanziario",
         "login_sub": "Accedi al tuo account o registrati.",
         "tab_login": "🔑 Accedi",
         "tab_register": "📝 Registrati",
@@ -605,6 +610,7 @@ TEXTOS = {
         "value_label": "Valore",
         "cat_label": "Categoria Principale",
         "desc_label": "Descrizione",
+        "veiculo_label": "Veicolo / Flotta / Targa (Opzionale)",
         "save_btn": "🚀 Salva Voce",
         "success_msg": "Salvato con successo!",
         "warn_desc": "Compila la descrizione.",
@@ -637,7 +643,7 @@ TEXTOS = {
         "del_success": "Voce eliminata con successo!"
     },
     "Deutsch": {
-        "login_title": "Mein Finanz-Zugang",
+        "login_title": "⚡ Mein Finanz-Zugang",
         "login_sub": "Melden Sie sich an oder registrieren Sie sich.",
         "tab_login": "🔑 Anmelden",
         "tab_register": "📝 Registrieren",
@@ -677,6 +683,7 @@ TEXTOS = {
         "value_label": "Wert",
         "cat_label": "Hauptkategorie",
         "desc_label": "Beschreibung",
+        "veiculo_label": "Fahrzeug / Flotte / Kennzeichen (Optional)",
         "save_btn": "🚀 Eintrag Speichern",
         "success_msg": "Erfolgreich gespeichert!",
         "warn_desc": "Bitte Beschreibung ausfüllen.",
@@ -713,8 +720,7 @@ TEXTOS = {
 MOEDAS = {
     "Real (R$)": "R$",
     "Euro (€)": "€",
-    "Dólar ($)": "$",
-    "Libra (£)": "£"
+    "Dólar ($)": "$"
 }
 
 if 'logged_in' not in st.session_state:
@@ -768,9 +774,6 @@ if not st.session_state['logged_in']:
                     ramos_atuais_dict["outros"]
                 ]
                 reg_branch_ui = st.selectbox(t_login['reg_branch_label'], opcoes_ramos_reg)
-                
-                # Mapeia de volta para a chave padrão interna para salvar no banco
-                mapa_inverso_ramos = {v: k for k, v in ramos_atuais_dict.items() if k in ["mecanica", "obras", "ti", "comercio", "outros"]}
                 
                 submit_reg = st.form_submit_button(t_login['btn_reg_submit'], use_container_width=True)
                 
@@ -944,13 +947,13 @@ else:
                     st.info("Nenhuma despesa registrada neste mês.")
 
             st.subheader(t['biz_report'])
-            st.dataframe(df_mes[['data', 'tipo', 'categoria', 'descricao', 'valor']], use_container_width=True)
+            colunas_relatorio = ['data', 'tipo', 'categoria', 'descricao', 'veiculo', 'valor'] if 'veiculo' in df_mes.columns else ['data', 'tipo', 'categoria', 'descricao', 'valor']
+            st.dataframe(df_mes[[c for c in colunas_relatorio if c in df_mes.columns]], use_container_width=True)
 
     elif menu == t['nav_new']:
         st.title(t['new_title'])
         st.write(t['new_sub'])
 
-        # Seleciona as listas de categorias com base no ramo do usuário e idioma atual
         if ramo_usuario_db == "mecanica":
             lista_desp_cat = ramos_dict["cat_mecanica_desp"]
             lista_rec_cat = ramos_dict["cat_mecanica_rec"]
@@ -980,10 +983,15 @@ else:
             
             desc_lanc = st.text_input(t['desc_label'])
             
+            # Campo extra exclusivo para identificação de veículo/frota se for oficina mecânica
+            veiculo_lanc = ""
+            if ramo_usuario_db == "mecanica":
+                veiculo_lanc = st.text_input(t['veiculo_label'])
+            
             submit_lanc = st.form_submit_button(t['save_btn'], use_container_width=True)
             if submit_lanc:
                 if desc_lanc.strip() != "":
-                    salvar_lancamento(st.session_state['username'], str(data_lanc), desc_lanc, cat_lanc, tipo_lanc_ui, valor_lanc)
+                    salvar_lancamento(st.session_state['username'], str(data_lanc), desc_lanc, cat_lanc, tipo_lanc_ui, valor_lanc, veiculo_lanc)
                     st.success(t['success_msg'])
                 else:
                     st.warning(t['warn_desc'])
@@ -1019,7 +1027,6 @@ else:
             ramos_dict["outros"]
         ]
         
-        # Encontra o índice atual para o selectbox
         ramo_atual_ui = ramos_dict.get(ramo_atual_db, ramos_dict["outros"])
         idx_ramo = opcoes_ramos_perfil.index(ramo_atual_ui) if ramo_atual_ui in opcoes_ramos_perfil else 0
 
@@ -1039,7 +1046,6 @@ else:
                 if foto_upload is not None:
                     foto_blob = foto_upload.read()
                 
-                # Mapeia a seleção de volta para a chave padrão interna
                 nova_chave_ramo = "outros"
                 for k, v in ramos_dict.items():
                     if v == novo_ramo_ui:
