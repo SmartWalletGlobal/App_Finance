@@ -784,7 +784,8 @@ TEXTOS = {
 MOEDAS = {
     "Real (R$)": "R$",
     "Euro (€)": "€",
-    "Dólar ($)": "$"
+    "Dólar ($)": "$",
+    "Libra (£)": "£"
 }
 
 if 'logged_in' not in st.session_state:
