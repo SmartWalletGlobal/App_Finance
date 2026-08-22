@@ -980,7 +980,7 @@ with col2:
     st.metric(label="💸 Despesas do Mês", value=f"€ {total_despesas:,.2f}")
     st.metric(label="📈 Investimento do Mês", value=f"€ {investimento_mes:,.2f}")
     st.metric(label="🏦 Saldo Real na Conta", value=f"€ {saldo_real_conta:,.2f}")
-            st.markdown("---")
+    st.markdown("---")
             c1, c2 = st.columns(2)
             with c1:
                 df_desp = df_mes[df_mes['tipo_exibicao'] == ramos_dict["tipo_despesa"]]
