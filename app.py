@@ -857,7 +857,7 @@ else:
         else:
             st.write("👤")
 
-        st.markdown(f"### ⚡ Olá, {nome_completo_user}")
+        st.markdown(f"### Olá, {nome_completo_user}")
         st.caption(f"💼 {ramo_usuario_exibicao}")
         st.markdown("---")
 
@@ -968,15 +968,18 @@ else:
             """, unsafe_allow_html=True)
 
             col1, col2 = st.columns(2)
-            with col1:
-                st.metric(t['total_rev'], f"{simbolo_moeda} {total_receitas:,.2f}")
-                st.metric(t['total_exp'], f"{simbolo_moeda} {total_despesas:,.2f}")
-                st.metric("⚡ Saldo do Mês", f"{simbolo_moeda} {saldo_mes:,.2f}")
-            with col2:
-                st.metric("📈 Investimento do Mês", f"{simbolo_moeda} {investimento_mes:,.2f}")
-                st.metric("💎 Total Investido (Acumulado)", f"{simbolo_moeda} {investimento_total:,.2f}")
-                st.metric("🏦 Saldo Real na Conta (Acumulado)", f"{simbolo_moeda} {saldo_real_conta:,.2f}")
 
+with col1:
+    st.metric(label="💰 Receitas do Mês", value=f"€ {total_receitas:,.2f}")
+    st.metric(label="⚡ Saldo do Mês", value=f"€ {saldo_mes:,.2f}")
+    st.metric(
+        label="💎 Total Investido (Acumulado)", value=f"€ {investimento_total:,.2f}"
+    )
+
+with col2:
+    st.metric(label="💸 Despesas do Mês", value=f"€ {total_despesas:,.2f}")
+    st.metric(label="📈 Investimento do Mês", value=f"€ {investimento_mes:,.2f}")
+    st.metric(label="🏦 Saldo Real na Conta", value=f"€ {saldo_real_conta:,.2f}")
             st.markdown("---")
             c1, c2 = st.columns(2)
             with c1:
