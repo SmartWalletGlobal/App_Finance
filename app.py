@@ -107,8 +107,7 @@ def salvar_lancamento(username, data, descricao, categoria, tipo, valor, veiculo
             "descricao": descricao,
             "categoria": categoria,
             "tipo": tipo,
-            "valor": float(valor),
-            "veiculo": veiculo
+            "valor": float(valor)
         }
         supabase.table("lancamentos").insert(dados).execute()
         return True
