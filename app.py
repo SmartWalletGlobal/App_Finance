@@ -50,8 +50,7 @@ def cadastrar_usuario(username, nome_completo, senha, ramo_atividade="Outros"):
     
     response = supabase.table("usuarios").insert(dados).execute()
     return response
-    }
-
+    
 def autenticar_usuario(username, senha):
     try:
         response = supabase.table("usuarios").select("senha").eq("username", username).execute()
