@@ -36,7 +36,6 @@ def init_db():
     url = st.secrets["SUPABASE_URL"]
     key = st.secrets["SUPABASE_KEY"]
     supabase = create_client(url, key)
-    
 
 init_db()
 
@@ -125,7 +124,7 @@ def deletar_lancamento(id_lancamento, username):
         return True
     except Exception as e:
         return False
-
+        
 TRADUCOES_RAMOS = {
     "Português": {
         "mecanica": "🛠️ Mecânica / Oficina",
