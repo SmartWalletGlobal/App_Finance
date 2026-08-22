@@ -1083,9 +1083,20 @@ else:
         st.markdown("<br>", unsafe_allow_html=True)
         if st.button(t['save_btn'], use_container_width=True):
             if desc_lanc.strip() != "":
-                salvar_lancamento(st.session_state['username'], str(data_lanc), desc_lanc, cat_lanc, tipo_lanc_ui, valor_lanc, veiculo_lanc)
-                st.success(t['success_msg'])
-                st.rerun()
+                sucesso = salvar_lancamento(
+                    st.session_state['username'], 
+                    str(data_lanc), 
+                    desc_lanc, 
+                    cat_lanc, 
+                    tipo_lanc_ui, 
+                    float(valor_lanc), 
+                    veiculo_lanc
+                )
+                if sucesso:
+                    st.success(t['success_msg'])
+                    st.rerun()
+                else:
+                    st.error("Erro ao salvar no banco de dados. Verifique a tabela 'lancamentos' no Supabase.")
             else:
                 st.warning(t['warn_desc'])
 
