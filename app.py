@@ -41,16 +41,16 @@ def init_db():
 init_db()
 
 def cadastrar_usuario(username, nome_completo, senha, ramo_atividade="Outros"):
-    conn = sqlite3.connect('financeiro.db')
-    cursor = conn.cursor()
     try:
-        cursor.execute("INSERT INTO usuarios (username, nome_completo, senha, ramo_atividade) VALUES (?, ?, ?, ?)", 
-                       (username, nome_completo, make_hash(senha), ramo_atividade))
-        conn.commit()
-        conn.close()
+        dados = {
+            "username": username,
+            "nome_completo": nome_completo,
+            "senha": make_hash(senha),
+            "ramo_atividade": ramo_atividade
+        }
+        response = supabase.table("usuarios").insert(dados).execute()
         return True
-    except:
-        conn.close()
+    except Exception as e:
         return False
 
 def autenticar_usuario(username, senha):
