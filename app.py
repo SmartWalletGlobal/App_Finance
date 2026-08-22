@@ -40,17 +40,14 @@ def init_db():
 init_db()
 
 def cadastrar_usuario(username, nome_completo, senha, ramo_atividade="Outros"):
-    try:
-        dados = {
-            "username": username,
-            "nome_completo": nome_completo,
-            "senha": make_hash(senha),
-            "ramo_atividade": ramo_atividade
-        }
-        response = supabase.table("usuarios").insert(dados).execute()
-        return True
-    except Exception as e:
-        return False
+    dados = {
+        "username": username,
+        "nome_completo": nome_completo,
+        "senha": make_hash(senha),
+        "ramo_atividade": ramo_atividade
+    }
+    response = supabase.table("usuarios").insert(dados).execute()
+    return True
 
 def autenticar_usuario(username, senha):
     try:
