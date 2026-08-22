@@ -927,7 +927,6 @@ else:
 
         st.markdown("---")
         
-        # Monta dinamicamente a navegação dependendo se o perfil é estritamente pessoal ou profissional
         if ramo_usuario_db == "outros":
             opcoes_menu = [
                 t['nav_overview'],
@@ -985,15 +984,26 @@ else:
             df_inv_total = df[df['categoria'].str.contains("Investimento|Reserva", case=False, na=False)]
             investimento_total = df_inv_total['valor'].sum() if not df_inv_total.empty else 0.0
 
-            col1, col2, col3 = st.columns(3)
-            col1.metric(t['total_rev'], f"{simbolo_moeda} {total_receitas:,.2f}")
-            col2.metric(t['total_exp'], f"{simbolo_moeda} {total_despesas:,.2f}")
-            col3.metric("⚡ Saldo do Mês", f"{simbolo_moeda} {saldo_mes:,.2f}")
+            # Força o layout a exibir as métricas em duas colunas lado a lado no celular e PC
+            st.markdown("""
+                <style>
+                    [data-testid="column"] {
+                        width: calc(50% - 1rem) !important;
+                        flex: 1 1 calc(50% - 1rem) !important;
+                        min-width: calc(50% - 1rem) !important;
+                    }
+                </style>
+            """, unsafe_allow_html=True)
 
-            col4, col5, col6 = st.columns(3)
-            col4.metric("📈 Investimento do Mês", f"{simbolo_moeda} {investimento_mes:,.2f}")
-            col5.metric("💎 Total Investido (Acumulado)", f"{simbolo_moeda} {investimento_total:,.2f}")
-            col6.metric("🏦 Saldo Real na Conta (Acumulado)", f"{simbolo_moeda} {saldo_real_conta:,.2f}")
+            col1, col2 = st.columns(2)
+            with col1:
+                st.metric(t['total_rev'], f"{simbolo_moeda} {total_receitas:,.2f}")
+                st.metric(t['total_exp'], f"{simbolo_moeda} {total_despesas:,.2f}")
+                st.metric("⚡ Saldo do Mês", f"{simbolo_moeda} {saldo_mes:,.2f}")
+            with col2:
+                st.metric("📈 Investimento do Mês", f"{simbolo_moeda} {investimento_mes:,.2f}")
+                st.metric("💎 Total Investido (Acumulado)", f"{simbolo_moeda} {investimento_total:,.2f}")
+                st.metric("🏦 Saldo Real na Conta (Acumulado)", f"{simbolo_moeda} {saldo_real_conta:,.2f}")
 
             st.markdown("---")
             c1, c2 = st.columns(2)
