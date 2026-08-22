@@ -953,6 +953,7 @@ else:
             df_inv_total = df[df['categoria'].str.contains("investimento|reserva", case=False, na=False)]
             investimento_total = df_inv_total['valor'].sum() if not df_inv_total.empty else 0.0
 
+            # Organizado em 2 colunas (Coluna A e Coluna B) conforme solicitado
             col1, col2 = st.columns(2)
             
             with col1:
@@ -979,7 +980,6 @@ else:
             with c2:
                 if not df_mes.empty:
                     fig_bar = px.bar(df_mes, x='data', y='valor', color='tipo_exibicao', title=t['bar_title'], barmode='group')
-                    # BLOQUEIO DE ZOOM APLICADO AQUI:
                     fig_bar.update_layout(dragmode=False, xaxis=dict(fixedrange=True), yaxis=dict(fixedrange=True))
                     st.plotly_chart(fig_bar, use_container_width=True, config={'displayModeBar': False, 'scrollZoom': False})
                 else:
