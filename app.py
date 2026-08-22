@@ -956,16 +956,39 @@ else:
             meses_disponiveis = sorted(df["mes_ano"].unique(), reverse=True)
             mes_selecionado = st.selectbox("📅 Selecione o Mês", meses_disponiveis)
             
+            # 1. Cálculo do mês selecionado
             df_mes = df[df["mes_ano"] == mes_selecionado]
 
             total_receitas = df_mes[df_mes['tipo'] == ramos_dict["tipo_receita"]]['valor'].sum()
             total_despesas = df_mes[df_mes['tipo'] == ramos_dict["tipo_despesa"]]['valor'].sum()
-            saldo = total_receitas - total_despesas
+            
+            # Filtra investimentos do mês (considerando categorias que contenham investimento/reserva)
+            df_inv_mes = df_mes[df_mes['categoria'].str.contains("Investimento|Reserva", case=False, na=False)]
+            investimento_mes = df_inv_mes['valor'].sum() if not df_inv_mes.empty else 0.0
 
+            saldo_mes = total_receitas - total_despesas
+
+            # 2. Cálculo do Acumulado Geral (Saldo Real na Conta até o mês selecionado)
+            # Filtra todos os lançamentos até o mês/ano selecionado para somar o histórico real
+            df_historico = df[df["mes_ano"] <= mes_selecionado]
+            hist_rec = df_historico[df_historico['tipo'] == ramos_dict["tipo_receita"]]['valor'].sum()
+            hist_esp = df_historico[df_historico['tipo'] == ramos_dict["tipo_despesa"]]['valor'].sum()
+            saldo_real_conta = hist_rec - hist_esp
+
+            # 3. Cálculo do Total Acumulado de Investimentos de todos os tempos
+            df_inv_total = df[df['categoria'].str.contains("Investimento|Reserva", case=False, na=False)]
+            investimento_total = df_inv_total['valor'].sum() if not df_inv_total.empty else 0.0
+
+            # Exibição das Métricas em duas linhas para ficar bem organizado
             col1, col2, col3 = st.columns(3)
             col1.metric(t['total_rev'], f"{simbolo_moeda} {total_receitas:,.2f}")
             col2.metric(t['total_exp'], f"{simbolo_moeda} {total_despesas:,.2f}")
-            col3.metric(t['balance'], f"{simbolo_moeda} {saldo:,.2f}")
+            col3.metric("⚡ Saldo do Mês", f"{simbolo_moeda} {saldo_mes:,.2f}")
+
+            col4, col5, col6 = st.columns(3)
+            col4.metric("📈 Investimento do Mês", f"{simbolo_moeda} {investimento_mes:,.2f}")
+            col5.metric("💎 Total Investido (Acumulado)", f"{simbolo_moeda} {investimento_total:,.2f}")
+            col6.metric("🏦 Saldo Real na Conta (Acumulado)", f"{simbolo_moeda} {saldo_real_conta:,.2f}")
 
             st.markdown("---")
             c1, c2 = st.columns(2)
@@ -1058,7 +1081,6 @@ else:
             lista_desp_cat = ramos_dict["cat_outros_desp"]
             lista_rec_cat = ramos_dict["cat_outros_rec"]
 
-        # Abordagem sem st.form para separar perfeitamente as categorias instantaneamente
         data_lanc = st.date_input(t['date_label'], datetime.date.today())
         
         tipo_opcoes = [ramos_dict["tipo_despesa"], ramos_dict["tipo_receita"]]
@@ -1066,7 +1088,6 @@ else:
         
         valor_lanc = st.number_input(f"{t['value_label']} ({simbolo_moeda})", min_value=0.0, format="%.2f")
         
-        # Filtro estrito de categorias separadas por Tipo
         if tipo_lanc_ui == ramos_dict["tipo_receita"]:
             opcoes_cat = lista_rec_cat
         else:
