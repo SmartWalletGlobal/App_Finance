@@ -337,12 +337,24 @@ TEXTOS = {
         "rec_cat_biz": "📊 Receitas por Categoria (Negócio)",
         "origin_rev": "Origem do Faturamento",
         "op_costs_biz": "🛠️ Custos Operacionais / Insumos",
-        "highest_costs": "Maiores Costos por Categoria",
+        "highest_costs": "Maiores Custos por Categoria",
         "biz_report": "📋 Relatório Analítico de Lançamentos do Negócio",
         "id_del_label": "ID do lançamento para excluir",
         "del_success": "Lançamento excluído com sucesso!",
         "info_pessoal": "Criação de conta estritamente pessoal (sem exigência de ramo profissional ou oficina).",
-        "info_prof": "Criação de conta profissional voltada para o seu setor de mercado."
+        "info_prof": "Criação de conta profissional voltada para o seu setor de mercado.",
+        "hello": "Olá",
+        "nav_menu_title": "Navegação",
+        "select_month": "📅 Selecione o Mês",
+        "inv_month": "📈 Investimento do Mês",
+        "total_inv": "💎 Total Investido (Acumulado)",
+        "real_balance": "🏦 Saldo Real na Conta (Acumulado)",
+        "tbl_data": "Data",
+        "tbl_tipo": "Tipo",
+        "tbl_cat": "Categoria",
+        "tbl_desc": "Descrição",
+        "tbl_valor": "Valor",
+        "tbl_veiculo": "Veículo"
     },
     "English": {
         "login_title": "My Finance Access",
@@ -418,7 +430,19 @@ TEXTOS = {
         "id_del_label": "Entry ID to delete",
         "del_success": "Entry deleted successfully!",
         "info_pessoal": "Strictly personal account creation (no professional or workshop branch required).",
-        "info_prof": "Professional account creation tailored to your market sector."
+        "info_prof": "Professional account creation tailored to your market sector.",
+        "hello": "Hello",
+        "nav_menu_title": "Navigation",
+        "select_month": "📅 Select Month",
+        "inv_month": "📈 Month Investment",
+        "total_inv": "💎 Total Invested (Accumulated)",
+        "real_balance": "🏦 Real Account Balance (Accumulated)",
+        "tbl_data": "Date",
+        "tbl_tipo": "Type",
+        "tbl_cat": "Category",
+        "tbl_desc": "Description",
+        "tbl_valor": "Value",
+        "tbl_veiculo": "Vehicle"
     },
     "Français": {
         "login_title": "Accès à Mon Financier",
@@ -494,7 +518,19 @@ TEXTOS = {
         "id_del_label": "ID de l'entrée à supprimer",
         "del_success": "Entrée supprimée avec succès !",
         "info_pessoal": "Création de compte strictement personnel (sans exigence de secteur professionnel ou d'atelier).",
-        "info_prof": "Création de compte professionnel adapté à votre secteur de marché."
+        "info_prof": "Création de compte professionnel adapté à votre secteur de marché.",
+        "hello": "Bonjour",
+        "nav_menu_title": "Navigation",
+        "select_month": "📅 Sélectionner le Mois",
+        "inv_month": "📈 Investissement du Mois",
+        "total_inv": "💎 Total Investi (Cumulé)",
+        "real_balance": "🏦 Solde Réel en Compte (Cumulé)",
+        "tbl_data": "Date",
+        "tbl_tipo": "Type",
+        "tbl_cat": "Catégorie",
+        "tbl_desc": "Description",
+        "tbl_valor": "Valeur",
+        "tbl_veiculo": "Véhicule"
     },
     "Español": {
         "login_title": "Acceso a Mi Financiero",
@@ -570,7 +606,19 @@ TEXTOS = {
         "id_del_label": "ID del movimiento a eliminar",
         "del_success": "¡Movimiento eliminado con éxito!",
         "info_pessoal": "Creación de cuenta estrictamente personal (sin requerir sector profesional o taller).",
-        "info_prof": "Creación de cuenta profesional adaptada a tu sector de mercado."
+        "info_prof": "Creación de cuenta profesional adaptada a tu sector de mercado.",
+        "hello": "Hola",
+        "nav_menu_title": "Navegación",
+        "select_month": "📅 Seleccionar Mes",
+        "inv_month": "📈 Inversión del Mes",
+        "total_inv": "💎 Total Invertido (Acumulado)",
+        "real_balance": "🏦 Saldo Real en Cuenta (Acumulado)",
+        "tbl_data": "Fecha",
+        "tbl_tipo": "Tipo",
+        "tbl_cat": "Categoría",
+        "tbl_desc": "Descripción",
+        "tbl_valor": "Valor",
+        "tbl_veiculo": "Vehículo"
     },
     "Italiano": {
         "login_title": "Accesso a Il Mio Finanziario",
@@ -646,7 +694,19 @@ TEXTOS = {
         "id_del_label": "ID voce da eliminare",
         "del_success": "Voce eliminata con successo!",
         "info_pessoal": "Creazione account strettamente personale (senza requisiti di settore professionale o officina).",
-        "info_prof": "Creazione account professionale su misura per il tuo settore di mercato."
+        "info_prof": "Creazione account professionale su misura per il tuo settore di mercato.",
+        "hello": "Ciao",
+        "nav_menu_title": "Navigazione",
+        "select_month": "📅 Seleziona Mese",
+        "inv_month": "📈 Investimento del Mese",
+        "total_inv": "💎 Totale Investito (Accumulato)",
+        "real_balance": "🏦 Saldo Reale in Conto (Accumulato)",
+        "tbl_data": "Data",
+        "tbl_tipo": "Tipo",
+        "tbl_cat": "Categoria",
+        "tbl_desc": "Descrizione",
+        "tbl_valor": "Valore",
+        "tbl_veiculo": "Veicolo"
     },
     "Deutsch": {
         "login_title": "Mein Finanz-Zugang",
@@ -722,7 +782,19 @@ TEXTOS = {
         "id_del_label": "Eintrags-ID zum Löschen",
         "del_success": "Eintrag erfolgreich gelöscht!",
         "info_pessoal": "Streng persönliches Konto (kein Berufszweig oder Werkstatt erforderlich).",
-        "info_prof": "Professionelles Konto zugeschnitten auf Ihre Branche."
+        "info_prof": "Professionelles Konto zugeschnitten auf Ihre Branche.",
+        "hello": "Hallo",
+        "nav_menu_title": "Navigation",
+        "select_month": "📅 Monat Auswählen",
+        "inv_month": "📈 Monatliche Investition",
+        "total_inv": "💎 Gesamte Investition (Kumuliert)",
+        "real_balance": "🏦 Echter Kontostand (Kumuliert)",
+        "tbl_data": "Datum",
+        "tbl_tipo": "Typ",
+        "tbl_cat": "Kategorie",
+        "tbl_desc": "Beschreibung",
+        "tbl_valor": "Wert",
+        "tbl_veiculo": "Fahrzeug"
     }
 }
 
@@ -856,7 +928,7 @@ else:
         else:
             st.write("👤")
 
-        st.markdown(f"### ⚡ Olá, {nome_completo_user}")
+        st.markdown(f"### ⚡ {t['hello']}, {nome_completo_user}")
         st.caption(f"💼 {ramo_usuario_exibicao}")
         st.markdown("---")
 
@@ -888,7 +960,7 @@ else:
                 t['nav_profile']
             ]
 
-        menu = st.radio("Navegação", opcoes_menu)
+        menu = st.radio(t['nav_menu_title'], opcoes_menu)
 
         st.markdown("<br><br>", unsafe_allow_html=True)
         if st.button(t['logout'], use_container_width=True):
@@ -933,7 +1005,7 @@ else:
             df["mes_ano"] = df["data"].dt.strftime("%Y-%m")
             
             meses_disponiveis = sorted(df["mes_ano"].unique(), reverse=True)
-            mes_selecionado = st.selectbox("📅 Selecione o Mês", meses_disponiveis)
+            mes_selecionado = st.selectbox(t['select_month'], meses_disponiveis)
             
             df_mes = df[df["mes_ano"] == mes_selecionado]
 
@@ -953,18 +1025,17 @@ else:
             df_inv_total = df[df['categoria'].str.contains("investimento|reserva", case=False, na=False)]
             investimento_total = df_inv_total['valor'].sum() if not df_inv_total.empty else 0.0
 
-            # Organizado em 2 colunas (Coluna A e Coluna B) conforme solicitado
             col1, col2 = st.columns(2)
             
             with col1:
                 st.metric(t['total_rev'], f"{simbolo_moeda} {total_receitas:,.2f}")
                 st.metric(t['total_exp'], f"{simbolo_moeda} {total_despesas:,.2f}")
-                st.metric("⚡ Saldo do Mês", f"{simbolo_moeda} {saldo_mes:,.2f}")
+                st.metric(t['balance'], f"{simbolo_moeda} {saldo_mes:,.2f}")
                 
             with col2:
-                st.metric("📈 Investimento do Mês", f"{simbolo_moeda} {investimento_mes:,.2f}")
-                st.metric("💎 Total Investido (Acumulado)", f"{simbolo_moeda} {investimento_total:,.2f}")
-                st.metric("🏦 Saldo Real na Conta (Acumulado)", f"{simbolo_moeda} {saldo_real_conta:,.2f}")
+                st.metric(t['inv_month'], f"{simbolo_moeda} {investimento_mes:,.2f}")
+                st.metric(t['total_inv'], f"{simbolo_moeda} {investimento_total:,.2f}")
+                st.metric(t['real_balance'], f"{simbolo_moeda} {saldo_real_conta:,.2f}")
 
             st.markdown("---")
             c1, c2 = st.columns(2)
@@ -987,7 +1058,7 @@ else:
 
             st.subheader(t['recent_list'])
             df_exibicao_tabela = df_mes[['data', 'tipo_exibicao', 'categoria_exibicao', 'descricao', 'valor']].copy()
-            df_exibicao_tabela.columns = ['Data', 'Tipo', 'Categoria', 'Descrição', 'Valor']
+            df_exibicao_tabela.columns = [t['tbl_data'], t['tbl_tipo'], t['tbl_cat'], t['tbl_desc'], t['tbl_valor']]
             st.dataframe(df_exibicao_tabela, use_container_width=True)
 
     elif menu == t['nav_business']:
@@ -1001,7 +1072,7 @@ else:
             df["mes_ano"] = df["data"].dt.strftime("%Y-%m")
             
             meses_disponiveis = sorted(df["mes_ano"].unique(), reverse=True)
-            mes_selecionado = st.selectbox("📅 Mês de Análise (Business)", meses_disponiveis, key="sel_mes_biz")
+            mes_selecionado = st.selectbox(t['select_month'], meses_disponiveis, key="sel_mes_biz")
             
             df_mes = df[df["mes_ano"] == mes_selecionado]
 
@@ -1042,7 +1113,7 @@ else:
             st.subheader(t['biz_report'])
             colunas_relatorio = ['data', 'tipo_exibicao', 'categoria_exibicao', 'descricao', 'veiculo', 'valor'] if 'veiculo' in df_mes.columns else ['data', 'tipo_exibicao', 'categoria_exibicao', 'descricao', 'valor']
             df_biz_tab = df_mes[[c for c in colunas_relatorio if c in df_mes.columns]].copy()
-            df_biz_tab.columns = ['Data', 'Tipo', 'Categoria', 'Descrição', 'Veículo', 'Valor'] if 'veiculo' in colunas_relatorio else ['Data', 'Tipo', 'Categoria', 'Descrição', 'Valor']
+            df_biz_tab.columns = [t['tbl_data'], t['tbl_tipo'], t['tbl_cat'], t['tbl_desc'], t['tbl_veiculo'], t['tbl_valor']] if 'veiculo' in colunas_relatorio else [t['tbl_data'], t['tbl_tipo'], t['tbl_cat'], t['tbl_desc'], t['tbl_valor']]
             st.dataframe(df_biz_tab, use_container_width=True)
 
     elif menu == t['nav_new']:
@@ -1109,7 +1180,7 @@ else:
             st.info(t['no_data'])
         else:
             df_gerenciar = df[['id', 'data', 'tipo_exibicao', 'categoria_exibicao', 'descricao', 'valor']].copy()
-            df_gerenciar.columns = ['ID', 'Data', 'Tipo', 'Categoria', 'Descrição', 'Valor']
+            df_gerenciar.columns = ['ID', t['tbl_data'], t['tbl_tipo'], t['tbl_cat'], t['tbl_desc'], t['tbl_valor']]
             st.dataframe(df_gerenciar, use_container_width=True)
             id_del = st.selectbox(t['id_del_label'], df['id'].tolist())
             if st.button(t['del_btn']):
