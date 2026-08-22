@@ -38,42 +38,51 @@ def init_db():
 
 init_db()
 
-def cadastrar_usuario(username, nome_completo, senha, ramo_atividade="Outros"):
+def cadastrar_usuario(username, nome_completo, senha, ramo_atividade="Outros", idioma="Português", moeda="Real (R$)"):
     dados = {
         "username": username,
         "nome_completo": nome_completo,
         "senha": make_hash(senha),
-        "ramo_atividade": ramo_atividade
+        "ramo_atividade": ramo_atividade,
+        "idioma": idioma,
+        "moeda": moeda
     }
     supabase.table("usuarios").insert(dados).execute()
     return True
 
 def autenticar_usuario(username, senha):
     try:
-        response = supabase.table("usuarios").select("senha").eq("username", username).execute()
+        response = supabase.table("usuarios").select("senha, idioma, moeda").eq("username", username).execute()
         if response.data and len(response.data) > 0:
-            senha_cadastrada = response.data[0]["senha"]
-            return check_hash(senha, senha_cadastrada)
+            user = response.data[0]
+            senha_cadastrada = user["senha"]
+            if check_hash(senha, senha_cadastrada):
+                # Carrega as preferências salvas no banco para a sessão
+                st.session_state['idioma'] = user.get("idioma", "Português")
+                st.session_state['moeda'] = user.get("moeda", "Real (R$)")
+                return True
         return False
     except Exception as e:
         return False
 
 def obter_dados_usuario(username):
     try:
-        response = supabase.table("usuarios").select("nome_completo, endereco, foto_perfil, ramo_atividade").eq("username", username).execute()
+        response = supabase.table("usuarios").select("nome_completo, endereco, foto_perfil, ramo_atividade, idioma, moeda").eq("username", username).execute()
         if response.data and len(response.data) > 0:
             user = response.data[0]
-            return (user.get("nome_completo"), user.get("endereco"), user.get("foto_perfil"), user.get("ramo_atividade"))
+            return (user.get("nome_completo"), user.get("endereco"), user.get("foto_perfil"), user.get("ramo_atividade"), user.get("idioma"), user.get("moeda"))
         return None
     except Exception as e:
         return None
 
-def atualizar_perfil(username, novo_nome, novo_endereco, nova_senha, nova_foto_blob, novo_ramo, remover_foto=False):
+def atualizar_perfil(username, novo_nome, novo_endereco, nova_senha, nova_foto_blob, novo_ramo, novo_idioma, nova_moeda, remover_foto=False):
     try:
         dados_atualizados = {
             "nome_completo": novo_nome,
             "endereco": novo_endereco,
-            "ramo_atividade": novo_ramo
+            "ramo_atividade": novo_ramo,
+            "idioma": novo_idioma,
+            "moeda": nova_moeda
         }
         
         if remover_foto:
@@ -88,6 +97,12 @@ def atualizar_perfil(username, novo_nome, novo_endereco, nova_senha, nova_foto_b
         return True
     except Exception as e:
         return False
+
+def atualizar_preferencias_usuario(username, idioma, moeda):
+    try:
+        supabase.table("usuarios").update({"idioma": idioma, "moeda": moeda}).eq("username", username).execute()
+    except Exception as e:
+        pass
 
 def carregar_dados(username):
     try:
@@ -241,7 +256,8 @@ TRADUCOES_RAMOS = {
             "softwares_assinaturas": "Software / Abbonamenti", "hospedagem_servidores": "Hosting / Server", "marketing": "Marketing", "cursos_capacitacao": "Corsi / Formazione",
             "desenvolvimento_projetos": "Sviluppo Progetti", "consultoria": "Consulenza", "suporte_mensal": "Supporto Mensile",
             "aquisicao_mercadorias": "Acquisto Merce", "embalagens": "Imballaggi", "frete_logistica": "Spedizione / Logistica", "marketing_anuncios": "Marketing / Annunci", "vendas_vista": "Vendite in Contanti", "vendas_cartao_pix": "Vendite Carta / Pix", "vendas_parceladas": "Vendite Rateali",
-            "aluguel_prestacao_casa": "Affitto / Mutuo Casa", "agua_gas_energia": "Acqua, Gas ed Elettricità", "impostos_taxas_geral": "Tasse e Imposte", "investimentos_reservas": "Investimenti e Riserve", "transportes_combustivel": "Trasporti e Carburante", "alimentacao_supermercado": "Spesa Alimentare", "saude_farmacia": "Salute e Farmacia", "lazer_outras_despesas": "Tempo Libero e Altre Spese",
+            "aluguel_prestacao_casa": "Affitto / Mutuo Casa", "agua_gas_energia": "Acqua, Gas ed Elettricità",
+            "impostos_taxas_geral": "Tasse e Imposte", "investimentos_reservas": "Investimenti e Riserve", "transportes_combustivel": "Trasporti e Carburante", "alimentacao_supermercado": "Spesa Alimentare", "saude_farmacia": "Salute e Farmacia", "lazer_outras_despesas": "Tempo Libero e Altre Spese",
             "salario_base": "Stipendio Base", "receitas_variaveis": "Entrate Variabili (Giornate / Extra)", "investimentos_rendimentos": "Investimenti e Rendimenti", "outros_ganhos": "Altri Guadagni"
         }
     },
@@ -256,8 +272,8 @@ TRADUCOES_RAMOS = {
         "cat_nomes": {
             "pecas_insumos": "Teile / Verbrauchsmaterial", "ferramentas": "Werkzeuge", "equipamentos": "Ausstattung", "manutencao_predial": "Gebäudewartung", "aluguel": "Miete", "impostos_taxas": "Steuern / Gebühren", "outras_despesas": "Sonstige Ausgaben",
             "pagamento_clientes": "Kundenzahlungen", "servicos_realizados": "Erbrachte Dienstleistungen", "venda_pecas": "Teileverkauf", "orcamentos_aprovados": "Genehmigte Budgets", "salario": "Gehalt", "outras_receitas": "Sonstige Einnahmen",
-            "materiais_construcao": "Baumaterialien", "mao_de_obra": "Arbeitskräfte / Subunternehmer", "combustivel_frete": "Kraftstoff / Fracht",
-            "medicao_obra": "Bauabrechnung", "adiantamento_sinal": "Vorschuss / Anzahlung", "venda_sobras": "Restverkauf",
+            "materiais_construcao": "Baumaterialien", "mao_de_obra": "Arbeitskräfte / Subunternehmer",
+            "combustivel_frete": "Kraftstoff / Fracht", "medicao_obra": "Bauabrechnung", "adiantamento_sinal": "Vorschuss / Anzahlung", "venda_sobras": "Restverkauf",
             "softwares_assinaturas": "Software / Abonnements", "hospedagem_servidores": "Hosting / Server", "marketing": "Marketing", "cursos_capacitacao": "Kurse / Schulungen",
             "desenvolvimento_projetos": "Projektentwicklung", "consultoria": "Beratung", "suporte_mensal": "Monatlicher Support",
             "aquisicao_mercadorias": "Warenerwerb", "embalagens": "Verpackung", "frete_logistica": "Fracht / Logistik", "marketing_anuncios": "Marketing / Werbung", "vendas_vista": "Barverkäufe", "vendas_cartao_pix": "Kartenzahlung / Pix", "vendas_parceladas": "Ratenverkäufe",
@@ -851,7 +867,7 @@ if not st.session_state['logged_in']:
                 
                 if submit_reg_p:
                     if reg_user_p and reg_name_p and reg_pass_p:
-                        if cadastrar_usuario(reg_user_p, reg_name_p, reg_pass_p, "outros"):
+                        if cadastrar_usuario(reg_user_p, reg_name_p, reg_pass_p, "outros", st.session_state['idioma'], st.session_state['moeda']):
                             st.success(t_login['reg_success'])
                         else:
                             st.error(t_login['reg_error'])
@@ -882,7 +898,7 @@ if not st.session_state['logged_in']:
                             if v == reg_branch_ui:
                                 chave_ramo = k
                                 break
-                        if cadastrar_usuario(reg_user_prof, reg_name_prof, reg_pass_prof, chave_ramo):
+                        if cadastrar_usuario(reg_user_prof, reg_name_prof, reg_pass_prof, chave_ramo, st.session_state['idioma'], st.session_state['moeda']):
                             st.success(t_login['reg_success'])
                         else:
                             st.error(t_login['reg_error'])
@@ -929,11 +945,13 @@ else:
         sel_lang = st.selectbox(t['lang_label'], lista_idiomas, index=lista_idiomas.index(st.session_state['idioma']), key="sb_lang")
         if sel_lang != st.session_state['idioma']:
             st.session_state['idioma'] = sel_lang
+            atualizar_preferencias_usuario(st.session_state['username'], st.session_state['idioma'], st.session_state['moeda'])
             st.rerun()
 
         sel_moeda = st.selectbox(t['curr_label'], list(MOEDAS.keys()), index=list(MOEDAS.keys()).index(st.session_state['moeda']), key="sb_curr")
         if sel_moeda != st.session_state['moeda']:
             st.session_state['moeda'] = sel_moeda
+            atualizar_preferencias_usuario(st.session_state['username'], st.session_state['idioma'], st.session_state['moeda'])
             st.rerun()
 
         st.markdown("---")
@@ -1223,8 +1241,8 @@ else:
                         nova_chave_ramo = k
                         break
 
-                if atualizar_perfil(st.session_state['username'], novo_nome, novo_endereco, nova_senha, foto_blob, nova_chave_ramo, remover_foto_check):
-                    st.success(t['profile_success'])
+                if atualizar_perfil(st.session_state['username'], novo_nome, novo_endereco, nova_senha, foto_blob, nova_chave_ramo, st.session_state['idioma'], st.session_state['moeda'], remover_foto_check):
+                    st.success(t['profile_profile_success'] if 'profile_profile_success' in t else t['profile_success'])
                     st.rerun()
                 else:
                     st.error(t['profile_error'])
