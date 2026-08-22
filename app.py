@@ -32,8 +32,6 @@ def check_hash(password, hashed_text):
     return False
 
 def init_db():
-    # Como as tabelas já foram criadas no Supabase, 
-    # apenas inicializamos a conexão aqui:
     global supabase
     url = st.secrets["SUPABASE_URL"]
     key = st.secrets["SUPABASE_KEY"]
