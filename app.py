@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
-import sqlite3
+#import sqlite3
+from supabase import create_client, Client
 import datetime
 import plotly.express as px
 import hashlib
@@ -31,21 +32,13 @@ def check_hash(password, hashed_text):
     return False
 
 def init_db():
-    conn = sqlite3.connect('financeiro.db')
-    cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS usuarios (
-            username TEXT PRIMARY KEY,
-            nome_completo TEXT,
-            senha TEXT
-        )
-    ''')
-    for col, col_type in [("endereco", "TEXT"), ("foto_perfil", "BLOB"), ("ramo_atividade", "TEXT")]:
-        try:
-            cursor.execute(f"ALTER TABLE usuarios ADD COLUMN {col} {col_type}")
-        except:
-            pass
-
+    # Como as tabelas já foram criadas no Supabase, 
+    # apenas inicializamos a conexão aqui:
+    global supabase
+    url = st.secrets["SUPABASE_URL"]
+    key = st.secrets["SUPABASE_KEY"]
+    supabase = create_client(url, key)
+    
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS lancamentos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
