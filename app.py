@@ -64,70 +64,67 @@ def autenticar_usuario(username, senha):
         return False
 
 def obter_dados_usuario(username):
-    conn = sqlite3.connect('financeiro.db')
-    cursor = conn.cursor()
-    cursor.execute("SELECT nome_completo, endereco, foto_perfil, ramo_atividade FROM usuarios WHERE username = ?", (username,))
-    result = cursor.fetchone()
-    conn.close()
-    return result
+    try:
+        response = supabase.table("usuarios").select("nome_completo, endereco, foto_perfil, ramo_atividade").eq("username", username).execute()
+        if response.data and len(response.data) > 0:
+            user = response.data[0]
+            return (user.get("nome_completo"), user.get("endereco"), user.get("foto_perfil"), user.get("ramo_atividade"))
+        return None
+    except Exception as e:
+        return None
 
 def atualizar_perfil(username, novo_nome, novo_endereco, nova_senha, nova_foto_blob, novo_ramo, remover_foto=False):
-    conn = sqlite3.connect('financeiro.db')
-    cursor = conn.cursor()
     try:
+        dados_atualizados = {
+            "nome_completo": novo_nome,
+            "endereco": novo_endereco,
+            "ramo_atividade": novo_ramo
+        }
+        
         if remover_foto:
-            foto_sql = None
-        else:
-            foto_sql = nova_foto_blob
-
+            dados_atualizados["foto_perfil"] = None
+        elif nova_foto_blob is not None:
+            dados_atualizados["foto_perfil"] = nova_foto_blob
+            
         if nova_senha:
-            hash_senha = make_hash(nova_senha)
-            if remover_foto:
-                cursor.execute("UPDATE usuarios SET nome_completo = ?, endereco = ?, senha = ?, foto_perfil = NULL, ramo_atividade = ? WHERE username = ?", 
-                               (novo_nome, novo_endereco, hash_senha, novo_ramo, username))
-            elif nova_foto_blob is not None:
-                cursor.execute("UPDATE usuarios SET nome_completo = ?, endereco = ?, senha = ?, foto_perfil = ?, ramo_atividade = ? WHERE username = ?", 
-                               (novo_nome, novo_endereco, hash_senha, nova_foto_blob, novo_ramo, username))
-            else:
-                cursor.execute("UPDATE usuarios SET nome_completo = ?, endereco = ?, senha = ?, ramo_atividade = ? WHERE username = ?", 
-                               (novo_nome, novo_endereco, hash_senha, novo_ramo, username))
-        else:
-            if remover_foto:
-                cursor.execute("UPDATE usuarios SET nome_completo = ?, endereco = ?, foto_perfil = NULL, ramo_atividade = ? WHERE username = ?", 
-                               (novo_nome, novo_endereco, novo_ramo, username))
-            elif nova_foto_blob is not None:
-                cursor.execute("UPDATE usuarios SET nome_completo = ?, endereco = ?, foto_perfil = ?, ramo_atividade = ? WHERE username = ?", 
-                               (novo_nome, novo_endereco, nova_foto_blob, novo_ramo, username))
-            else:
-                cursor.execute("UPDATE usuarios SET nome_completo = ?, endereco = ?, ramo_atividade = ? WHERE username = ?", 
-                               (novo_nome, novo_endereco, novo_ramo, username))
-        conn.commit()
-        conn.close()
+            dados_atualizados["senha"] = make_hash(nova_senha)
+            
+        supabase.table("usuarios").update(dados_atualizados).eq("username", username).execute()
         return True
-    except:
-        conn.close()
+    except Exception as e:
         return False
 
 def carregar_dados(username):
-    conn = sqlite3.connect('financeiro.db')
-    df = pd.read_sql_query("SELECT * FROM lancamentos WHERE username = ?", conn, params=(username,))
-    conn.close()
-    return df
+    try:
+        response = supabase.table("lancamentos").select("*").eq("username", username).execute()
+        if response.data:
+            return pd.DataFrame(response.data)
+        return pd.DataFrame()
+    except Exception as e:
+        return pd.DataFrame()
 
 def salvar_lancamento(username, data, descricao, categoria, tipo, valor, veiculo=""):
-    conn = sqlite3.connect('financeiro.db')
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO lancamentos (username, data, descricao, categoria, tipo, valor, veiculo) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                   (username, data, descricao, categoria, tipo, valor, veiculo))
-    conn.commit()
-    conn.close()
+    try:
+        dados = {
+            "username": username,
+            "data": str(data),
+            "descricao": descricao,
+            "categoria": categoria,
+            "tipo": tipo,
+            "valor": float(valor),
+            "veiculo": veiculo
+        }
+        supabase.table("lancamentos").insert(dados).execute()
+        return True
+    except Exception as e:
+        return False
 
 def deletar_lancamento(id_lancamento, username):
-    conn = sqlite3.connect('financeiro.db')
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM lancamentos WHERE id = ? AND username = ?", (id_lancamento, username))
-    conn.commit()
-    conn.close()
+    try:
+        supabase.table("lancamentos").delete().eq("id", id_lancamento).eq("username", username).execute()
+        return True
+    except Exception as e:
+        return False
 
 TRADUCOES_RAMOS = {
     "Português": {
