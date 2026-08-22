@@ -997,10 +997,10 @@ with c2:
                 else:
                     st.info("Sem dados para o gráfico.")
 
-            st.subheader(t['recent_list'])
-            df_exibicao_tabela = df_mes[['data', 'tipo_exibicao', 'categoria_exibicao', 'descricao', 'valor']].copy()
-            df_exibicao_tabela.columns = ['Data', 'Tipo', 'Categoria', 'Descrição', 'Valor']
-            st.dataframe(df_exibicao_tabela, use_container_width=True)
+st.subheader(t['recent_list'])
+df_exibicao_tabela = df_mes[['data', 'tipo_exibicao', 'categoria_exibicao', 'descricao', 'valor']].copy()
+df_exibicao_tabela.columns = ['Data', 'Tipo', 'Categoria', 'Descrição', 'Valor']
+st.dataframe(df_exibicao_tabela, use_container_width=True)
 
     elif menu == t['nav_business']:
         st.title(t['business_title'])
