@@ -309,11 +309,10 @@ TEXTOS = {
         "type_label": "Tipo",
         "value_label": "Valor",
         "cat_label": "Categoria Principal",
-        "desc_label": "Descrição Específica",
+        "desc_label": "Descrição Específica (Opcional)",
         "veiculo_label": "Veículo / Frota / Placa (Opcional)",
         "save_btn": "🚀 Salvar Lançamento",
         "success_msg": "Lançamento salvo com sucesso!",
-        "warn_desc": "Por favor, preencha a descrição.",
         "manage_title": "✏️ Gerenciar e Editar Lançamentos",
         "manage_sub": "Visualize, filtre ou exclua lançamentos antigos.",
         "del_btn": "🗑️ Excluir Selecionado",
@@ -397,11 +396,10 @@ TEXTOS = {
         "type_label": "Type",
         "value_label": "Value",
         "cat_label": "Main Category",
-        "desc_label": "Description",
+        "desc_label": "Description (Optional)",
         "veiculo_label": "Vehicle / Fleet / Plate (Optional)",
         "save_btn": "🚀 Save Entry",
         "success_msg": "Entry saved successfully!",
-        "warn_desc": "Please fill in the description.",
         "manage_title": "✏️ Manage and Edit Entries",
         "manage_sub": "View, filter, or delete old entries.",
         "del_btn": "🗑️ Delete Selected",
@@ -485,11 +483,10 @@ TEXTOS = {
         "type_label": "Type",
         "value_label": "Valeur",
         "cat_label": "Catégorie Principale",
-        "desc_label": "Description",
+        "desc_label": "Description (Optionnel)",
         "veiculo_label": "Véhicule / Flotte / Plaque (Optionnel)",
         "save_btn": "🚀 Enregistrer",
         "success_msg": "Enregistré avec succès !",
-        "warn_desc": "Veuillez remplir la description.",
         "manage_title": "✏️ Gérer les Entrées",
         "manage_sub": "Visualisez ou supprimez vos entrées.",
         "del_btn": "🗑️ Supprimer la sélection",
@@ -573,11 +570,10 @@ TEXTOS = {
         "type_label": "Tipo",
         "value_label": "Valor",
         "cat_label": "Categoría Principal",
-        "desc_label": "Descripción",
+        "desc_label": "Descripción (Opcional)",
         "veiculo_label": "Vehículo / Flota / Patente (Opcional)",
         "save_btn": "🚀 Guardar Movimiento",
         "success_msg": "¡Movimiento guardado con éxito!",
-        "warn_desc": "Por favor llena la descripción.",
         "manage_title": "✏️ Gestionar Movimientos",
         "manage_sub": "Visualiza, filtra o elimina registros antiguos.",
         "del_btn": "🗑️ Eliminar Seleccionado",
@@ -661,11 +657,10 @@ TEXTOS = {
         "type_label": "Tipo",
         "value_label": "Valore",
         "cat_label": "Categoria Principale",
-        "desc_label": "Descrizione",
+        "desc_label": "Descrizione (Opzionale)",
         "veiculo_label": "Veicolo / Flotta / Targa (Opzionale)",
         "save_btn": "🚀 Salva Voce",
         "success_msg": "Salvato con successo!",
-        "warn_desc": "Compila la descrizione.",
         "manage_title": "✏️ Gestisci Voci",
         "manage_sub": "Visualizza o elimina voci.",
         "del_btn": "🗑️ Elimina Selezionato",
@@ -749,11 +744,10 @@ TEXTOS = {
         "type_label": "Typ",
         "value_label": "Wert",
         "cat_label": "Hauptkategorie",
-        "desc_label": "Beschreibung",
+        "desc_label": "Beschreibung (Optional)",
         "veiculo_label": "Fahrzeug / Flotte / Kennzeichen (Optional)",
         "save_btn": "🚀 Eintrag Speichern",
         "success_msg": "Erfolgreich gespeichert!",
-        "warn_desc": "Bitte Beschreibung ausfüllen.",
         "manage_title": "✏️ Einträge Verwalten",
         "manage_sub": "Einträge anzeigen oder löschen.",
         "del_btn": "🗑️ Ausgewählte Löschen",
@@ -1153,24 +1147,23 @@ else:
             
         st.markdown("<br>", unsafe_allow_html=True)
         if st.button(t['save_btn'], use_container_width=True):
-            if desc_lanc.strip() != "":
-                tipo_para_salvar = "Despesa" if tipo_lanc_ui == ramos_dict["tipo_despesa"] else "Receita"
-                sucesso = salvar_lancamento(
-                    st.session_state['username'], 
-                    str(data_lanc), 
-                    desc_lanc, 
-                    cat_lanc_chave, 
-                    tipo_para_salvar, 
-                    float(valor_lanc), 
-                    veiculo_lanc
-                )
-                if sucesso:
-                    st.success(t['success_msg'])
-                    st.rerun()
-                else:
-                    st.error("Erro ao salvar no banco de dados.")
+            tipo_para_salvar = "Despesa" if tipo_lanc_ui == ramos_dict["tipo_despesa"] else "Receita"
+            descricao_final = desc_lanc.strip() if desc_lanc.strip() != "" else "-"
+            
+            sucesso = salvar_lancamento(
+                st.session_state['username'], 
+                str(data_lanc), 
+                descricao_final, 
+                cat_lanc_chave, 
+                tipo_para_salvar, 
+                float(valor_lanc), 
+                veiculo_lanc
+            )
+            if sucesso:
+                st.success(t['success_msg'])
+                st.rerun()
             else:
-                st.warning(t['warn_desc'])
+                st.error("Erro ao salvar no banco de dados.")
 
     elif menu == t['nav_manage']:
         st.title(t['manage_title'])
