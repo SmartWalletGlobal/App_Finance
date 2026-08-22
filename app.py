@@ -983,7 +983,7 @@ with col2:
     st.markdown("---")
     c1, c2 = st.columns(2)
     with c1:
-    df_desp = df_mes[df_mes['tipo_exibicao'] == ramos_dict["tipo_despesa"]]
+                df_desp = df_mes[df_mes['tipo_exibicao'] == ramos_dict["tipo_despesa"]]
                 if not df_desp.empty:
                     fig_pie = px.pie(df_desp, names='categoria_exibicao', values='valor', title=t['pie_title'], hole=0.4)
                     st.plotly_chart(fig_pie, use_container_width=True, config={'displayModeBar': False})
