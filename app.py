@@ -360,7 +360,7 @@ TRADUCOES_RAMOS = {
 
 TEXTOS = {
     "Português": {
-        "login_title": "⚡ Acesso ao Meu Financeiro",
+        "login_title": "Acesso ao Meu Financeiro",
         "login_sub": "Entre com sua conta ou cadastre-se escolhendo o seu perfil.",
         "tab_login": "🔑 Entrar",
         "tab_register_pessoal": "👤 Perfil Pessoal",
@@ -436,7 +436,7 @@ TEXTOS = {
         "info_prof": "Criação de conta profissional voltada para o seu setor de mercado."
     },
     "English": {
-        "login_title": "⚡ My Finance Access",
+        "login_title": "My Finance Access",
         "login_sub": "Log in to your account or choose your profile type to register.",
         "tab_login": "🔑 Log In",
         "tab_register_pessoal": "👤 Personal Profile",
@@ -512,7 +512,7 @@ TEXTOS = {
         "info_prof": "Professional account creation tailored to your market sector."
     },
     "Français": {
-        "login_title": "⚡ Accès à Mon Financier",
+        "login_title": "Accès à Mon Financier",
         "login_sub": "Connectez-vous ou choisissez votre profil pour vous inscrire.",
         "tab_login": "🔑 Connexion",
         "tab_register_pessoal": "👤 Profil Personnel",
@@ -588,7 +588,7 @@ TEXTOS = {
         "info_prof": "Création de compte professionnel adapté à votre secteur de marché."
     },
     "Español": {
-        "login_title": "⚡ Acceso a Mi Financiero",
+        "login_title": "Acceso a Mi Financiero",
         "login_sub": "Inicia sesión o regístrese seleccionando su perfil.",
         "tab_login": "🔑 Entrar",
         "tab_register_pessoal": "👤 Perfil Personal",
@@ -664,7 +664,7 @@ TEXTOS = {
         "info_prof": "Creación de cuenta profesional adaptada a tu sector de mercado."
     },
     "Italiano": {
-        "login_title": "⚡ Accesso a Il Mio Finanziario",
+        "login_title": "Accesso a Il Mio Finanziario",
         "login_sub": "Accedi al tuo account o registrati scegliendo il profilo.",
         "tab_login": "🔑 Accedi",
         "tab_register_pessoal": "👤 Profilo Personale",
@@ -740,7 +740,7 @@ TEXTOS = {
         "info_prof": "Creazione account professionale su misura per il tuo settore di mercato."
     },
     "Deutsch": {
-        "login_title": "⚡ Mein Finanz-Zugang",
+        "login_title": "Mein Finanz-Zugang",
         "login_sub": "Melden Sie sich an oder wählen Sie Ihr Profil zur Registrierung.",
         "tab_login": "🔑 Anmelden",
         "tab_register_pessoal": "👤 Persönliches Profil",
