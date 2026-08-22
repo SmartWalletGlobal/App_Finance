@@ -37,25 +37,6 @@ def init_db():
     key = st.secrets["SUPABASE_KEY"]
     supabase = create_client(url, key)
     
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS lancamentos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT,
-            data TEXT,
-            descricao TEXT,
-            categoria TEXT,
-            tipo TEXT,
-            valor REAL
-        )
-    ''')
-    for col, col_type in [("username", "TEXT"), ("veiculo", "TEXT")]:
-        try:
-            cursor.execute(f"ALTER TABLE lancamentos ADD COLUMN {col} {col_type}")
-        except:
-            pass
-
-    conn.commit()
-    conn.close()
 
 init_db()
 
