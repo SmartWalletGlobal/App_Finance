@@ -14,6 +14,14 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+st.markdown("""
+    <head>
+        <meta property="og:title" content="Meu Financeiro | Multi-Usuário">
+        <meta property="og:description" content="Sistema de gestão financeira online, simples, rápido e seguro.">
+        <meta property="og:image" content="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?q=80&w=1200&auto=format&fit=crop">
+    </head>
+""", unsafe_allow_html=True)
+
 def make_hash(password):
     return hashlib.sha256(str.encode(password)).hexdigest()
 
@@ -44,10 +52,8 @@ def autenticar_usuario(username, senha):
     try:
         response = supabase.table("usuarios").select("senha").eq("username", username).execute()
         if response.data and len(response.data) > 0:
-            user = response.data[0]
-            senha_cadastrada = user["senha"]
-            if check_hash(senha, senha_cadastrada):
-                return True
+            senha_cadastrada = response.data[0]["senha"]
+            return check_hash(senha, senha_cadastrada)
         return False
     except Exception as e:
         return False
@@ -235,8 +241,7 @@ TRADUCOES_RAMOS = {
             "softwares_assinaturas": "Software / Abbonamenti", "hospedagem_servidores": "Hosting / Server", "marketing": "Marketing", "cursos_capacitacao": "Corsi / Formazione",
             "desenvolvimento_projetos": "Sviluppo Progetti", "consultoria": "Consulenza", "suporte_mensal": "Supporto Mensile",
             "aquisicao_mercadorias": "Acquisto Merce", "embalagens": "Imballaggi", "frete_logistica": "Spedizione / Logistica", "marketing_anuncios": "Marketing / Annunci", "vendas_vista": "Vendite in Contanti", "vendas_cartao_pix": "Vendite Carta / Pix", "vendas_parceladas": "Vendite Rateali",
-            "aluguel_prestacao_casa": "Affitto / Mutuo Casa", "agua_gas_energia": "Acqua, Gas ed Elettricità",
-            "impostos_taxas_geral": "Tasse e Imposte", "investimentos_reservas": "Investimenti e Riserve", "transportes_combustivel": "Trasporti e Carburante", "alimentacao_supermercado": "Spesa Alimentare", "saude_farmacia": "Salute e Farmacia", "lazer_outras_despesas": "Tempo Libero e Altre Spese",
+            "aluguel_prestacao_casa": "Affitto / Mutuo Casa", "agua_gas_energia": "Acqua, Gas ed Elettricità", "impostos_taxas_geral": "Tasse e Imposte", "investimentos_reservas": "Investimenti e Riserve", "transportes_combustivel": "Trasporti e Carburante", "alimentacao_supermercado": "Spesa Alimentare", "saude_farmacia": "Salute e Farmacia", "lazer_outras_despesas": "Tempo Libero e Altre Spese",
             "salario_base": "Stipendio Base", "receitas_variaveis": "Entrate Variabili (Giornate / Extra)", "investimentos_rendimentos": "Investimenti e Rendimenti", "outros_ganhos": "Altri Guadagni"
         }
     },
@@ -251,13 +256,12 @@ TRADUCOES_RAMOS = {
         "cat_nomes": {
             "pecas_insumos": "Teile / Verbrauchsmaterial", "ferramentas": "Werkzeuge", "equipamentos": "Ausstattung", "manutencao_predial": "Gebäudewartung", "aluguel": "Miete", "impostos_taxas": "Steuern / Gebühren", "outras_despesas": "Sonstige Ausgaben",
             "pagamento_clientes": "Kundenzahlungen", "servicos_realizados": "Erbrachte Dienstleistungen", "venda_pecas": "Teileverkauf", "orcamentos_aprovados": "Genehmigte Budgets", "salario": "Gehalt", "outras_receitas": "Sonstige Einnahmen",
-            "materiais_construcao": "Baumaterialien", "mao_de_obra": "Arbeitskräfte / Subunternehmer",
-            "combustivel_frete": "Kraftstoff / Fracht", "medicao_obra": "Bauabrechnung", "adiantamento_sinal": "Vorschuss / Anzahlung", "venda_sobras": "Restverkauf",
+            "materiais_construcao": "Baumaterialien", "mao_de_obra": "Arbeitskräfte / Subunternehmer", "combustivel_frete": "Kraftstoff / Fracht",
+            "medicao_obra": "Bauabrechnung", "adiantamento_sinal": "Vorschuss / Anzahlung", "venda_sobras": "Restverkauf",
             "softwares_assinaturas": "Software / Abonnements", "hospedagem_servidores": "Hosting / Server", "marketing": "Marketing", "cursos_capacitacao": "Kurse / Schulungen",
             "desenvolvimento_projetos": "Projektentwicklung", "consultoria": "Beratung", "suporte_mensal": "Monatlicher Support",
             "aquisicao_mercadorias": "Warenerwerb", "embalagens": "Verpackung", "frete_logistica": "Fracht / Logistik", "marketing_anuncios": "Marketing / Werbung", "vendas_vista": "Barverkäufe", "vendas_cartao_pix": "Kartenzahlung / Pix", "vendas_parceladas": "Ratenverkäufe",
-            "aluguel_prestacao_casa": "Miete / Hauskredit", "agua_gas_energia": "Wasser, Gas und Strom",
-            "impostos_taxas_geral": "Steuern und Gebühren", "investimentos_reservas": "Investitionen und Rücklagen", "transportes_combustivel": "Transport und Kraftstoff", "alimentacao_supermercado": "Lebensmittel und Supermarkt", "saude_farmacia": "Gesundheit und Apotheke", "lazer_outras_despesas": "Freizeit und Sonstige Ausgaben",
+            "aluguel_prestacao_casa": "Miete / Hauskredit", "agua_gas_energia": "Wasser, Gas und Strom", "impostos_taxas_geral": "Steuern und Gebühren", "investimentos_reservas": "Investitionen und Rücklagen", "transportes_combustivel": "Transport und Kraftstoff", "alimentacao_supermercado": "Lebensmittel und Supermarkt", "saude_farmacia": "Gesundheit und Apotheke", "lazer_outras_despesas": "Freizeit und Sonstige Ausgaben",
             "salario_base": "Grundgehalt", "receitas_variaveis": "Variables Einkommen (Tagelöhner / Extras)", "investimentos_rendimentos": "Investitionen und Renditen", "outros_ganhos": "Sonstige Einnahmen"
         }
     }
