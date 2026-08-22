@@ -44,9 +44,13 @@ def cadastrar_usuario(username, nome_completo, senha, ramo_atividade="Outros"):
         "nome_completo": nome_completo,
         "senha": make_hash(senha),
         "ramo_atividade": ramo_atividade
+        "idioma": "Português",  # ou "pt" dependendo de como você trata no código
+        "moeda": "BRL"         # ou o padrão que você usa
     }
-    supabase.table("usuarios").insert(dados).execute()
-    return True
+    
+    response = supabase.table("usuarios").insert(dados).execute()
+    return response
+    }
 
 def autenticar_usuario(username, senha):
     try:
