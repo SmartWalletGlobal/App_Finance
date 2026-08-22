@@ -858,8 +858,7 @@ if not st.session_state['logged_in']:
                     ramos_atuais_dict["mecanica"],
                     ramos_atuais_dict["obras"],
                     ramos_atuais_dict["ti"],
-                    ramos_atuais_dict["comercio"],
-                    ramos_atuais_dict["outros"]
+                    ramos_atuais_dict["comercio"]
                 ]
                 reg_branch_ui = st.selectbox(t_login['reg_branch_label'], opcoes_ramos_reg, key="reg_branch_prof")
                 
@@ -867,7 +866,7 @@ if not st.session_state['logged_in']:
                 
                 if submit_reg_prof:
                     if reg_user_prof and reg_name_prof and reg_pass_prof:
-                        chave_ramo = "outros"
+                        chave_ramo = "mecanica"
                         for k, v in ramos_atuais_dict.items():
                             if v == reg_branch_ui:
                                 chave_ramo = k
@@ -927,13 +926,25 @@ else:
             st.rerun()
 
         st.markdown("---")
-        menu = st.radio("Navegação", [
-            t['nav_overview'],
-            t['nav_business'],
-            t['nav_new'],
-            t['nav_manage'],
-            t['nav_profile']
-        ])
+        
+        # Monta dinamicamente a navegação dependendo se o perfil é estritamente pessoal ou profissional
+        if ramo_usuario_db == "outros":
+            opcoes_menu = [
+                t['nav_overview'],
+                t['nav_new'],
+                t['nav_manage'],
+                t['nav_profile']
+            ]
+        else:
+            opcoes_menu = [
+                t['nav_overview'],
+                t['nav_business'],
+                t['nav_new'],
+                t['nav_manage'],
+                t['nav_profile']
+            ]
+
+        menu = st.radio("Navegação", opcoes_menu)
 
         st.markdown("<br><br>", unsafe_allow_html=True)
         if st.button(t['logout'], use_container_width=True):
@@ -956,30 +967,24 @@ else:
             meses_disponiveis = sorted(df["mes_ano"].unique(), reverse=True)
             mes_selecionado = st.selectbox("📅 Selecione o Mês", meses_disponiveis)
             
-            # 1. Cálculo do mês selecionado
             df_mes = df[df["mes_ano"] == mes_selecionado]
 
             total_receitas = df_mes[df_mes['tipo'] == ramos_dict["tipo_receita"]]['valor'].sum()
             total_despesas = df_mes[df_mes['tipo'] == ramos_dict["tipo_despesa"]]['valor'].sum()
             
-            # Filtra investimentos do mês (considerando categorias que contenham investimento/reserva)
             df_inv_mes = df_mes[df_mes['categoria'].str.contains("Investimento|Reserva", case=False, na=False)]
             investimento_mes = df_inv_mes['valor'].sum() if not df_inv_mes.empty else 0.0
 
             saldo_mes = total_receitas - total_despesas
 
-            # 2. Cálculo do Acumulado Geral (Saldo Real na Conta até o mês selecionado)
-            # Filtra todos os lançamentos até o mês/ano selecionado para somar o histórico real
             df_historico = df[df["mes_ano"] <= mes_selecionado]
             hist_rec = df_historico[df_historico['tipo'] == ramos_dict["tipo_receita"]]['valor'].sum()
             hist_esp = df_historico[df_historico['tipo'] == ramos_dict["tipo_despesa"]]['valor'].sum()
             saldo_real_conta = hist_rec - hist_esp
 
-            # 3. Cálculo do Total Acumulado de Investimentos de todos os tempos
             df_inv_total = df[df['categoria'].str.contains("Investimento|Reserva", case=False, na=False)]
             investimento_total = df_inv_total['valor'].sum() if not df_inv_total.empty else 0.0
 
-            # Exibição das Métricas em duas linhas para ficar bem organizado
             col1, col2, col3 = st.columns(3)
             col1.metric(t['total_rev'], f"{simbolo_moeda} {total_receitas:,.2f}")
             col2.metric(t['total_exp'], f"{simbolo_moeda} {total_despesas:,.2f}")
