@@ -990,7 +990,7 @@ with col2:
                 else:
                     st.info("Sem despesas para exibir no gráfico neste mês.")
 
-     with c2:
+    with c2:
                 if not df_mes.empty:
                     fig_bar = px.bar(df_mes, x='data', y='valor', color='tipo_exibicao', title=t['bar_title'], barmode='group')
                     st.plotly_chart(fig_bar, use_container_width=True, config={'displayModeBar': False})
