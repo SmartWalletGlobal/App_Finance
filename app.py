@@ -45,7 +45,7 @@ def cadastrar_usuario(username, nome_completo, senha, ramo_atividade="Outros"):
         "senha": make_hash(senha),
         "ramo_atividade": ramo_atividade
     }
-    response = supabase.table("usuarios").insert(dados).execute()
+    supabase.table("usuarios").insert(dados).execute()
     return True
 
 def autenticar_usuario(username, senha):
@@ -200,7 +200,7 @@ TRADUCOES_RAMOS = {
             "medicao_obra": "Mesurage de Chantier", "adiantamento_sinal": "Acompte / Avance", "venda_sobras": "Vente de Surplus",
             "softwares_assinaturas": "Logiciels / Abonnements", "hospedagem_servidores": "Hébergement / Serveurs", "marketing": "Marketing", "cursos_capacitacao": "Formations",
             "desenvolvimento_projetos": "Développement de Projets", "consultoria": "Conseil", "suporte_mensal": "Support Mensuel (Retainer)",
-            "aquisicao_mercadorias": "Achat de Marchandises", "embalagens": "Emballages", "frete_logistica": "Fret / Logistique", "marketing_anuncios": "Marketing / Publicité", "vendas_vista": "Ventes au Comptant", "vendas_cartao_pix": "Ventes Carte / Pix", "vendas_parceladas": "Ventes Échelonnées",
+            "aquisicao_mercadorias": "Achat de Marchandises", "embalagens": "Emballages", "frete_logistica": "Fret / Logistique", "marketing_anuncios": "Marketing / Publicité",
             "aluguel_prestacao_casa": "Loyer / Prêt Immobilier", "agua_gas_energia": "Eau, Gaz et Électricité", "impostos_taxas_geral": "Impôts et Taxes", "investimentos_reservas": "Investissements et Réserves", "transportes_combustivel": "Transport et Carburant", "alimentacao_supermercado": "Alimentation et Supermarché", "saude_farmacia": "Santé et Pharmacie", "lazer_outras_despesas": "Loisirs et Autres Dépenses",
             "salario_base": "Salaire de Base", "receitas_variaveis": "Revenus Variables (Journées / Extras)", "investimentos_rendimentos": "Investissements et Rendements", "outros_ganhos": "Autres Gains"
         }
@@ -514,7 +514,7 @@ TEXTOS = {
         "btn_reg_submit": "Crear Cuenta Nueva",
         "reg_warn": "Por favor llena todos los campos.",
         "reg_success": "¡Cuenta creada con éxito! Ve a la pestaña 'Entrar'.",
-        "reg_error": "Este usuario ya existe o hubo un error.",
+        "reg_error": "Este usuario ya existe ou hubo un error.",
         "nav_overview": "📊 Visión General y Gráficos",
         "nav_business": "💼 Panel Profesional (Business)",
         "nav_new": "➕ Nuevo Movimiento",
@@ -953,7 +953,6 @@ else:
             df_inv_total = df[df['categoria'].str.contains("investimento|reserva", case=False, na=False)]
             investimento_total = df_inv_total['valor'].sum() if not df_inv_total.empty else 0.0
 
-            # CORREÇÃO AQUI: Uso limpo de st.columns para garantir divisão lado a lado perfeita
             col1, col2 = st.columns(2)
             
             with col1:
@@ -972,14 +971,17 @@ else:
                 df_desp = df_mes[df_mes['tipo_exibicao'] == ramos_dict["tipo_despesa"]]
                 if not df_desp.empty:
                     fig_pie = px.pie(df_desp, names='categoria_exibicao', values='valor', title=t['pie_title'], hole=0.4)
-                    st.plotly_chart(fig_pie, use_container_width=True, config={'displayModeBar': False})
+                    fig_pie.update_layout(dragmode=False)
+                    st.plotly_chart(fig_pie, use_container_width=True, config={'displayModeBar': False, 'scrollZoom': False})
                 else:
                     st.info("Sem despesas para exibir no gráfico neste mês.")
 
             with c2:
                 if not df_mes.empty:
                     fig_bar = px.bar(df_mes, x='data', y='valor', color='tipo_exibicao', title=t['bar_title'], barmode='group')
-                    st.plotly_chart(fig_bar, use_container_width=True, config={'displayModeBar': False})
+                    # BLOQUEIO DE ZOOM APLICADO AQUI:
+                    fig_bar.update_layout(dragmode=False, xaxis=dict(fixedrange=True), yaxis=dict(fixedrange=True))
+                    st.plotly_chart(fig_bar, use_container_width=True, config={'displayModeBar': False, 'scrollZoom': False})
                 else:
                     st.info("Sem dados para o gráfico.")
 
@@ -1022,7 +1024,8 @@ else:
                 df_rec = df_mes[df_mes['tipo_exibicao'] == ramos_dict["tipo_receita"]]
                 if not df_rec.empty:
                     fig_rec = px.pie(df_rec, names='categoria_exibicao', values='valor', title=t['origin_rev'], hole=0.4)
-                    st.plotly_chart(fig_rec, use_container_width=True, config={'displayModeBar': False})
+                    fig_rec.update_layout(dragmode=False)
+                    st.plotly_chart(fig_rec, use_container_width=True, config={'displayModeBar': False, 'scrollZoom': False})
                 else:
                     st.info("Nenhuma receita registrada neste mês.")
 
@@ -1031,7 +1034,8 @@ else:
                 df_desp = df_mes[df_mes['tipo_exibicao'] == ramos_dict["tipo_despesa"]]
                 if not df_desp.empty:
                     fig_desp = px.bar(df_desp, x='categoria_exibicao', y='valor', title=t['highest_costs'], color='categoria_exibicao')
-                    st.plotly_chart(fig_desp, use_container_width=True, config={'displayModeBar': False})
+                    fig_desp.update_layout(dragmode=False, xaxis=dict(fixedrange=True), yaxis=dict(fixedrange=True))
+                    st.plotly_chart(fig_desp, use_container_width=True, config={'displayModeBar': False, 'scrollZoom': False})
                 else:
                     st.info("Nenhuma despesa registrada neste mês.")
 
