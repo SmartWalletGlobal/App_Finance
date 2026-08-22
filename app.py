@@ -54,14 +54,14 @@ def cadastrar_usuario(username, nome_completo, senha, ramo_atividade="Outros"):
         return False
 
 def autenticar_usuario(username, senha):
-    conn = sqlite3.connect('financeiro.db')
-    cursor = conn.cursor()
-    cursor.execute("SELECT senha FROM usuarios WHERE username = ?", (username,))
-    result = cursor.fetchone()
-    conn.close()
-    if result:
-        return check_hash(senha, result[0])
-    return False
+    try:
+        response = supabase.table("usuarios").select("senha").eq("username", username).execute()
+        if response.data and len(response.data) > 0:
+            senha_cadastrada = response.data[0]["senha"]
+            return check_hash(senha, senha_cadastrada)
+        return False
+    except Exception as e:
+        return False
 
 def obter_dados_usuario(username):
     conn = sqlite3.connect('financeiro.db')
