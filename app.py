@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-#import sqlite3
 from supabase import create_client, Client
 import datetime
 import plotly.express as px
@@ -107,7 +106,8 @@ def salvar_lancamento(username, data, descricao, categoria, tipo, valor, veiculo
             "descricao": descricao,
             "categoria": categoria,
             "tipo": tipo,
-            "valor": float(valor)
+            "valor": float(valor),
+            "veiculo": veiculo
         }
         supabase.table("lancamentos").insert(dados).execute()
         return True
@@ -120,7 +120,31 @@ def deletar_lancamento(id_lancamento, username):
         return True
     except Exception as e:
         return False
-        
+
+# Mapeamento fixo de chaves de categorias para garantir compatibilidade entre idiomas
+CATEGORIAS_CHAVES = {
+    "mecanica": {
+        "desp": ["pecas_insumos", "ferramentas", "equipamentos", "manutencao_predial", "aluguel", "impostos_taxas", "outras_despesas"],
+        "rec": ["pagamento_clientes", "servicos_realizados", "venda_pecas", "orcamentos_aprovados", "salario", "outras_receitas"]
+    },
+    "obras": {
+        "desp": ["materiais_construcao", "ferramentas", "equipamentos", "mao_de_obra", "combustivel_frete", "outras_despesas"],
+        "rec": ["medicao_obra", "pagamento_clientes", "adiantamento_sinal", "venda_sobras", "salario", "outras_receitas"]
+    },
+    "ti": {
+        "desp": ["softwares_assinaturas", "hospedagem_servidores", "equipamentos", "marketing", "cursos_capacitacao", "outras_despesas"],
+        "rec": ["desenvolvimento_projetos", "consultoria", "suporte_mensal", "salario", "outras_receitas"]
+    },
+    "comercio": {
+        "desp": ["aquisicao_mercadorias", "embalagens", "frete_logistica", "marketing_anuncios", "aluguel", "outras_despesas"],
+        "rec": ["vendas_vista", "vendas_cartao_pix", "vendas_parceladas", "salario", "outras_receitas"]
+    },
+    "outros": {
+        "desp": ["aluguel_prestacao_casa", "agua_gas_energia", "impostos_taxas_geral", "investimentos_reservas", "transportes_combustivel", "alimentacao_supermercado", "saude_farmacia", "lazer_outras_despesas"],
+        "rec": ["salario_base", "receitas_variaveis", "investimentos_rendimentos", "outros_ganhos"]
+    }
+}
+
 TRADUCOES_RAMOS = {
     "Português": {
         "mecanica": "🛠️ Mecânica / Oficina",
@@ -128,32 +152,19 @@ TRADUCOES_RAMOS = {
         "ti": "💻 TI / Desenvolvimento",
         "comercio": "🛍️ Comércio / Loja",
         "outros": "📋 Outros / Pessoal",
-        "cat_mecanica_desp": ["Peças / Insumos", "Ferramentas", "Equipamentos", "Manutenção Predial", "Aluguel", "Impostos / Taxas", "Outras Despesas"],
-        "cat_mecanica_rec": ["Pagamento de Clientes", "Serviços Realizados", "Venda de Peças", "Orçamentos Aprovados", "Salário", "Outras Receitas"],
-        "cat_obras_desp": ["Materiais de Construção", "Ferramentas", "Equipamentos", "Mão de Obra / Subcontratados", "Combustível / Frete", "Outras Despesas"],
-        "cat_obras_rec": ["Medição de Obra", "Pagamento de Clientes", "Adiantamento / Sinal", "Venda de Sobras", "Salário", "Outras Receitas"],
-        "cat_ti_desp": ["Softwares / Assinaturas", "Hospedagem / Servidores", "Equipamentos", "Marketing", "Cursos / Capacitação", "Outras Despesas"],
-        "cat_ti_rec": ["Desenvolvimento de Projetos", "Consultoria", "Suporte Mensal (Retainer)", "Salário", "Outras Receitas"],
-        "cat_comercio_desp": ["Aquisição de Mercadorias", "Embalagens", "Frete / Logística", "Marketing / Anúncios", "Aluguel", "Outras Despesas"],
-        "cat_comercio_rec": ["Vendas à Vista", "Vendas no Cartão / Pix", "Vendas Parceladas", "Salário", "Outras Receitas"],
-        "cat_outros_desp": [
-            "Aluguel / Prestação da Casa", 
-            "Água, Gás e Energia Elétrica", 
-            "Impostos e Taxas (IPTU, IPVA, IR)", 
-            "Investimentos e Reservas", 
-            "Transportes e Combustível", 
-            "Alimentação e Supermercado", 
-            "Saúde e Farmácia", 
-            "Lazer e Outras Despesas"
-        ],
-        "cat_outros_rec": [
-            "Salário Base", 
-            "Receitas Variáveis (Diárias / Bicos)", 
-            "Investimentos e Rendimentos",
-            "Outros Ganhos / Outras Receitas"
-        ],
         "tipo_despesa": "Despesa",
-        "tipo_receita": "Receita"
+        "tipo_receita": "Receita",
+        "cat_nomes": {
+            "pecas_insumos": "Peças / Insumos", "ferramentas": "Ferramentas", "equipamentos": "Equipamentos", "manutencao_predial": "Manutenção Predial", "aluguel": "Aluguel", "impostos_taxas": "Impostos / Taxas", "outras_despesas": "Outras Despesas",
+            "pagamento_clientes": "Pagamento de Clientes", "servicos_realizados": "Serviços Realizados", "venda_pecas": "Venda de Peças", "orcamentos_aprovados": "Orçamentos Aprovados", "salario": "Salário", "outras_receitas": "Outras Receitas",
+            "materiais_construcao": "Materiais de Construção", "mao_de_obra": "Mão de Obra / Subcontratados", "combustivel_frete": "Combustível / Frete",
+            "medicao_obra": "Medição de Obra", "adiantamento_sinal": "Adiantamento / Sinal", "venda_sobras": "Venda de Sobras",
+            "softwares_assinaturas": "Softwares / Assinaturas", "hospedagem_servidores": "Hospedagem / Servidores", "marketing": "Marketing", "cursos_capacitacao": "Cursos / Capacitação",
+            "desenvolvimento_projetos": "Desenvolvimento de Projetos", "consultoria": "Consultoria", "suporte_mensal": "Suporte Mensal (Retainer)",
+            "aquisicao_mercadorias": "Aquisição de Mercadorias", "embalagens": "Embalagens", "frete_logistica": "Frete / Logística", "marketing_anuncios": "Marketing / Anúncios", "vendas_vista": "Vendas à Vista", "vendas_cartao_pix": "Vendas no Cartão / Pix", "vendas_parceladas": "Vendas Parceladas",
+            "aluguel_prestacao_casa": "Aluguel / Prestação da Casa", "agua_gas_energia": "Água, Gás e Energia Elétrica", "impostos_taxas_geral": "Impostos e Taxas (IPTU, IPVA, IR)", "investimentos_reservas": "Investimentos e Reservas", "transportes_combustivel": "Transportes e Combustível", "alimentacao_supermercado": "Alimentação e Supermercado", "saude_farmacia": "Saúde e Farmácia", "lazer_outras_despesas": "Lazer e Outras Despesas",
+            "salario_base": "Salário Base", "receitas_variaveis": "Receitas Variáveis (Diárias / Bicos)", "investimentos_rendimentos": "Investimentos e Rendimentos", "outros_ganhos": "Outros Ganhos / Outras Receitas"
+        }
     },
     "English": {
         "mecanica": "🛠️ Mechanics / Workshop",
@@ -161,32 +172,19 @@ TRADUCOES_RAMOS = {
         "ti": "💻 IT / Development",
         "comercio": "🛍️ Retail / Store",
         "outros": "📋 Others / Personal",
-        "cat_mecanica_desp": ["Parts / Supplies", "Tools", "Equipment", "Building Maintenance", "Rent", "Taxes / Fees", "Other Expenses"],
-        "cat_mecanica_rec": ["Client Payments", "Services Rendered", "Parts Sales", "Approved Budgets", "Salary", "Other Income"],
-        "cat_obras_desp": ["Building Materials", "Tools", "Equipment", "Labor / Subcontractors", "Fuel / Freight", "Other Expenses"],
-        "cat_obras_rec": ["Construction Measurement", "Client Payments", "Advance / Deposit", "Surplus Sales", "Salary", "Other Income"],
-        "cat_ti_desp": ["Software / Subscriptions", "Hosting / Servers", "Equipment", "Marketing", "Courses / Training", "Other Expenses"],
-        "cat_ti_rec": ["Project Development", "Consulting", "Monthly Support (Retainer)", "Salary", "Other Income"],
-        "cat_comercio_desp": ["Goods Acquisition", "Packaging", "Freight / Logistics", "Marketing / Ads", "Rent", "Other Expenses"],
-        "cat_comercio_rec": ["Cash Sales", "Card / Pix Sales", "Installment Sales", "Salary", "Other Income"],
-        "cat_outros_desp": [
-            "Rent / House Installment", 
-            "Water, Gas & Electricity", 
-            "Taxes & Fees", 
-            "Investments & Reserves", 
-            "Transport & Fuel", 
-            "Groceries & Food", 
-            "Health & Pharmacy", 
-            "Leisure & Other Expenses"
-        ],
-        "cat_outros_rec": [
-            "Base Salary", 
-            "Variable Income (Daily work / Extras)", 
-            "Investments & Yields",
-            "Other Earnings"
-        ],
         "tipo_despesa": "Expense",
-        "tipo_receita": "Income"
+        "tipo_receita": "Income",
+        "cat_nomes": {
+            "pecas_insumos": "Parts / Supplies", "ferramentas": "Tools", "equipamentos": "Equipment", "manutencao_predial": "Building Maintenance", "aluguel": "Rent", "impostos_taxas": "Taxes / Fees", "outras_despesas": "Other Expenses",
+            "pagamento_clientes": "Client Payments", "servicos_realizados": "Services Rendered", "venda_pecas": "Parts Sales", "orcamentos_aprovados": "Approved Budgets", "salario": "Salary", "outras_receitas": "Other Income",
+            "materiais_construcao": "Building Materials", "mao_de_obra": "Labor / Subcontractors", "combustivel_frete": "Fuel / Freight",
+            "medicao_obra": "Construction Measurement", "adiantamento_sinal": "Advance / Deposit", "venda_sobras": "Surplus Sales",
+            "softwares_assinaturas": "Software / Subscriptions", "hospedagem_servidores": "Hosting / Servers", "marketing": "Marketing", "cursos_capacitacao": "Courses / Training",
+            "desenvolvimento_projetos": "Project Development", "consultoria": "Consulting", "suporte_mensal": "Monthly Support (Retainer)",
+            "aquisicao_mercadorias": "Goods Acquisition", "embalagens": "Packaging", "frete_logistica": "Freight / Logistics", "marketing_anuncios": "Marketing / Ads", "vendas_vista": "Cash Sales", "vendas_cartao_pix": "Card / Pix Sales", "vendas_parceladas": "Installment Sales",
+            "aluguel_prestacao_casa": "Rent / House Installment", "agua_gas_energia": "Water, Gas & Electricity", "impostos_taxas_geral": "Taxes & Fees", "investimentos_reservas": "Investments & Reserves", "transportes_combustivel": "Transport & Fuel", "alimentacao_supermercado": "Groceries & Food", "saude_farmacia": "Health & Pharmacy", "lazer_outras_despesas": "Leisure & Other Expenses",
+            "salario_base": "Base Salary", "receitas_variaveis": "Variable Income (Daily work / Extras)", "investimentos_rendimentos": "Investments & Yields", "outros_ganhos": "Other Earnings"
+        }
     },
     "Français": {
         "mecanica": "🛠️ Mécanique / Atelier",
@@ -194,32 +192,19 @@ TRADUCOES_RAMOS = {
         "ti": "💻 Informatique / Développement",
         "comercio": "🛍️ Commerce / Magasin",
         "outros": "📋 Autres / Personnel",
-        "cat_mecanica_desp": ["Pièces / Consommables", "Outils", "Équipement", "Maintenance des Locaux", "Loyer", "Impôts / Taxes", "Autres Dépenses"],
-        "cat_mecanica_rec": ["Paiement des Clients", "Services Réalisés", "Vente de Pièces", "Devis Approuvés", "Salaire", "Autres Revenus"],
-        "cat_obras_desp": ["Matériaux de Construction", "Outils", "Équipement", "Main-d'œuvre / Sous-traitants", "Carburant / Fret", "Autres Dépenses"],
-        "cat_obras_rec": ["Mesurage de Chantier", "Paiement des Clients", "Acompte / Avance", "Vente de Surplus", "Salaire", "Autres Revenus"],
-        "cat_ti_desp": ["Logiciels / Abonnements", "Hébergement / Serveurs", "Équipement", "Marketing", "Formations", "Autres Dépenses"],
-        "cat_ti_rec": ["Développement de Projets", "Conseil", "Support Mensuel (Retainer)", "Salaire", "Autres Revenus"],
-        "cat_comercio_desp": ["Achat de Marchandises", "Emballages", "Fret / Logistique", "Marketing / Publicité", "Loyer", "Autres Dépenses"],
-        "cat_comercio_rec": ["Ventes au Comptant", "Ventes Carte / Pix", "Ventes Échelonnées", "Salaire", "Autres Revenus"],
-        "cat_outros_desp": [
-            "Loyer / Prêt Immobilier", 
-            "Eau, Gaz et Électricité", 
-            "Impôts et Taxes", 
-            "Investissements et Réserves", 
-            "Transport et Carburant", 
-            "Alimentation et Supermarché", 
-            "Santé et Pharmacie", 
-            "Loisirs et Autres Dépenses"
-        ],
-        "cat_outros_rec": [
-            "Salaire de Base", 
-            "Revenus Variables (Journées / Extras)", 
-            "Investissements et Rendements",
-            "Autres Gains"
-        ],
         "tipo_despesa": "Dépense",
-        "tipo_receita": "Revenu"
+        "tipo_receita": "Revenu",
+        "cat_nomes": {
+            "pecas_insumos": "Pièces / Consommables", "ferramentas": "Outils", "equipamentos": "Équipement", "manutencao_predial": "Maintenance des Locaux", "aluguel": "Loyer", "impostos_taxas": "Impôts / Taxes", "outras_despesas": "Autres Dépenses",
+            "pagamento_clientes": "Paiement des Clients", "servicos_realizados": "Services Réalisés", "venda_pecas": "Vente de Pièces", "orcamentos_aprovados": "Devis Approuvés", "salario": "Salaire", "outras_receitas": "Autres Revenus",
+            "materiais_construcao": "Matériaux de Construction", "mao_de_obra": "Main-d'œuvre / Sous-traitants", "combustivel_frete": "Carburant / Fret",
+            "medicao_obra": "Mesurage de Chantier", "adiantamento_sinal": "Acompte / Avance", "venda_sobras": "Vente de Surplus",
+            "softwares_assinaturas": "Logiciels / Abonnements", "hospedagem_servidores": "Hébergement / Serveurs", "marketing": "Marketing", "cursos_capacitacao": "Formations",
+            "desenvolvimento_projetos": "Développement de Projets", "consultoria": "Conseil", "suporte_mensal": "Support Mensuel (Retainer)",
+            "aquisicao_mercadorias": "Achat de Marchandises", "embalagens": "Emballages", "frete_logistica": "Fret / Logistique", "marketing_anuncios": "Marketing / Publicité", "vendas_vista": "Ventes au Comptant", "vendas_cartao_pix": "Ventes Carte / Pix", "vendas_parceladas": "Ventes Échelonnées",
+            "aluguel_prestacao_casa": "Loyer / Prêt Immobilier", "agua_gas_energia": "Eau, Gaz et Électricité", "impostos_taxas_geral": "Impôts et Taxes", "investimentos_reservas": "Investissements et Réserves", "transportes_combustivel": "Transport et Carburant", "alimentacao_supermercado": "Alimentation et Supermarché", "saude_farmacia": "Santé et Pharmacie", "lazer_outras_despesas": "Loisirs et Autres Dépenses",
+            "salario_base": "Salaire de Base", "receitas_variaveis": "Revenus Variables (Journées / Extras)", "investimentos_rendimentos": "Investissements et Rendements", "outros_ganhos": "Autres Gains"
+        }
     },
     "Español": {
         "mecanica": "🛠️ Mecánica / Taller",
@@ -227,32 +212,19 @@ TRADUCOES_RAMOS = {
         "ti": "💻 TI / Desarrollo",
         "comercio": "🛍️ Comercio / Tienda",
         "outros": "📋 Otros / Personal",
-        "cat_mecanica_desp": ["Piezas / Insumos", "Herramientas", "Equipos", "Mantenimiento", "Alquiler", "Impuestos / Tasas", "Otros Gastos"],
-        "cat_mecanica_rec": ["Pago de Clientes", "Servicios Realizados", "Venta de Piezas", "Presupuestos Aprobados", "Salario", "Otros Ingresos"],
-        "cat_obras_desp": ["Materiales de Construcción", "Herramientas", "Equipos", "Mano de Obra / Subcontratados", "Combustible / Flete", "Otros Gastos"],
-        "cat_obras_rec": ["Medición de Obra", "Pago de Clientes", "Anticipo / Seña", "Venta de Sobrantes", "Salario", "Otros Ingresos"],
-        "cat_ti_desp": ["Software / Suscripciones", "Hosting / Servidores", "Equipos", "Marketing", "Cursos / Capacitación", "Otros Gastos"],
-        "cat_ti_rec": ["Desarrollo de Proyectos", "Consultoría", "Soporte Mensual", "Salario", "Otros Ingresos"],
-        "cat_comercio_desp": ["Adquisición de Mercancías", "Embalajes", "Flete / Logística", "Marketing / Anuncios", "Alquiler", "Otros Gastos"],
-        "cat_comercio_rec": ["Ventas al Contado", "Ventas con Tarjeta / Pix", "Ventas en Cuotas", "Salario", "Otros Ingresos"],
-        "cat_outros_desp": [
-            "Alquiler / Cuota de Casa", 
-            "Agua, Gas y Electricidad", 
-            "Impuestos y Tasas", 
-            "Inversiones y Reservas", 
-            "Transporte y Combustible", 
-            "Alimentación y Supermercado", 
-            "Salud y Farmacia", 
-            "Ocio y Otros Gastos"
-        ],
-        "cat_outros_rec": [
-            "Salario Base", 
-            "Ingresos Variables (Diarias / Extras)", 
-            "Inversiones y Rendimientos",
-            "Otros Ingresos"
-        ],
         "tipo_despesa": "Gasto",
-        "tipo_receita": "Ingreso"
+        "tipo_receita": "Ingreso",
+        "cat_nomes": {
+            "pecas_insumos": "Piezas / Insumos", "ferramentas": "Herramientas", "equipamentos": "Equipos", "manutencao_predial": "Mantenimiento", "aluguel": "Alquiler", "impostos_taxas": "Impuestos / Tasas", "outras_despesas": "Otros Gastos",
+            "pagamento_clientes": "Pago de Clientes", "servicos_realizados": "Servicios Realizados", "venda_pecas": "Venta de Piezas", "orcamentos_aprovados": "Presupuestos Aprobados", "salario": "Salario", "outras_receitas": "Otros Ingresos",
+            "materiais_construcao": "Materiales de Construcción", "mao_de_obra": "Mano de Obra / Subcontratados", "combustivel_frete": "Combustible / Flete",
+            "medicao_obra": "Medición de Obra", "adiantamento_sinal": "Anticipo / Seña", "venda_sobras": "Venta de Sobrantes",
+            "softwares_assinaturas": "Software / Suscripciones", "hospedagem_servidores": "Hosting / Servidores", "marketing": "Marketing", "cursos_capacitacao": "Cursos / Capacitación",
+            "desenvolvimento_projetos": "Desarrollo de Proyectos", "consultoria": "Consultoría", "suporte_mensal": "Soporte Mensual",
+            "aquisicao_mercadorias": "Adquisición de Mercancías", "embalagens": "Embalajes", "frete_logistica": "Flete / Logística", "marketing_anuncios": "Marketing / Anuncios", "vendas_vista": "Ventas al Contado", "vendas_cartao_pix": "Ventas con Tarjeta / Pix", "vendas_parceladas": "Ventas en Cuotas",
+            "aluguel_prestacao_casa": "Alquiler / Cuota de Casa", "agua_gas_energia": "Agua, Gas y Electricidad", "impostos_taxas_geral": "Impuestos y Tasas", "investimentos_reservas": "Inversiones y Reservas", "transportes_combustivel": "Transporte y Combustible", "alimentacao_supermercado": "Alimentación y Supermercado", "saude_farmacia": "Salud y Farmacia", "lazer_outras_despesas": "Ocio y Otros Gastos",
+            "salario_base": "Salario Base", "receitas_variaveis": "Ingresos Variables (Diarias / Extras)", "investimentos_rendimentos": "Inversiones y Rendimientos", "outros_ganhos": "Otros Ingresos"
+        }
     },
     "Italiano": {
         "mecanica": "🛠️ Meccanica / Officina",
@@ -260,32 +232,19 @@ TRADUCOES_RAMOS = {
         "ti": "💻 IT / Sviluppo",
         "comercio": "🛍️ Commercio / Negozio",
         "outros": "📋 Altro / Personale",
-        "cat_mecanica_desp": ["Ricambi / Materiali", "Utensili", "Attrezzatura", "Manutenzione", "Affitto", "Tasse / Imposte", "Altre Spese"],
-        "cat_mecanica_rec": ["Pagamenti Clienti", "Servizi Eseguiti", "Vendita Ricambi", "Preventivi Approvati", "Stipendio", "Altre Entrate"],
-        "cat_obras_desp": ["Materiali Edili", "Utensili", "Attrezzatura", "Manodopera / Subappalti", "Carburante / Trasporto", "Altre Spese"],
-        "cat_obras_rec": ["Stato Avanzamento Lavori", "Pagamenti Clienti", "Acconto", "Vendita Surplus", "Stipendio", "Altre Entrate"],
-        "cat_ti_desp": ["Software / Abbonamenti", "Hosting / Server", "Attrezzatura", "Marketing", "Corsi / Formazione", "Altre Spese"],
-        "cat_ti_rec": ["Sviluppo Progetti", "Consulenza", "Supporto Mensile", "Stipendio", "Altre Entrate"],
-        "cat_comercio_desp": ["Acquisto Merce", "Imballaggi", "Spedizione / Logistica", "Marketing / Annunci", "Affitto", "Altre Spese"],
-        "cat_comercio_rec": ["Vendite in Contanti", "Vendite Carta / Pix", "Vendite Rateali", "Stipendio", "Altre Entrate"],
-        "cat_outros_desp": [
-            "Affitto / Mutuo Casa", 
-            "Acqua, Gas ed Elettricità", 
-            "Tasse e Imposte", 
-            "Investimenti e Riserve", 
-            "Trasporti e Carburante", 
-            "Spesa Alimentare", 
-            "Salute e Farmacia", 
-            "Tempo Libero e Altre Spese"
-        ],
-        "cat_outros_rec": [
-            "Stipendio Base", 
-            "Entrate Variabili (Giornate / Extra)", 
-            "Investimenti e Rendimenti",
-            "Altri Guadagni"
-        ],
         "tipo_despesa": "Spesa",
-        "tipo_receita": "Entrata"
+        "tipo_receita": "Entrata",
+        "cat_nomes": {
+            "pecas_insumos": "Ricambi / Materiali", "ferramentas": "Utensili", "equipamentos": "Attrezzatura", "manutencao_predial": "Manutenzione", "aluguel": "Affitto", "impostos_taxas": "Tasse / Imposte", "outras_despesas": "Altre Spese",
+            "pagamento_clientes": "Pagamenti Clienti", "servicos_realizados": "Servizi Eseguiti", "venda_pecas": "Vendita Ricambi", "orcamentos_aprovados": "Preventivi Approvati", "salario": "Stipendio", "outras_receitas": "Altre Entrate",
+            "materiais_construcao": "Materiali Edili", "mao_de_obra": "Manodopera / Subappalti", "combustivel_frete": "Carburante / Trasporto",
+            "medicao_obra": "Stato Avanzamento Lavori", "adiantamento_sinal": "Acconto", "venda_sobras": "Vendita Surplus",
+            "softwares_assinaturas": "Software / Abbonamenti", "hospedagem_servidores": "Hosting / Server", "marketing": "Marketing", "cursos_capacitacao": "Corsi / Formazione",
+            "desenvolvimento_projetos": "Sviluppo Progetti", "consultoria": "Consulenza", "suporte_mensal": "Supporto Mensile",
+            "aquisicao_mercadorias": "Acquisto Merce", "embalagens": "Imballaggi", "frete_logistica": "Spedizione / Logistica", "marketing_anuncios": "Marketing / Annunci", "vendas_vista": "Vendite in Contanti", "vendas_cartao_pix": "Vendite Carta / Pix", "vendas_parceladas": "Vendite Rateali",
+            "aluguel_prestacao_casa": "Affitto / Mutuo Casa", "agua_gas_energia": "Acqua, Gas ed Elettricità", "impostos_taxas_geral": "Tasse e Imposte", "investimentos_reservas": "Investimenti e Riserve", "transportes_combustivel": "Trasporti e Carburante", "alimentacao_supermercado": "Spesa Alimentare", "saude_farmacia": "Salute e Farmacia", "lazer_outras_despesas": "Tempo Libero e Altre Spese",
+            "salario_base": "Stipendio Base", "receitas_variaveis": "Entrate Variabili (Giornate / Extra)", "investimentos_rendimentos": "Investimenti e Rendimenti", "outros_ganhos": "Altri Guadagni"
+        }
     },
     "Deutsch": {
         "mecanica": "🛠️ Mechanik / Werkstatt",
@@ -293,32 +252,19 @@ TRADUCOES_RAMOS = {
         "ti": "💻 IT / Entwicklung",
         "comercio": "🛍️ Handel / Geschäft",
         "outros": "📋 Sonstiges / Persönlich",
-        "cat_mecanica_desp": ["Teile / Verbrauchsmaterial", "Werkzeuge", "Ausstattung", "Gebäudewartung", "Miete", "Steuern / Gebühren", "Sonstige Ausgaben"],
-        "cat_mecanica_rec": ["Kundenzahlungen", "Erbrachte Dienstleistungen", "Teileverkauf", "Genehmigte Budgets", "Gehalt", "Sonstige Einnahmen"],
-        "cat_obras_desp": ["Baumaterialien", "Werkzeuge", "Ausstattung", "Arbeitskräfte / Subunternehmer", "Kraftstoff / Fracht", "Sonstige Ausgaben"],
-        "cat_obras_rec": ["Bauabrechnung", "Kundenzahlungen", "Vorschuss / Anzahlung", "Restverkauf", "Gehalt", "Sonstige Einnahmen"],
-        "cat_ti_desp": ["Software / Abonnements", "Hosting / Server", "Ausstattung", "Marketing", "Kurse / Schulungen", "Sonstige Ausgaben"],
-        "cat_ti_rec": ["Projektentwicklung", "Beratung", "Monatlicher Support", "Gehalt", "Sonstige Einnahmen"],
-        "cat_comercio_desp": ["Warenerwerb", "Verpackung", "Fracht / Logistik", "Marketing / Werbung", "Miete", "Sonstige Ausgaben"],
-        "cat_comercio_rec": ["Barverkäufe", "Kartenzahlung / Pix", "Ratenverkäufe", "Gehalt", "Sonstige Einnahmen"],
-        "cat_outros_desp": [
-            "Miete / Hauskredit", 
-            "Wasser, Gas und Strom", 
-            "Steuern und Gebühren", 
-            "Investitionen und Rücklagen", 
-            "Transport und Kraftstoff", 
-            "Lebensmittel und Supermarkt", 
-            "Gesundheit und Apotheke", 
-            "Freizeit und Sonstige Ausgaben"
-        ],
-        "cat_outros_rec": [
-            "Grundgehalt", 
-            "Variables Einkommen (Tagelöhner / Extras)", 
-            "Investitionen und Renditen",
-            "Sonstige Einnahmen"
-        ],
         "tipo_despesa": "Ausgabe",
-        "tipo_receita": "Einnahme"
+        "tipo_receita": "Einnahme",
+        "cat_nomes": {
+            "pecas_insumos": "Teile / Verbrauchsmaterial", "ferramentas": "Werkzeuge", "equipamentos": "Ausstattung", "manutencao_predial": "Gebäudewartung", "aluguel": "Miete", "impostos_taxas": "Steuern / Gebühren", "outras_despesas": "Sonstige Ausgaben",
+            "pagamento_clientes": "Kundenzahlungen", "servicos_realizados": "Erbrachte Dienstleistungen", "venda_pecas": "Teileverkauf", "orcamentos_aprovados": "Genehmigte Budgets", "salario": "Gehalt", "outras_receitas": "Sonstige Einnahmen",
+            "materiais_construcao": "Baumaterialien", "mao_de_obra": "Arbeitskräfte / Subunternehmer", "combustivel_frete": "Kraftstoff / Fracht",
+            "medicao_obra": "Bauabrechnung", "adiantamento_sinal": "Vorschuss / Anzahlung", "venda_sobras": "Restverkauf",
+            "softwares_assinaturas": "Software / Abonnements", "hospedagem_servidores": "Hosting / Server", "marketing": "Marketing", "cursos_capacitacao": "Kurse / Schulungen",
+            "desenvolvimento_projetos": "Projektentwicklung", "consultoria": "Beratung", "suporte_mensal": "Monatlicher Support",
+            "aquisicao_mercadorias": "Warenerwerb", "embalagens": "Verpackung", "frete_logistica": "Fracht / Logistik", "marketing_anuncios": "Marketing / Werbung", "vendas_vista": "Barverkäufe", "vendas_cartao_pix": "Kartenzahlung / Pix", "vendas_parceladas": "Ratenverkäufe",
+            "aluguel_prestacao_casa": "Miete / Hauskredit", "agua_gas_energia": "Wasser, Gas und Strom", "impostos_taxas_geral": "Steuern und Gebühren", "investimentos_reservas": "Investitionen und Rücklagen", "transportes_combustivel": "Transport und Kraftstoff", "alimentacao_supermercado": "Lebensmittel und Supermarkt", "saude_farmacia": "Gesundheit und Apotheke", "lazer_outras_despesas": "Freizeit und Sonstige Ausgaben",
+            "salario_base": "Grundgehalt", "receitas_variaveis": "Variables Einkommen (Tagelöhner / Extras)", "investimentos_rendimentos": "Investitionen und Renditen", "outros_ganhos": "Sonstige Einnahmen"
+        }
     }
 }
 
@@ -392,7 +338,7 @@ TEXTOS = {
         "rec_cat_biz": "📊 Receitas por Categoria (Negócio)",
         "origin_rev": "Origem do Faturamento",
         "op_costs_biz": "🛠️ Custos Operacionais / Insumos",
-        "highest_costs": "Maiores Custos por Categoria",
+        "highest_costs": "Maiores Costos por Categoria",
         "biz_report": "📋 Relatório Analítico de Lançamentos do Negócio",
         "id_del_label": "ID do lançamento para excluir",
         "del_success": "Lançamento excluído com sucesso!",
@@ -866,7 +812,7 @@ if not st.session_state['logged_in']:
                 
                 if submit_reg_prof:
                     if reg_user_prof and reg_name_prof and reg_pass_prof:
-                        chave_ramo = "mecanica"
+                        chave_ramo = "outros"
                         for k, v in ramos_atuais_dict.items():
                             if v == reg_branch_ui:
                                 chave_ramo = k
@@ -953,6 +899,33 @@ else:
 
     df = carregar_dados(st.session_state['username'])
 
+    # Função auxiliar para traduzir a categoria salva (chave) para o idioma atual da tela
+    def traduzir_categoria(cat_salva):
+        if not cat_salva:
+            return ""
+        # Se a categoria já for uma chave conhecida
+        if cat_salva in ramos_dict["cat_nomes"]:
+            return ramos_dict["cat_nomes"][cat_salva]
+        # Compatibilidade retroativa com dados antigos salvos em texto livre por idioma
+        for lang_key, lang_data in TRADUCOES_RAMOS.items():
+            for c_key, c_val in lang_data["cat_nomes"].items():
+                if c_val.lower() == str(cat_salva).lower():
+                    return ramos_dict["cat_nomes"].get(c_key, cat_salva)
+        return cat_salva
+
+    def traduzir_tipo(tipo_salvo):
+        if not tipo_salvo:
+            return ""
+        if tipo_salvo in ["Despesa", "Expense", "Dépense", "Gasto", "Spesa", "Ausgabe"]:
+            return ramos_dict["tipo_despesa"]
+        if tipo_salvo in ["Receita", "Income", "Revenu", "Ingreso", "Entrata", "Einnahme"]:
+            return ramos_dict["tipo_receita"]
+        return tipo_salvo
+
+    if not df.empty:
+        df["categoria_exibicao"] = df["categoria"].apply(traduzir_categoria)
+        df["tipo_exibicao"] = df["tipo"].apply(traduzir_tipo)
+
     if menu == t['nav_overview']:
         st.title(t['overview_title'])
         st.write(t['overview_sub'])
@@ -968,23 +941,22 @@ else:
             
             df_mes = df[df["mes_ano"] == mes_selecionado]
 
-            total_receitas = df_mes[df_mes['tipo'] == ramos_dict["tipo_receita"]]['valor'].sum()
-            total_despesas = df_mes[df_mes['tipo'] == ramos_dict["tipo_despesa"]]['valor'].sum()
+            total_receitas = df_mes[df_mes['tipo_exibicao'] == ramos_dict["tipo_receita"]]['valor'].sum()
+            total_despesas = df_mes[df_mes['tipo_exibicao'] == ramos_dict["tipo_despesa"]]['valor'].sum()
             
-            df_inv_mes = df_mes[df_mes['categoria'].str.contains("Investimento|Reserva", case=False, na=False)]
+            df_inv_mes = df_mes[df_mes['categoria'].str.contains("investimento|reserva", case=False, na=False)]
             investimento_mes = df_inv_mes['valor'].sum() if not df_inv_mes.empty else 0.0
 
             saldo_mes = total_receitas - total_despesas
 
             df_historico = df[df["mes_ano"] <= mes_selecionado]
-            hist_rec = df_historico[df_historico['tipo'] == ramos_dict["tipo_receita"]]['valor'].sum()
-            hist_esp = df_historico[df_historico['tipo'] == ramos_dict["tipo_despesa"]]['valor'].sum()
+            hist_rec = df_historico[df_historico['tipo_exibicao'] == ramos_dict["tipo_receita"]]['valor'].sum()
+            hist_esp = df_historico[df_historico['tipo_exibicao'] == ramos_dict["tipo_despesa"]]['valor'].sum()
             saldo_real_conta = hist_rec - hist_esp
 
-            df_inv_total = df[df['categoria'].str.contains("Investimento|Reserva", case=False, na=False)]
+            df_inv_total = df[df['categoria'].str.contains("investimento|reserva", case=False, na=False)]
             investimento_total = df_inv_total['valor'].sum() if not df_inv_total.empty else 0.0
 
-            # Força o layout a exibir as métricas em duas colunas lado a lado no celular e PC
             st.markdown("""
                 <style>
                     [data-testid="column"] {
@@ -1008,22 +980,24 @@ else:
             st.markdown("---")
             c1, c2 = st.columns(2)
             with c1:
-                df_desp = df_mes[df_mes['tipo'] == ramos_dict["tipo_despesa"]]
+                df_desp = df_mes[df_mes['tipo_exibicao'] == ramos_dict["tipo_despesa"]]
                 if not df_desp.empty:
-                    fig_pie = px.pie(df_desp, names='categoria', values='valor', title=t['pie_title'], hole=0.4)
+                    fig_pie = px.pie(df_desp, names='categoria_exibicao', values='valor', title=t['pie_title'], hole=0.4)
                     st.plotly_chart(fig_pie, use_container_width=True, config={'displayModeBar': False})
                 else:
                     st.info("Sem despesas para exibir no gráfico neste mês.")
 
             with c2:
                 if not df_mes.empty:
-                    fig_bar = px.bar(df_mes, x='data', y='valor', color='tipo', title=t['bar_title'], barmode='group')
+                    fig_bar = px.bar(df_mes, x='data', y='valor', color='tipo_exibicao', title=t['bar_title'], barmode='group')
                     st.plotly_chart(fig_bar, use_container_width=True, config={'displayModeBar': False})
                 else:
                     st.info("Sem dados para o gráfico.")
 
             st.subheader(t['recent_list'])
-            st.dataframe(df_mes, use_container_width=True)
+            df_exibicao_tabela = df_mes[['data', 'tipo_exibicao', 'categoria_exibicao', 'descricao', 'valor']].copy()
+            df_exibicao_tabela.columns = ['Data', 'Tipo', 'Categoria', 'Descrição', 'Valor']
+            st.dataframe(df_exibicao_tabela, use_container_width=True)
 
     elif menu == t['nav_business']:
         st.title(t['business_title'])
@@ -1040,8 +1014,8 @@ else:
             
             df_mes = df[df["mes_ano"] == mes_selecionado]
 
-            faturamento = df_mes[df_mes['tipo'] == ramos_dict["tipo_receita"]]['valor'].sum()
-            custos = df_mes[df_mes['tipo'] == ramos_dict["tipo_despesa"]]['valor'].sum()
+            faturamento = df_mes[df_mes['tipo_exibicao'] == ramos_dict["tipo_receita"]]['valor'].sum()
+            custos = df_mes[df_mes['tipo_exibicao'] == ramos_dict["tipo_despesa"]]['valor'].sum()
             lucro_liquido = faturamento - custos
             margem = (lucro_liquido / faturamento * 100) if faturamento > 0 else 0.0
 
@@ -1056,59 +1030,57 @@ else:
             bc1, bc2 = st.columns(2)
             with bc1:
                 st.subheader(t['rec_cat_biz'])
-                df_rec = df_mes[df_mes['tipo'] == ramos_dict["tipo_receita"]]
+                df_rec = df_mes[df_mes['tipo_exibicao'] == ramos_dict["tipo_receita"]]
                 if not df_rec.empty:
-                    fig_rec = px.pie(df_rec, names='categoria', values='valor', title=t['origin_rev'], hole=0.4)
+                    fig_rec = px.pie(df_rec, names='categoria_exibicao', values='valor', title=t['origin_rev'], hole=0.4)
                     st.plotly_chart(fig_rec, use_container_width=True, config={'displayModeBar': False})
                 else:
                     st.info("Nenhuma receita registrada neste mês.")
 
             with bc2:
                 st.subheader(t['op_costs_biz'])
-                df_desp = df_mes[df_mes['tipo'] == ramos_dict["tipo_despesa"]]
+                df_desp = df_mes[df_mes['tipo_exibicao'] == ramos_dict["tipo_despesa"]]
                 if not df_desp.empty:
-                    fig_desp = px.bar(df_desp, x='categoria', y='valor', title=t['highest_costs'], color='categoria')
+                    fig_desp = px.bar(df_desp, x='categoria_exibicao', y='valor', title=t['highest_costs'], color='categoria_exibicao')
                     st.plotly_chart(fig_desp, use_container_width=True, config={'displayModeBar': False})
                 else:
                     st.info("Nenhuma despesa registrada neste mês.")
 
             st.subheader(t['biz_report'])
-            colunas_relatorio = ['data', 'tipo', 'categoria', 'descricao', 'veiculo', 'valor'] if 'veiculo' in df_mes.columns else ['data', 'tipo', 'categoria', 'descricao', 'valor']
-            st.dataframe(df_mes[[c for c in colunas_relatorio if c in df_mes.columns]], use_container_width=True)
+            colunas_relatorio = ['data', 'tipo_exibicao', 'categoria_exibicao', 'descricao', 'veiculo', 'valor'] if 'veiculo' in df_mes.columns else ['data', 'tipo_exibicao', 'categoria_exibicao', 'descricao', 'valor']
+            df_biz_tab = df_mes[[c for c in colunas_relatorio if c in df_mes.columns]].copy()
+            df_biz_tab.columns = ['Data', 'Tipo', 'Categoria', 'Descrição', 'Veículo', 'Valor'] if 'veiculo' in colunas_relatorio else ['Data', 'Tipo', 'Categoria', 'Descrição', 'Valor']
+            st.dataframe(df_biz_tab, use_container_width=True)
 
     elif menu == t['nav_new']:
         st.title(t['new_title'])
         st.write(t['new_sub'])
 
-        if ramo_usuario_db == "mecanica":
-            lista_desp_cat = ramos_dict["cat_mecanica_desp"]
-            lista_rec_cat = ramos_dict["cat_mecanica_rec"]
-        elif ramo_usuario_db == "obras":
-            lista_desp_cat = ramos_dict["cat_obras_desp"]
-            lista_rec_cat = ramos_dict["cat_obras_rec"]
-        elif ramo_usuario_db == "ti":
-            lista_desp_cat = ramos_dict["cat_ti_desp"]
-            lista_rec_cat = ramos_dict["cat_ti_rec"]
-        elif ramo_usuario_db == "comercio":
-            lista_desp_cat = ramos_dict["cat_comercio_desp"]
-            lista_rec_cat = ramos_dict["cat_comercio_rec"]
-        else:
-            lista_desp_cat = ramos_dict["cat_outros_desp"]
-            lista_rec_cat = ramos_dict["cat_outros_rec"]
+        ramo_chave_atual = ramo_usuario_db if ramo_usuario_db in CATEGORIAS_CHAVES else "outros"
+        chaves_desp = CATEGORIAS_CHAVES[ramo_chave_atual]["desp"]
+        chaves_rec = CATEGORIAS_CHAVES[ramo_chave_atual]["rec"]
 
         data_lanc = st.date_input(t['date_label'], datetime.date.today())
         
-        tipo_opcoes = [ramos_dict["tipo_despesa"], ramos_dict["tipo_receita"]]
-        tipo_lanc_ui = st.selectbox(t['type_label'], tipo_opcoes)
+        tipo_opcoes_ui = [ramos_dict["tipo_despesa"], ramos_dict["tipo_receita"]]
+        tipo_lanc_ui = st.selectbox(t['type_label'], tipo_opcoes_ui)
         
         valor_lanc = st.number_input(f"{t['value_label']} ({simbolo_moeda})", min_value=0.0, format="%.2f")
         
         if tipo_lanc_ui == ramos_dict["tipo_receita"]:
-            opcoes_cat = lista_rec_cat
+            lista_chaves = chaves_rec
         else:
-            opcoes_cat = lista_desp_cat
+            lista_chaves = chaves_desp
             
-        cat_lanc = st.selectbox(t['cat_label'], opcoes_cat)
+        opcoes_cat_ui = [ramos_dict["cat_nomes"][k] for k in lista_chaves]
+        cat_escolhida_ui = st.selectbox(t['cat_label'], opcoes_cat_ui)
+        
+        # Encontra a chave interna correspondente à categoria selecionada visualmente
+        cat_lanc_chave = lista_chaves[0]
+        for k in lista_chaves:
+            if ramos_dict["cat_nomes"][k] == cat_escolhida_ui:
+                cat_lanc_chave = k
+                break
         
         desc_lanc = st.text_input(t['desc_label'])
         
@@ -1119,12 +1091,13 @@ else:
         st.markdown("<br>", unsafe_allow_html=True)
         if st.button(t['save_btn'], use_container_width=True):
             if desc_lanc.strip() != "":
+                tipo_para_salvar = "Despesa" if tipo_lanc_ui == ramos_dict["tipo_despesa"] else "Receita"
                 sucesso = salvar_lancamento(
                     st.session_state['username'], 
                     str(data_lanc), 
                     desc_lanc, 
-                    cat_lanc, 
-                    tipo_lanc_ui, 
+                    cat_lanc_chave, 
+                    tipo_para_salvar, 
                     float(valor_lanc), 
                     veiculo_lanc
                 )
@@ -1132,7 +1105,7 @@ else:
                     st.success(t['success_msg'])
                     st.rerun()
                 else:
-                    st.error("Erro ao salvar no banco de dados. Verifique a tabela 'lancamentos' no Supabase.")
+                    st.error("Erro ao salvar no banco de dados.")
             else:
                 st.warning(t['warn_desc'])
 
@@ -1143,7 +1116,9 @@ else:
         if df.empty:
             st.info(t['no_data'])
         else:
-            st.dataframe(df, use_container_width=True)
+            df_gerenciar = df[['id', 'data', 'tipo_exibicao', 'categoria_exibicao', 'descricao', 'valor']].copy()
+            df_gerenciar.columns = ['ID', 'Data', 'Tipo', 'Categoria', 'Descrição', 'Valor']
+            st.dataframe(df_gerenciar, use_container_width=True)
             id_del = st.selectbox(t['id_del_label'], df['id'].tolist())
             if st.button(t['del_btn']):
                 deletar_lancamento(id_del, st.session_state['username'])
